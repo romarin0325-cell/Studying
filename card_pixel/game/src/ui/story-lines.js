@@ -10,6 +10,16 @@ export function outcomeText(entry) {
   return entry.result === 'win' && entry.returned === true ? '생환' : '귀환 여부 미기록';
 }
 
+export function retreatStoryLine(run, card) {
+  const result = run.lastBattleResult;
+  if (!result?.survivorIds.length) return '';
+  const battle = run.chronicle?.findLast(record => record.floor === result.floor && record.party);
+  const retreat = run.lastBattleLog?.flatMap(turn => turn.rows).find(row => row.kind === 'retreat')?.faces?.[0];
+  if (!retreat || retreat.side !== 'ally' || !result.survivorIds.includes(retreat.id) || !battle?.party.includes(retreat.id)) return '';
+  const name = card(retreat.id)?.name;
+  return name ? `${josa(name, '이/가')} 물러나 살아남았다.` : '';
+}
+
 export function storyLine(entry, card) {
   if (!entry) return '';
   const dungeon = DUNGEONS[entry.dungeonId]?.name;

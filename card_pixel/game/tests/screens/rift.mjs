@@ -317,7 +317,6 @@ export function createRiftCases({
     const run = playDaily('2026-11-21');
     assert.deepEqual([run.seed, run.result, run.floor, run.stats.turns], [20261121, 'win', 7, 33]);
     command(fixture.store.save, run);
-    const finished = fixture.page();
     const store = backupStore({ [sessionKey]: first.session, [dailyKey]: first.daily });
     assert.equal(store.inspectBackup(store.exportBackup({ dailyRun: run })).summary.dailyActive.floor, 7);
     return {
@@ -336,7 +335,7 @@ export function createRiftCases({
             if (this === localStorage && item === key) throw new DOMException('Forced rift write failure', 'QuotaExceededError');
             return setItem.call(this, item, value);
           };
-        }, { key: dailyKey, finalSave: finished.daily });
+        }, { key: dailyKey, finalSave: JSON.stringify(DailyStore.withDailyCheckpoint(JSON.parse(first.daily), run)) });
         await riftRow(page).click();
         const result = page.locator('#daily-result.on');
         // The export sheet opens at once (aria-modal), so read the alert by CSS rather than by role.
@@ -379,7 +378,9 @@ export function createRiftCases({
     assert.deepEqual(store.inspectBackup(backup).warnings, ['invalid_daily']);
     assert.equal(backup.session.run.run.floor, 2);
     assert.equal(backup.damagedDaily, damaged);
-    assert.equal(store.restoreLastGood().ok, true);
+    assert.equal(store.loadDetailed().status, 'ok');
+    const restored = store.restoreLastGood();
+    assert.ok(restored.ok, restored.reason);
     assert.equal(store.loadDetailed().status, 'ok');
     return {
       session, daily: damaged, lastGood, now,

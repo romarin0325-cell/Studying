@@ -6,131 +6,80 @@
       "kind": "ally",
       "heightGroup": "normal",
       "posture": "standing",
-      "revision": "pixel-v1",
-      "marksSource": "assets/ash/metadata.json",
+      "revision": "head-recheck-20261122",
+      "marksSource": "face box chosen for the head-recheck-20261122 frames (head box ×1.10)",
       "frames": {
         "idle": {
-          "source": "assets/ash/idle.png",
-          "sha256": "43da821a17a3f774447a1c28d283c637f6176137eee778d86f9e6e2807e0597f",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.89502762430939,
-          "feetBaselineY": 89.87292817679558,
+          "source": "card_pixel/art/pixel-v2/ash/idle.png",
+          "sha256": "b0fb2cff011fa42d39f5996f86f0ccff29e6bcbf418fae8c8f8cf468fd6fd507",
+          "width": 85,
+          "height": 75,
+          "bodyCenterX": 49,
+          "feetBaselineY": 74,
           "alphaBounds": {
-            "x": 9,
-            "y": 18,
-            "width": 55,
-            "height": 73,
-            "right": 63,
-            "bottom": 90,
-            "pixels": 2600
+            "x": 10,
+            "y": 0,
+            "width": 58,
+            "height": 74,
+            "right": 68,
+            "bottom": 74,
+            "pixels": 2758
           }
         },
         "attack": {
-          "source": "assets/ash/attack.png",
-          "sha256": "de5e363cbe5cba51144189ddc4f59d4834a24faf59dc532f5d3bebbfa4ccf00f",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.74585635359116,
-          "feetBaselineY": 89.87292817679558,
+          "source": "card_pixel/art/pixel-v2/ash/attack.png",
+          "sha256": "cf743b9e4f0c3efe1e0eafb0a93a31257d5b0bbcac5632f0baa340833f17147c",
+          "width": 85,
+          "height": 75,
+          "bodyCenterX": 49,
+          "feetBaselineY": 74,
           "alphaBounds": {
-            "x": 10,
-            "y": 21,
-            "width": 72,
-            "height": 70,
-            "right": 81,
-            "bottom": 90,
-            "pixels": 2725
+            "x": 12,
+            "y": 1,
+            "width": 73,
+            "height": 73,
+            "right": 85,
+            "bottom": 74,
+            "pixels": 2974
           }
         },
         "hurt": {
-          "source": "assets/ash/hurt.png",
-          "sha256": "f43d48dffd797e36275328818f904cdf7e22d07acd06a9d04bbed9feafe50f02",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.00552486187845,
-          "feetBaselineY": 90.13812154696133,
+          "source": "card_pixel/art/pixel-v2/ash/hurt.png",
+          "sha256": "00682f46a5c5fcbfb26b0e3150ac8ec0346119b1ac67fbfd23ec28a5a6ae02e5",
+          "width": 85,
+          "height": 75,
+          "bodyCenterX": 49,
+          "feetBaselineY": 74,
           "alphaBounds": {
-            "x": 1,
-            "y": 20,
-            "width": 61,
-            "height": 71,
-            "right": 61,
-            "bottom": 90,
-            "pixels": 2603
+            "x": 4,
+            "y": 2,
+            "width": 65,
+            "height": 72,
+            "right": 69,
+            "bottom": 74,
+            "pixels": 2848
           }
         }
       },
       "marks": {
         "idle": {
+          "pose": "idle",
+          "derived": true,
           "crown": [
-            45.50828729281768,
-            23.441988950276244
+            50,
+            5
           ],
           "chin": [
-            51.209944751381215,
-            52.48066298342541
+            50,
+            37
           ],
           "eye": [
-            48.690607734806626,
-            45.05524861878453
-          ],
-          "sole": [
-            48.95580110497237,
-            89.87292817679558
-          ],
-          "bodyCenter": [
-            47.89502762430939,
-            65.34254143646409
-          ],
-          "coordinateSpace": "final-canvas"
+            50,
+            24
+          ]
         },
-        "attack": {
-          "crown": [
-            51.85635359116022,
-            26.88950276243094
-          ],
-          "chin": [
-            58.751381215469614,
-            55.795580110497234
-          ],
-          "eye": [
-            56.3646408839779,
-            48.50276243093923
-          ],
-          "sole": [
-            48.408839779005525,
-            89.87292817679558
-          ],
-          "bodyCenter": [
-            47.74585635359116,
-            68.52486187845304
-          ],
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "crown": [
-            40.773480662983424,
-            25.03314917127072
-          ],
-          "chin": [
-            47.00552486187845,
-            53.93922651933701
-          ],
-          "eye": [
-            43.690607734806626,
-            45.58563535911602
-          ],
-          "sole": [
-            48.19889502762431,
-            90.13812154696133
-          ],
-          "bodyCenter": [
-            47.00552486187845,
-            69.32044198895028
-          ],
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -4409,143 +4358,80 @@
       "kind": "ally",
       "heightGroup": "small",
       "posture": "standing",
-      "revision": "pixel-v1",
-      "marksSource": "assets/snow_rabbit/metadata.json",
+      "revision": "head-recheck-20261122",
+      "marksSource": "face box chosen for the head-recheck-20261122 frames (head box ×0.87)",
       "frames": {
         "idle": {
-          "source": "assets/snow_rabbit/idle.png",
-          "sha256": "70a5329386ba42a05078670a887c80544615dd4bfb8596dbbb087aec42f8da12",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.41068139963168,
-          "feetBaselineY": 89.93370165745856,
+          "source": "card_pixel/art/pixel-v2/snow_rabbit/idle.png",
+          "sha256": "ee96702553cee2a9fd6ad731c1edb9c677ae3df351c047d4797f5ebf5bcfb283",
+          "width": 71,
+          "height": 81,
+          "bodyCenterX": 24,
+          "feetBaselineY": 80,
           "alphaBounds": {
-            "x": 20,
-            "y": 7,
-            "width": 51,
-            "height": 83,
-            "right": 70,
-            "bottom": 89,
-            "pixels": 2510
+            "x": 0,
+            "y": 0,
+            "width": 46,
+            "height": 80,
+            "right": 46,
+            "bottom": 80,
+            "pixels": 2081
           }
         },
         "attack": {
-          "source": "assets/snow_rabbit/attack.png",
-          "sha256": "46000c027bd6164d2279fac5978aaeb524f58c468be6eb90cdd618a4b8dc886e",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.39917127071823,
-          "feetBaselineY": 89.93370165745856,
+          "source": "card_pixel/art/pixel-v2/snow_rabbit/attack.png",
+          "sha256": "82f71249c20a13436a12cb737e33bd0b1b2344b4e550d605f763165ef4c65d35",
+          "width": 71,
+          "height": 81,
+          "bodyCenterX": 24,
+          "feetBaselineY": 80,
           "alphaBounds": {
-            "x": 22,
-            "y": 8,
-            "width": 68,
-            "height": 82,
-            "right": 89,
-            "bottom": 89,
-            "pixels": 2724
+            "x": 6,
+            "y": 0,
+            "width": 65,
+            "height": 80,
+            "right": 71,
+            "bottom": 80,
+            "pixels": 2433
           }
         },
         "hurt": {
-          "source": "assets/snow_rabbit/hurt.png",
-          "sha256": "c85db05ad2216ba4b28ef65bdb12986202343c56c70aa37889ebddf4b925da52",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.54696132596685,
-          "feetBaselineY": 89.93370165745856,
+          "source": "card_pixel/art/pixel-v2/snow_rabbit/hurt.png",
+          "sha256": "20a8c8e7832bd62c067f5c997a3d3c3510bbf6a5d1a814ceb34e77cfe1a4040b",
+          "width": 71,
+          "height": 81,
+          "bodyCenterX": 24,
+          "feetBaselineY": 80,
           "alphaBounds": {
-            "x": 26,
-            "y": 9,
-            "width": 58,
-            "height": 81,
-            "right": 83,
-            "bottom": 89,
-            "pixels": 2448
+            "x": 8,
+            "y": 2,
+            "width": 51,
+            "height": 78,
+            "right": 59,
+            "bottom": 80,
+            "pixels": 2094
           }
         }
       },
       "marks": {
         "idle": {
+          "pose": "idle",
+          "derived": true,
           "crown": [
-            47.41068139963168,
-            29.60220994475138
+            27,
+            20
           ],
           "chin": [
-            50.2744014732965,
-            61.20441988950276
+            27,
+            48
           ],
           "eye": [
-            48.84254143646409,
-            51.72375690607735
-          ],
-          "sole": [
-            47.41068139963168,
-            89.93370165745856
-          ],
-          "bodyCenter": [
-            47.41068139963168,
-            73.41436464088397
-          ],
-          "uncertainty": [
-            1.14548802946593,
-            1.149171270718232
-          ],
-          "coordinateSpace": "final-canvas"
+            27,
+            37
+          ]
         },
-        "attack": {
-          "crown": [
-            49.40377532228361,
-            31.03867403314917
-          ],
-          "chin": [
-            52.26749539594843,
-            63.071823204419886
-          ],
-          "eye": [
-            50.83563535911602,
-            54.16574585635359
-          ],
-          "sole": [
-            47.542357274401475,
-            89.93370165745856
-          ],
-          "bodyCenter": [
-            47.39917127071823,
-            74.85082872928176
-          ],
-          "uncertainty": [
-            1.14548802946593,
-            1.149171270718232
-          ],
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "crown": [
-            51.69935543278085,
-            35.77900552486188
-          ],
-          "chin": [
-            54.56307550644567,
-            67.52486187845304
-          ],
-          "eye": [
-            53.13121546961326,
-            59.76795580110497
-          ],
-          "sole": [
-            46.54465930018416,
-            89.93370165745856
-          ],
-          "bodyCenter": [
-            47.54696132596685,
-            75.56906077348066
-          ],
-          "uncertainty": [
-            1.14548802946593,
-            1.149171270718232
-          ],
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -4554,185 +4440,80 @@
       "kind": "ally",
       "heightGroup": "small",
       "posture": "standing",
-      "revision": "pixel-v1",
-      "marksSource": "assets/silver_rabbit/metadata.json",
+      "revision": "head-recheck-20261122",
+      "marksSource": "face box chosen for the head-recheck-20261122 frames (head box ×0.92)",
       "frames": {
         "idle": {
-          "source": "assets/silver_rabbit/idle.png",
-          "sha256": "ca48718e7acd04c987aed1a4533d2f1c1743096c8a5f5724da8f368ee567e024",
-          "width": 128,
-          "height": 128,
-          "bodyCenterX": 63.48204419889503,
-          "feetBaselineY": 121.72651933701657,
+          "source": "card_pixel/art/pixel-v2/silver_rabbit/idle.png",
+          "sha256": "2f0566eb6af0fd07e46bf300edf1dab74d43ea8c5593cd3a7ada32ffcbcf310c",
+          "width": 63,
+          "height": 92,
+          "bodyCenterX": 28,
+          "feetBaselineY": 91,
           "alphaBounds": {
-            "x": 29,
-            "y": 31,
-            "width": 56,
-            "height": 91,
-            "right": 84,
-            "bottom": 121,
-            "pixels": 3208
+            "x": 0,
+            "y": 1,
+            "width": 47,
+            "height": 90,
+            "right": 47,
+            "bottom": 91,
+            "pixels": 2473
           }
         },
         "attack": {
-          "source": "assets/silver_rabbit/attack.png",
-          "sha256": "75d097c301cda98decc522c0e6b787d0c688023fe6ac7745e37f23dee47ba534",
-          "width": 128,
-          "height": 128,
-          "bodyCenterX": 63.544659300184165,
-          "feetBaselineY": 121.72651933701657,
+          "source": "card_pixel/art/pixel-v2/silver_rabbit/attack.png",
+          "sha256": "21cb0c8bfb5b9acf99861b1b227ebdcf1cb36231fcce8f1cb43c496522a5da53",
+          "width": 63,
+          "height": 92,
+          "bodyCenterX": 28,
+          "feetBaselineY": 91,
           "alphaBounds": {
-            "x": 30,
-            "y": 29,
-            "width": 57,
-            "height": 90,
-            "right": 86,
-            "bottom": 118,
-            "pixels": 2980
+            "x": 3,
+            "y": 0,
+            "width": 49,
+            "height": 88,
+            "right": 52,
+            "bottom": 88,
+            "pixels": 2403
           }
         },
         "hurt": {
-          "source": "assets/silver_rabbit/hurt.png",
-          "sha256": "f3ab1321ed583f17d4cfbcd570b74211ba7f297e54c6f0ffd4610ee87ab9d768",
-          "width": 128,
-          "height": 128,
-          "bodyCenterX": 63.9852670349908,
-          "feetBaselineY": 121.87292817679557,
+          "source": "card_pixel/art/pixel-v2/silver_rabbit/hurt.png",
+          "sha256": "aac8ca25e880c459d638caa374cb5e5925dd37e26fef6ab4c264b3e045a4b944",
+          "width": 63,
+          "height": 92,
+          "bodyCenterX": 28,
+          "feetBaselineY": 91,
           "alphaBounds": {
-            "x": 27,
-            "y": 40,
-            "width": 70,
-            "height": 82,
-            "right": 96,
-            "bottom": 121,
-            "pixels": 3054
+            "x": 6,
+            "y": 11,
+            "width": 57,
+            "height": 80,
+            "right": 63,
+            "bottom": 91,
+            "pixels": 2329
           }
         }
       },
       "marks": {
         "idle": {
-          "crown": null,
+          "pose": "idle",
+          "derived": true,
+          "crown": [
+            31,
+            30
+          ],
           "chin": [
-            66.4194290976059,
-            90.54143646408839
+            31,
+            58
           ],
           "eye": [
-            64.95073664825047,
-            80.73204419889503
-          ],
-          "sole": [
-            63.48204419889503,
-            121.72651933701657
-          ],
-          "bodyCenter": [
-            63.48204419889503,
-            104.59668508287292
-          ],
-          "registrationPivot": [
-            63.48204419889503,
-            121.72651933701657
-          ],
-          "coverCrown": [
-            63.48204419889503,
-            59.795580110497234
-          ],
-          "packingHead": {
-            "estimate": 30.745856353591158,
-            "range": [
-              29.2817679558011,
-              32.209944751381215
-            ],
-            "reason": "Thin headband masks exact crown; estimates follow nearby hair dome, not ears or veil. Attack sole628 above virtual647.",
-            "coordinateSpace": "restored-cell"
-          },
-          "uncertainty": [
-            1.1749539594843463,
-            1.171270718232044
-          ],
-          "coordinateSpace": "final-canvas"
+            31,
+            47
+          ]
         },
-        "attack": {
-          "crown": null,
-          "chin": [
-            66.62891344383058,
-            87.02762430939225
-          ],
-          "eye": [
-            65.16022099447514,
-            77.6574585635359
-          ],
-          "sole": [
-            59.13858195211787,
-            118.94475138121547
-          ],
-          "bodyCenter": [
-            63.544659300184165,
-            100.20441988950276
-          ],
-          "registrationPivot": [
-            63.544659300184165,
-            121.72651933701657
-          ],
-          "coverCrown": [
-            63.69152854511971,
-            56.1353591160221
-          ],
-          "packingHead": {
-            "estimate": 30.892265193370164,
-            "range": [
-              29.428176795580107,
-              32.35635359116022
-            ],
-            "reason": "Thin headband masks exact crown; estimates follow nearby hair dome, not ears or veil. Attack sole628 above virtual647.",
-            "coordinateSpace": "restored-cell"
-          },
-          "uncertainty": [
-            1.1749539594843463,
-            1.171270718232044
-          ],
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "crown": null,
-          "chin": [
-            70.88812154696133,
-            93.6160220994475
-          ],
-          "eye": [
-            69.4194290976059,
-            84.97790055248618
-          ],
-          "sole": [
-            62.81031307550645,
-            121.87292817679557
-          ],
-          "bodyCenter": [
-            63.9852670349908,
-            106.06077348066297
-          ],
-          "registrationPivot": [
-            63.9852670349908,
-            121.87292817679557
-          ],
-          "coverCrown": [
-            67.95073664825047,
-            62.87016574585635
-          ],
-          "packingHead": {
-            "estimate": 30.745856353591158,
-            "range": [
-              29.2817679558011,
-              32.209944751381215
-            ],
-            "reason": "Thin headband masks exact crown; estimates follow nearby hair dome, not ears or veil. Attack sole628 above virtual647.",
-            "coordinateSpace": "restored-cell"
-          },
-          "uncertainty": [
-            1.1749539594843463,
-            1.171270718232044
-          ],
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -7145,143 +6926,80 @@
       "kind": "ally",
       "heightGroup": "normal",
       "posture": "standing",
-      "revision": "pixel-v1",
-      "marksSource": "assets/trauma/metadata.json",
+      "revision": "same-person-forms-20261122",
+      "marksSource": "face box chosen for the same-person-forms-20261122 frames (match trauma rms 49)",
       "frames": {
         "idle": {
-          "source": "assets/trauma/idle.png",
-          "sha256": "ee2463ff367d3c73b6da93ae91adff164dfbfec0016cf64c9f57c4802aa703fa",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.554788213627994,
-          "feetBaselineY": 90.17955801104972,
+          "source": "card_pixel/art/pixel-v2/trauma/idle.png",
+          "sha256": "723c3dd20817cb2c2905fcc07548f5fad1c1773304e2a251a6be52b7ef2fd575",
+          "width": 61,
+          "height": 73,
+          "bodyCenterX": 35,
+          "feetBaselineY": 72,
           "alphaBounds": {
-            "x": 16,
-            "y": 18,
+            "x": 3,
+            "y": 0,
             "width": 56,
             "height": 72,
-            "right": 71,
-            "bottom": 89,
-            "pixels": 2521
+            "right": 59,
+            "bottom": 72,
+            "pixels": 2540
           }
         },
         "attack": {
-          "source": "assets/trauma/attack.png",
-          "sha256": "7be67b91e77cc10e8b0f53c43fe22302dfe84367e39b35076f03eca15c9fdc26",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.43646408839779,
-          "feetBaselineY": 90.29834254143647,
+          "source": "card_pixel/art/pixel-v2/trauma/attack.png",
+          "sha256": "012ceb05a530479d0915287a3852326e03b8e089356827bc9d29ca8998d4517e",
+          "width": 61,
+          "height": 73,
+          "bodyCenterX": 35,
+          "feetBaselineY": 72,
           "alphaBounds": {
-            "x": 12,
-            "y": 19,
+            "x": 0,
+            "y": 1,
             "width": 61,
             "height": 72,
-            "right": 72,
-            "bottom": 90,
-            "pixels": 2568
+            "right": 61,
+            "bottom": 73,
+            "pixels": 2589
           }
         },
         "hurt": {
-          "source": "assets/trauma/hurt.png",
-          "sha256": "11e0e15986ad8aa87aa8dfe6b521479ca1fd373a9e6608b1cef23948d4956bfd",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.38305709023941,
-          "feetBaselineY": 89.94198895027624,
+          "source": "card_pixel/art/pixel-v2/trauma/hurt.png",
+          "sha256": "b4ccb6a9ca279ce1df633c45ab00433e26f8d3594416a44177d96d55c482a39d",
+          "width": 61,
+          "height": 73,
+          "bodyCenterX": 35,
+          "feetBaselineY": 72,
           "alphaBounds": {
-            "x": 12,
-            "y": 22,
+            "x": 0,
+            "y": 4,
             "width": 60,
             "height": 68,
-            "right": 71,
-            "bottom": 89,
-            "pixels": 2493
+            "right": 60,
+            "bottom": 72,
+            "pixels": 2502
           }
         }
       },
       "marks": {
         "idle": {
+          "pose": "idle",
+          "derived": true,
           "crown": [
-            48.146408839779006,
-            25.560773480662984
+            36,
+            8
           ],
           "chin": [
-            50.51289134438306,
-            54.187845303867405
+            36,
+            37
           ],
           "eye": [
-            49.32965009208103,
-            47.773480662983424
-          ],
-          "sole": [
-            47.554788213627994,
-            90.17955801104972
-          ],
-          "bodyCenter": [
-            47.554788213627994,
-            72.24309392265194
-          ],
-          "uncertainty": [
-            0.9465930018416207,
-            0.9502762430939227
-          ],
-          "coordinateSpace": "final-canvas"
+            36,
+            25
+          ]
         },
-        "attack": {
-          "crown": [
-            50.27624309392265,
-            27.34254143646409
-          ],
-          "chin": [
-            52.6427255985267,
-            57.39502762430939
-          ],
-          "eye": [
-            51.45948434622468,
-            51.09944751381216
-          ],
-          "sole": [
-            46.608195211786374,
-            90.29834254143647
-          ],
-          "bodyCenter": [
-            47.43646408839779,
-            74.14364640883979
-          ],
-          "uncertainty": [
-            0.9465930018416207,
-            0.9502762430939227
-          ],
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "crown": [
-            50.10451197053407,
-            29.005524861878452
-          ],
-          "chin": [
-            52.47099447513812,
-            60.24585635359116
-          ],
-          "eye": [
-            51.287753222836095,
-            53.47513812154696
-          ],
-          "sole": [
-            46.31813996316759,
-            89.94198895027624
-          ],
-          "bodyCenter": [
-            47.38305709023941,
-            74.5
-          ],
-          "uncertainty": [
-            0.9465930018416207,
-            0.9502762430939227
-          ],
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -8397,182 +8115,80 @@
       "kind": "boss",
       "heightGroup": "unknown",
       "posture": "creature",
-      "revision": "boss-pixel-v1",
-      "marksSource": "assets/iris_love/metadata.json",
+      "revision": "head-recheck-20261122",
+      "marksSource": "face box chosen for the head-recheck-20261122 frames (head box ×1.09)",
       "frames": {
         "idle": {
-          "source": "assets/iris_love/idle.png",
-          "sha256": "a492eadf83c4b8a82554bfdad74814b3ff198dc47a21b84921b34b63d8383620",
-          "width": 128,
-          "height": 128,
-          "bodyCenterX": 63.50909090909091,
-          "feetBaselineY": 121.72727272727272,
+          "source": "card_pixel/art/pixel-v2/iris_love/idle.png",
+          "sha256": "1a46f4ae5d1470fe5ab69fb4b0042abfefb83f8167bcdb58fd2cd4ba4304188d",
+          "width": 98,
+          "height": 119,
+          "bodyCenterX": 52,
+          "feetBaselineY": 118,
           "alphaBounds": {
-            "x": 22,
-            "y": 17,
-            "width": 75,
-            "height": 105,
-            "right": 96,
-            "bottom": 121,
-            "pixels": 4851
+            "x": 5,
+            "y": 0,
+            "width": 84,
+            "height": 118,
+            "right": 89,
+            "bottom": 118,
+            "pixels": 6083
           }
         },
         "attack": {
-          "source": "assets/iris_love/attack.png",
-          "sha256": "7040f11003874cb0649a0db8a9e7babea934cd0b97acde7f989063fe0a62ceb0",
-          "width": 128,
-          "height": 128,
-          "bodyCenterX": 63.50909090909091,
-          "feetBaselineY": 121.72727272727272,
+          "source": "card_pixel/art/pixel-v2/iris_love/attack.png",
+          "sha256": "0e22fb2cf7b11589b533c5f89f75968fe73c8662eecaf252461f009b23bf7739",
+          "width": 98,
+          "height": 119,
+          "bodyCenterX": 52,
+          "feetBaselineY": 118,
           "alphaBounds": {
-            "x": 20,
-            "y": 17,
-            "width": 85,
-            "height": 105,
-            "right": 104,
-            "bottom": 121,
-            "pixels": 4855
+            "x": 2,
+            "y": 0,
+            "width": 96,
+            "height": 118,
+            "right": 98,
+            "bottom": 118,
+            "pixels": 6091
           }
         },
         "hurt": {
-          "source": "assets/iris_love/hurt.png",
-          "sha256": "c75a6e5d1f26d2cde88a088d5d4f7f7ee43c90ff6630825fa0ba5196adbd9240",
-          "width": 128,
-          "height": 128,
-          "bodyCenterX": 63.50909090909091,
-          "feetBaselineY": 121.72727272727272,
+          "source": "card_pixel/art/pixel-v2/iris_love/hurt.png",
+          "sha256": "e59e178fcd5d0e3cd27f205c2d34d019bcd8b1a62ba672115dbf4b4c5e1e2ae8",
+          "width": 98,
+          "height": 119,
+          "bodyCenterX": 52,
+          "feetBaselineY": 118,
           "alphaBounds": {
-            "x": 18,
-            "y": 20,
-            "width": 75,
-            "height": 102,
-            "right": 92,
-            "bottom": 121,
-            "pixels": 4446
+            "x": 0,
+            "y": 3,
+            "width": 84,
+            "height": 115,
+            "right": 84,
+            "bottom": 118,
+            "pixels": 5566
           }
         }
       },
       "marks": {
         "idle": {
           "pose": "idle",
+          "derived": true,
           "crown": [
-            60.67272727272727,
-            37.58181818181818
+            51,
+            24
           ],
           "chin": [
-            66.34545454545454,
-            68.78181818181818
-          ],
-          "span": [
-            46.49090909090909,
-            79.58181818181818
+            51,
+            58
           ],
           "eye": [
-            62.56363636363636,
-            59.32727272727273
-          ],
-          "sole": [
-            63.50909090909091,
-            121.72727272727272
-          ],
-          "registrationPivot": [
-            63.50909090909091,
-            121.72727272727272
-          ],
-          "tip": [
-            61.61818181818182,
-            17.727272727272727
-          ],
-          "kind": "hair",
-          "u": [
-            0.9454545454545454,
-            0.9454545454545454
-          ],
-          "note": "태양 후광 제외하고 머리띠 위로 드러난 은빛 주 돔 관측. 작은 흰금색 신발 바닥.",
-          "eyeKind": "near visible pupil",
-          "eyeUncertainty": 0.9454545454545454,
-          "soleUncertainty": 0.9454545454545454,
-          "coordinateSpace": "final-canvas"
+            51,
+            44
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": [
-            60.67272727272727,
-            37.58181818181818
-          ],
-          "chin": [
-            66.34545454545454,
-            68.78181818181818
-          ],
-          "span": [
-            46.49090909090909,
-            79.58181818181818
-          ],
-          "eye": [
-            62.56363636363636,
-            59.32727272727273
-          ],
-          "sole": [
-            63.50909090909091,
-            121.72727272727272
-          ],
-          "registrationPivot": [
-            63.50909090909091,
-            121.72727272727272
-          ],
-          "tip": [
-            61.61818181818182,
-            17.727272727272727
-          ],
-          "kind": "hair",
-          "u": [
-            0.9454545454545454,
-            0.9454545454545454
-          ],
-          "note": "빈 두 손을 가슴에 모아 오른쪽에서 빛을 받음. 보라 호는 손 가까이, 얼굴은 가리지 않음.",
-          "eyeKind": "near visible pupil",
-          "eyeUncertainty": 0.9454545454545454,
-          "soleUncertainty": 0.9454545454545454,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": [
-            61.61818181818182,
-            43.25454545454545
-          ],
-          "chin": [
-            68.23636363636363,
-            74.45454545454545
-          ],
-          "span": [
-            47.43636363636364,
-            81.47272727272727
-          ],
-          "eye": null,
-          "sole": [
-            63.50909090909091,
-            121.72727272727272
-          ],
-          "registrationPivot": [
-            63.50909090909091,
-            121.72727272727272
-          ],
-          "tip": [
-            61.61818181818182,
-            22.454545454545453
-          ],
-          "kind": "hair",
-          "u": [
-            0.9454545454545454,
-            0.9454545454545454
-          ],
-          "note": "후광 기울기와 숙인 머리; 분홍/파랑 눈은 감음. 금색 치맛자락보다 신발 기준.",
-          "eyeKind": "closed eyes",
-          "eyeUncertainty": null,
-          "soleUncertainty": 0.9454545454545454,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -8581,182 +8197,80 @@
       "kind": "boss",
       "heightGroup": "unknown",
       "posture": "creature",
-      "revision": "boss-pixel-v1",
-      "marksSource": "assets/iris_curse/metadata.json",
+      "revision": "same-person-forms-20261122",
+      "marksSource": "face box chosen for the same-person-forms-20261122 frames (match iris_curse rms 84)",
       "frames": {
         "idle": {
-          "source": "assets/iris_curse/idle.png",
-          "sha256": "8980daee63bf77b784fa1a211cd6e94f86d225acbfc79b8217e26846397d797c",
-          "width": 128,
-          "height": 128,
-          "bodyCenterX": 63.400000000000006,
-          "feetBaselineY": 121.94285714285715,
+          "source": "card_pixel/art/pixel-v2/iris_curse/idle.png",
+          "sha256": "7ec03c31d29a21f60209ec02072ae6dd053cec85a015f184f92a962f9b3dc8b8",
+          "width": 109,
+          "height": 122,
+          "bodyCenterX": 49,
+          "feetBaselineY": 121,
           "alphaBounds": {
-            "x": 14,
-            "y": 16,
+            "x": 0,
+            "y": 13,
             "width": 78,
-            "height": 106,
-            "right": 91,
+            "height": 108,
+            "right": 78,
             "bottom": 121,
-            "pixels": 5179
+            "pixels": 4910
           }
         },
         "attack": {
-          "source": "assets/iris_curse/attack.png",
-          "sha256": "0a2f814bfe459313e9a8ce6cc29336846b3238a43892e6c083418d4bf3cc0f5a",
-          "width": 128,
-          "height": 128,
-          "bodyCenterX": 63.457142857142856,
-          "feetBaselineY": 121.94285714285715,
+          "source": "card_pixel/art/pixel-v2/iris_curse/attack.png",
+          "sha256": "01a5fc8dd953529dc155e228e9848846cbff8d52fc62c82bfb1ba7da7eb056e0",
+          "width": 109,
+          "height": 122,
+          "bodyCenterX": 49,
+          "feetBaselineY": 121,
           "alphaBounds": {
-            "x": 15,
-            "y": 17,
+            "x": 1,
+            "y": 2,
             "width": 108,
-            "height": 105,
-            "right": 122,
+            "height": 119,
+            "right": 109,
             "bottom": 121,
-            "pixels": 6436
+            "pixels": 6238
           }
         },
         "hurt": {
-          "source": "assets/iris_curse/hurt.png",
-          "sha256": "1560ce0911a652961092220c0a2f405e28dd935399fcce6722da08d9b699b193",
-          "width": 128,
-          "height": 128,
-          "bodyCenterX": 63.400000000000006,
-          "feetBaselineY": 121.94285714285715,
+          "source": "card_pixel/art/pixel-v2/iris_curse/hurt.png",
+          "sha256": "dc1323a64b957ad691501e9c7e5fcc0b88f608277221555977a06eb433e18aa3",
+          "width": 109,
+          "height": 122,
+          "bodyCenterX": 49,
+          "feetBaselineY": 121,
           "alphaBounds": {
-            "x": 16,
-            "y": 20,
-            "width": 85,
-            "height": 102,
-            "right": 100,
+            "x": 2,
+            "y": 21,
+            "width": 82,
+            "height": 100,
+            "right": 84,
             "bottom": 121,
-            "pixels": 5233
+            "pixels": 5037
           }
         }
       },
       "marks": {
         "idle": {
           "pose": "idle",
+          "derived": true,
           "crown": [
-            59.438095238095244,
-            23.885714285714286
+            47,
+            25
           ],
           "chin": [
-            65.38095238095238,
-            63.50476190476191
-          ],
-          "span": [
-            38.63809523809524,
-            84.2
+            47,
+            65
           ],
           "eye": [
-            60.42857142857143,
-            52.60952380952381
-          ],
-          "sole": [
-            63.400000000000006,
-            121.94285714285715
-          ],
-          "registrationPivot": [
-            63.400000000000006,
-            121.94285714285715
-          ],
-          "tip": [
-            61.41904761904762,
-            17.942857142857143
-          ],
-          "kind": "hair",
-          "u": [
-            0.9904761904761905,
-            0.9904761904761905
-          ],
-          "note": "작은 검정 뿔형 장식·독립 머리 뻗침 제외. 실제 검정 스트랩 신발 기준.",
-          "eyeKind": "near visible pupil",
-          "eyeUncertainty": 0.9904761904761905,
-          "soleUncertainty": 0.9904761904761905,
-          "coordinateSpace": "final-canvas"
+            47,
+            49
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": [
-            61.47619047619048,
-            23.885714285714286
-          ],
-          "chin": [
-            68.40952380952382,
-            62.51428571428572
-          ],
-          "span": [
-            40.67619047619048,
-            86.23809523809524
-          ],
-          "eye": [
-            63.457142857142856,
-            52.60952380952381
-          ],
-          "sole": [
-            63.457142857142856,
-            120.95238095238096
-          ],
-          "registrationPivot": [
-            63.457142857142856,
-            121.94285714285715
-          ],
-          "tip": [
-            60.48571428571429,
-            17.942857142857143
-          ],
-          "kind": "hair",
-          "u": [
-            0.9904761904761905,
-            0.9904761904761905
-          ],
-          "note": "가슴에서 엇갈린 손을 한쪽으로 여는 저주 동작. 이색눈과 무지개 아래머리 유지.",
-          "eyeKind": "near visible pupil",
-          "eyeUncertainty": 0.9904761904761905,
-          "soleUncertainty": 0.9904761904761905,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": [
-            61.41904761904762,
-            26.857142857142858
-          ],
-          "chin": [
-            67.36190476190477,
-            67.46666666666667
-          ],
-          "span": [
-            40.61904761904762,
-            86.18095238095239
-          ],
-          "eye": null,
-          "sole": [
-            63.400000000000006,
-            121.94285714285715
-          ],
-          "registrationPivot": [
-            63.400000000000006,
-            121.94285714285715
-          ],
-          "tip": [
-            58.44761904761905,
-            21.904761904761905
-          ],
-          "kind": "hair",
-          "u": [
-            0.9904761904761905,
-            0.9904761904761905
-          ],
-          "note": "빈 양손 가드, 머리 숙임. 장신구와 무지개 아래머리 유지.",
-          "eyeKind": "closed eyes",
-          "eyeUncertainty": null,
-          "soleUncertainty": 0.9904761904761905,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -9833,185 +9347,80 @@
       "kind": "ally",
       "heightGroup": "normal",
       "posture": "standing",
-      "revision": "pixel-v3-glasses",
-      "marksSource": "assets/alchemist/metadata.json",
+      "revision": "head-recheck-20261122",
+      "marksSource": "face box chosen for the head-recheck-20261122 frames (head box ×1.00)",
       "frames": {
         "idle": {
-          "source": "assets/alchemist/idle.png",
-          "sha256": "2d656a98caa3293401e2d4f30ff8f10e38539766819405592cfef10d973bb0b8",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.10144927536232,
-          "feetBaselineY": 89.95652173913044,
+          "source": "card_pixel/art/pixel-v2/alchemist/idle.png",
+          "sha256": "6cd97efaec630b3cfe52f04397df3b299336fd7330ba6c2d1594140313efabcf",
+          "width": 59,
+          "height": 81,
+          "bodyCenterX": 35,
+          "feetBaselineY": 80,
           "alphaBounds": {
-            "x": 19,
-            "y": 10,
-            "width": 50,
+            "x": 11,
+            "y": 0,
+            "width": 44,
             "height": 81,
-            "right": 68,
-            "bottom": 90,
-            "pixels": 2589
+            "right": 55,
+            "bottom": 81,
+            "pixels": 2463
           }
         },
         "attack": {
-          "source": "assets/alchemist/attack.png",
-          "sha256": "515825ca447ed8baca61d066a2ec0029f4c9b7bde5af001c03cfd0d3244ee11b",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.15942028985507,
-          "feetBaselineY": 89.95652173913044,
+          "source": "card_pixel/art/pixel-v2/alchemist/attack.png",
+          "sha256": "a2ea94c4141f5c6414243a565b44c8a76a79c2d7ad49bb5c5b0fdb7711a4f28e",
+          "width": 59,
+          "height": 81,
+          "bodyCenterX": 35,
+          "feetBaselineY": 80,
           "alphaBounds": {
-            "x": 12,
-            "y": 11,
-            "width": 56,
+            "x": 4,
+            "y": 1,
+            "width": 52,
             "height": 80,
-            "right": 67,
-            "bottom": 90,
-            "pixels": 2576
+            "right": 56,
+            "bottom": 81,
+            "pixels": 2457
           }
         },
         "hurt": {
-          "source": "assets/alchemist/hurt.png",
-          "sha256": "15ad06fadae6a2ff2f0cbf07374815e2f763d2a76eb13773f3fba48414659dc5",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.10144927536232,
-          "feetBaselineY": 89.95652173913044,
+          "source": "card_pixel/art/pixel-v2/alchemist/hurt.png",
+          "sha256": "4ec38c5735aeac63097637f45bc2cae29960f439fb277573c613662c444503a3",
+          "width": 59,
+          "height": 81,
+          "bodyCenterX": 35,
+          "feetBaselineY": 80,
           "alphaBounds": {
-            "x": 20,
-            "y": 15,
-            "width": 51,
+            "x": 9,
+            "y": 5,
+            "width": 48,
             "height": 76,
-            "right": 70,
-            "bottom": 90,
-            "pixels": 2433
+            "right": 57,
+            "bottom": 81,
+            "pixels": 2308
           }
         }
       },
       "marks": {
         "idle": {
           "pose": "idle",
-          "crown": null,
-          "coverCrown": [
-            45.21739130434783,
-            21.18840579710145
+          "derived": true,
+          "crown": [
+            37,
+            15
           ],
           "chin": [
-            49.927536231884055,
-            55.10144927536232
-          ],
-          "span": [
-            26.3768115942029,
-            64.05797101449275
+            37,
+            45
           ],
           "eye": [
-            45.21739130434783,
-            45.68115942028985
-          ],
-          "sole": [
-            47.10144927536232,
-            89.95652173913044
-          ],
-          "registrationPivot": [
-            47.10144927536232,
-            89.95652173913044
-          ],
-          "tip": [
-            39.565217391304344,
-            11.768115942028984
-          ],
-          "kind": "covered",
-          "u": [
-            null,
-            0.9420289855072463
-          ],
-          "note": "얼굴 원형 안경과 머리 고글이 별개로 관측됨. 오른손 플라스크.",
-          "eyeKind": "near visible pupil",
-          "eyeUncertainty": 0.9420289855072463,
-          "soleUncertainty": 0.9420289855072463,
-          "coordinateSpace": "final-canvas"
+            37,
+            33
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": null,
-          "coverCrown": [
-            43.391304347826086,
-            20.246376811594203
-          ],
-          "chin": [
-            50.927536231884055,
-            53.21739130434783
-          ],
-          "span": [
-            27.3768115942029,
-            65.05797101449275
-          ],
-          "eye": [
-            45.27536231884058,
-            44.73913043478261
-          ],
-          "sole": [
-            47.15942028985507,
-            89.95652173913044
-          ],
-          "registrationPivot": [
-            47.15942028985507,
-            89.95652173913044
-          ],
-          "tip": [
-            37.73913043478261,
-            11.768115942028984
-          ],
-          "kind": "covered",
-          "u": [
-            null,
-            0.9420289855072463
-          ],
-          "note": "오른팔을 몸 앞으로 굽혀 플라스크 받침, 왼손 병목 위 조작. 안경 유지.",
-          "eyeKind": "near visible pupil",
-          "eyeUncertainty": 0.9420289855072463,
-          "soleUncertainty": 0.9420289855072463,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": null,
-          "coverCrown": [
-            45.21739130434783,
-            27.782608695652172
-          ],
-          "chin": [
-            52.7536231884058,
-            61.69565217391304
-          ],
-          "span": [
-            29.202898550724637,
-            65.94202898550725
-          ],
-          "eye": null,
-          "sole": [
-            47.10144927536232,
-            89.95652173913044
-          ],
-          "registrationPivot": [
-            47.10144927536232,
-            89.95652173913044
-          ],
-          "tip": [
-            40.507246376811594,
-            19.304347826086957
-          ],
-          "kind": "covered",
-          "u": [
-            null,
-            0.9420289855072463
-          ],
-          "note": "재생성으로 닫힌 눈 위 원형 안경테를 복원. 고글도 유지하며 오른손 플라스크를 놓지 않음.",
-          "eyeKind": "closed eyes",
-          "eyeUncertainty": null,
-          "soleUncertainty": 0.9420289855072463,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -10020,182 +9429,80 @@
       "kind": "ally",
       "heightGroup": "tall",
       "posture": "standing",
-      "revision": "pixel-v4-height",
-      "marksSource": "assets/ancient_soul/metadata.json",
+      "revision": "head-recheck-20261122",
+      "marksSource": "face box chosen for the head-recheck-20261122 frames (manual)",
       "frames": {
         "idle": {
-          "source": "assets/ancient_soul/idle.png",
-          "sha256": "7c0cc409e1cad394fcd107b6e6764c096295f2a79d7643ae16ab04f83f78c03e",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.58181818181818,
-          "feetBaselineY": 89.9090909090909,
+          "source": "card_pixel/art/pixel-v2/ancient_soul/idle.png",
+          "sha256": "085181c2c40d6c59970efa78e2010013d15e3541e2fa20305450dda01447afb4",
+          "width": 73,
+          "height": 90,
+          "bodyCenterX": 45,
+          "feetBaselineY": 89,
           "alphaBounds": {
-            "x": 8,
-            "y": 3,
-            "width": 68,
-            "height": 88,
-            "right": 75,
+            "x": 9,
+            "y": 12,
+            "width": 59,
+            "height": 78,
+            "right": 68,
             "bottom": 90,
-            "pixels": 4192
+            "pixels": 3069
           }
         },
         "attack": {
-          "source": "assets/ancient_soul/attack.png",
-          "sha256": "6adfc9f06796323c11e7ead2280f364b4878fb1f05f98b7040e53afc5213366e",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.58181818181818,
-          "feetBaselineY": 89.9090909090909,
+          "source": "card_pixel/art/pixel-v2/ancient_soul/attack.png",
+          "sha256": "af56e1370cd0f2697aef3807dfe67db307473e09875d6d4aeb108750813a645d",
+          "width": 73,
+          "height": 90,
+          "bodyCenterX": 45,
+          "feetBaselineY": 89,
           "alphaBounds": {
-            "x": 8,
-            "y": 1,
-            "width": 67,
-            "height": 90,
-            "right": 74,
+            "x": 10,
+            "y": 12,
+            "width": 59,
+            "height": 78,
+            "right": 69,
             "bottom": 90,
-            "pixels": 4105
+            "pixels": 2983
           }
         },
         "hurt": {
-          "source": "assets/ancient_soul/hurt.png",
-          "sha256": "215e73d85b30f3d7200f252b10343ec5a4ced16b7982b686987c538f55693339",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.58181818181818,
-          "feetBaselineY": 89.9090909090909,
+          "source": "card_pixel/art/pixel-v2/ancient_soul/hurt.png",
+          "sha256": "8356e342212e90907ae94656cb520ca0c86c72e1ea5f6448bc347db0605ebf99",
+          "width": 73,
+          "height": 90,
+          "bodyCenterX": 45,
+          "feetBaselineY": 89,
           "alphaBounds": {
-            "x": 3,
-            "y": 8,
-            "width": 69,
-            "height": 83,
-            "right": 71,
+            "x": 10,
+            "y": 16,
+            "width": 58,
+            "height": 74,
+            "right": 68,
             "bottom": 90,
-            "pixels": 3986
+            "pixels": 2895
           }
         }
       },
       "marks": {
         "idle": {
           "pose": "idle",
+          "derived": true,
           "crown": [
-            45.10909090909091,
-            21.909090909090907
+            44,
+            22
           ],
           "chin": [
-            52.52727272727273,
-            52.81818181818181
-          ],
-          "span": [
-            26.563636363636363,
-            68.6
+            44,
+            50
           ],
           "eye": [
-            47.58181818181818,
-            42.92727272727272
-          ],
-          "sole": [
-            47.58181818181818,
-            89.9090909090909
-          ],
-          "registrationPivot": [
-            47.58181818181818,
-            89.9090909090909
-          ],
-          "tip": [
-            53.763636363636365,
-            3.3636363636363633
-          ],
-          "kind": "hair",
-          "u": [
-            1.2363636363636363,
-            1.2363636363636363
-          ],
-          "note": "불꽃 뿔·이마 보석·앞머리 바깥 컬을 제외한 주 돔. 맨발 기준.",
-          "eyeKind": "near visible pupil",
-          "eyeUncertainty": 1.2363636363636363,
-          "soleUncertainty": 1.2363636363636363,
-          "coordinateSpace": "final-canvas"
+            44,
+            39
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": [
-            45.10909090909091,
-            21.909090909090907
-          ],
-          "chin": [
-            52.52727272727273,
-            52.81818181818181
-          ],
-          "span": [
-            26.563636363636363,
-            68.6
-          ],
-          "eye": [
-            47.58181818181818,
-            42.92727272727272
-          ],
-          "sole": [
-            47.58181818181818,
-            89.9090909090909
-          ],
-          "registrationPivot": [
-            47.58181818181818,
-            89.9090909090909
-          ],
-          "tip": [
-            52.52727272727273,
-            3.3636363636363633
-          ],
-          "kind": "hair",
-          "u": [
-            1.2363636363636363,
-            1.2363636363636363
-          ],
-          "note": "오른쪽 가까운 어깨에서 연결된 오른손 손바닥이 중앙 불꽃 아래를 받친다. 왼손은 위/옆.",
-          "eyeKind": "near visible pupil",
-          "eyeUncertainty": 1.2363636363636363,
-          "soleUncertainty": 1.2363636363636363,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": [
-            46.345454545454544,
-            26.854545454545452
-          ],
-          "chin": [
-            53.763636363636365,
-            57.763636363636365
-          ],
-          "span": [
-            27.799999999999997,
-            69.83636363636363
-          ],
-          "eye": null,
-          "sole": [
-            47.58181818181818,
-            89.9090909090909
-          ],
-          "registrationPivot": [
-            47.58181818181818,
-            89.9090909090909
-          ],
-          "tip": [
-            56.236363636363635,
-            8.309090909090909
-          ],
-          "kind": "hair",
-          "u": [
-            1.2363636363636363,
-            1.2363636363636363
-          ],
-          "note": "오른손 불꽃과 왼손 가슴 보호. 드레스 뒤자락과 맨발을 구분.",
-          "eyeKind": "closed eyes",
-          "eyeUncertainty": null,
-          "soleUncertainty": 1.2363636363636363,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -16602,179 +15909,80 @@
       "kind": "ally",
       "heightGroup": "small",
       "posture": "standing",
-      "revision": "pixel-v1",
-      "marksSource": "assets/kobold/metadata.json",
+      "revision": "head-recheck-20261122",
+      "marksSource": "face box chosen for the head-recheck-20261122 frames (head box ×1.00)",
       "frames": {
         "idle": {
-          "source": "assets/kobold/idle.png",
-          "sha256": "c3c4c412db5b9855883839438337cdd71366fbc91ee11c0bb1be87a328ab40cc",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.1,
-          "feetBaselineY": 89.55,
+          "source": "card_pixel/art/pixel-v2/kobold/idle.png",
+          "sha256": "fc5deb6a11d0eb7158ab6b2f12fff0d91f6098d8f80ec1838880af591b4e1a7f",
+          "width": 63,
+          "height": 68,
+          "bodyCenterX": 31,
+          "feetBaselineY": 65,
           "alphaBounds": {
-            "x": 22,
-            "y": 22,
+            "x": 6,
+            "y": 0,
             "width": 46,
-            "height": 71,
-            "right": 67,
-            "bottom": 92,
-            "pixels": 2112
+            "height": 68,
+            "right": 52,
+            "bottom": 68,
+            "pixels": 2021
           }
         },
         "attack": {
-          "source": "assets/kobold/attack.png",
-          "sha256": "5e3fc550a9d290132f23c44dc5dcf87806ee245e57580be3405b61f267fe8ebc",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.25,
-          "feetBaselineY": 89.55,
+          "source": "card_pixel/art/pixel-v2/kobold/attack.png",
+          "sha256": "00d69fcbb33a260f9a7639e6dbe86b2215227ce33c886c80e469c90daee2768d",
+          "width": 63,
+          "height": 68,
+          "bodyCenterX": 31,
+          "feetBaselineY": 65,
           "alphaBounds": {
-            "x": 16,
-            "y": 28,
+            "x": 0,
+            "y": 6,
             "width": 63,
-            "height": 64,
-            "right": 78,
-            "bottom": 91,
-            "pixels": 2413
+            "height": 61,
+            "right": 63,
+            "bottom": 67,
+            "pixels": 2287
           }
         },
         "hurt": {
-          "source": "assets/kobold/hurt.png",
-          "sha256": "35f7a62967658f33f17ddd3a285f33bcf07086feda69f6bde1aad3c29350f9e2",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.1,
-          "feetBaselineY": 89.55,
+          "source": "card_pixel/art/pixel-v2/kobold/hurt.png",
+          "sha256": "a0ee0e2bafcfafc3aa42cce3b9bf501ae69b4777e710678be2171e21e470e740",
+          "width": 63,
+          "height": 68,
+          "bodyCenterX": 31,
+          "feetBaselineY": 65,
           "alphaBounds": {
-            "x": 17,
-            "y": 28,
+            "x": 1,
+            "y": 6,
             "width": 60,
-            "height": 65,
-            "right": 76,
-            "bottom": 92,
-            "pixels": 2152
+            "height": 62,
+            "right": 61,
+            "bottom": 68,
+            "pixels": 2061
           }
         }
       },
       "marks": {
         "idle": {
           "pose": "idle",
+          "derived": true,
           "crown": [
-            46.25,
-            27.5
+            34,
+            6
           ],
-          "coverCrown": null,
           "chin": [
-            52.199999999999996,
-            56.4
+            34,
+            35
           ],
           "eye": [
-            50.5,
-            48.75
-          ],
-          "sole": [
-            47.949999999999996,
-            89.55
-          ],
-          "tip": [
-            52.199999999999996,
-            22.4
-          ],
-          "span": [
-            35.2,
-            64.94999999999999
-          ],
-          "registrationPivot": [
-            47.1,
-            89.55
-          ],
-          "u": [
-            1.275,
-            0.85
-          ],
-          "kind": "dense hair dome",
-          "note": "수직 머리끝 뻗침과 늘어진 귀를 제외한 큰 머리 돔. 짧은 체형군으로 공통0.85배.",
-          "packingEstimate": null,
-          "coordinateSpace": "final-canvas"
+            34,
+            23
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": [
-            50.65,
-            35.15
-          ],
-          "coverCrown": null,
-          "chin": [
-            56.6,
-            61.5
-          ],
-          "eye": [
-            54.9,
-            54.699999999999996
-          ],
-          "sole": [
-            50.65,
-            89.55
-          ],
-          "tip": [
-            58.3,
-            30.049999999999997
-          ],
-          "span": [
-            37.9,
-            69.35
-          ],
-          "registrationPivot": [
-            47.25,
-            89.55
-          ],
-          "u": [
-            1.275,
-            0.85
-          ],
-          "kind": "dense hair dome",
-          "note": "수직 머리끝 뻗침과 늘어진 귀를 제외한 큰 머리 돔. 짧은 체형군으로 공통0.85배.",
-          "packingEstimate": null,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": [
-            48.8,
-            33.45
-          ],
-          "coverCrown": null,
-          "chin": [
-            54.75,
-            59.8
-          ],
-          "eye": null,
-          "sole": [
-            49.65,
-            89.55
-          ],
-          "tip": [
-            60.699999999999996,
-            29.2
-          ],
-          "span": [
-            36.9,
-            67.5
-          ],
-          "registrationPivot": [
-            47.1,
-            89.55
-          ],
-          "u": [
-            1.275,
-            0.85
-          ],
-          "kind": "dense hair dome",
-          "note": "수직 머리끝 뻗침과 늘어진 귀를 제외한 큰 머리 돔. 짧은 체형군으로 공통0.85배.",
-          "packingEstimate": null,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -17767,143 +16975,80 @@
       "kind": "ally",
       "heightGroup": "normal",
       "posture": "standing",
-      "revision": "pixel-v1",
-      "marksSource": "assets/mummy/metadata.json",
+      "revision": "head-recheck-20261122",
+      "marksSource": "face box chosen for the head-recheck-20261122 frames (head box ×1.00)",
       "frames": {
         "idle": {
-          "source": "assets/mummy/idle.png",
-          "sha256": "1fe985ecb8396c2a9b820e8d370ffbdb70cf7c6d6bb2ef357beb0f5de1c96a04",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.10497237569061,
-          "feetBaselineY": 90.20441988950276,
+          "source": "card_pixel/art/pixel-v2/mummy/idle.png",
+          "sha256": "10c64773a75978bc7b0943609225e5bbbaaa52c208dcc6e2b39b288670767cf3",
+          "width": 63,
+          "height": 73,
+          "bodyCenterX": 26,
+          "feetBaselineY": 72,
           "alphaBounds": {
-            "x": 26,
-            "y": 22,
+            "x": 5,
+            "y": 0,
             "width": 41,
-            "height": 68,
-            "right": 66,
-            "bottom": 89,
-            "pixels": 2002
+            "height": 72,
+            "right": 46,
+            "bottom": 72,
+            "pixels": 2100
           }
         },
         "attack": {
-          "source": "assets/mummy/attack.png",
-          "sha256": "45140fee7e750fb81739e19bfc16219e4e1c5bf46ca88eae5f8c1474affe0fac",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.200736648250455,
-          "feetBaselineY": 90.20441988950276,
+          "source": "card_pixel/art/pixel-v2/mummy/attack.png",
+          "sha256": "170355078fad4f31dd2745b8ea6bc20cbf835dad7aeb2f676731dba0d08634f6",
+          "width": 63,
+          "height": 73,
+          "bodyCenterX": 26,
+          "feetBaselineY": 72,
           "alphaBounds": {
-            "x": 21,
-            "y": 24,
+            "x": 0,
+            "y": 2,
             "width": 63,
-            "height": 66,
-            "right": 83,
-            "bottom": 89,
-            "pixels": 2105
+            "height": 70,
+            "right": 63,
+            "bottom": 72,
+            "pixels": 2217
           }
         },
         "hurt": {
-          "source": "assets/mummy/hurt.png",
-          "sha256": "ab8545eb5aeeb50a55f59b7475dec441b248cdd43388dce0cc23edee47c787fb",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.41068139963167,
-          "feetBaselineY": 90.08977900552486,
+          "source": "card_pixel/art/pixel-v2/mummy/hurt.png",
+          "sha256": "5f00af4e3b01428c1f66a78fd227c31a55ec88c9c5502d1efa07b40719661a7a",
+          "width": 63,
+          "height": 73,
+          "bodyCenterX": 26,
+          "feetBaselineY": 72,
           "alphaBounds": {
-            "x": 27,
-            "y": 26,
+            "x": 6,
+            "y": 4,
             "width": 42,
-            "height": 64,
-            "right": 68,
-            "bottom": 89,
-            "pixels": 1806
+            "height": 68,
+            "right": 48,
+            "bottom": 72,
+            "pixels": 1898
           }
         }
       },
       "marks": {
         "idle": {
+          "pose": "idle",
+          "derived": true,
           "crown": [
-            46.30570902394107,
-            26.234806629834253
+            28,
+            4
           ],
           "chin": [
-            51.44383057090239,
-            57.8756906077348
+            28,
+            36
           ],
           "eye": [
-            50.530386740331494,
-            49.392265193370164
-          ],
-          "sole": [
-            46.99079189686925,
-            90.20441988950276
-          ],
-          "bodyCenter": [
-            47.10497237569061,
-            72.32044198895028
-          ],
-          "uncertainty": [
-            1.141804788213628,
-            1.1464088397790055
-          ],
-          "coordinateSpace": "final-canvas"
+            28,
+            23
+          ]
         },
-        "attack": {
-          "crown": [
-            46.629834254143645,
-            29.100828729281766
-          ],
-          "chin": [
-            51.767955801104975,
-            59.59530386740332
-          ],
-          "eye": [
-            50.96869244935543,
-            51.68508287292818
-          ],
-          "sole": [
-            47.0865561694291,
-            90.20441988950276
-          ],
-          "bodyCenter": [
-            47.200736648250455,
-            73.12292817679558
-          ],
-          "uncertainty": [
-            1.141804788213628,
-            1.1464088397790055
-          ],
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "crown": [
-            47.75322283609577,
-            31.85220994475138
-          ],
-          "chin": [
-            52.434622467771646,
-            65.09806629834253
-          ],
-          "eye": [
-            51.86372007366484,
-            57.8756906077348
-          ],
-          "sole": [
-            47.75322283609577,
-            90.08977900552486
-          ],
-          "bodyCenter": [
-            47.41068139963167,
-            75.64502762430939
-          ],
-          "uncertainty": [
-            1.141804788213628,
-            1.1464088397790055
-          ],
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -18057,173 +17202,80 @@
       "kind": "ally",
       "heightGroup": "normal",
       "posture": "standing",
-      "revision": "pixel-v1",
-      "marksSource": "assets/perfect_aurora/metadata.json",
+      "revision": "same-person-forms-20261122",
+      "marksSource": "face box chosen for the same-person-forms-20261122 frames (match aurora rms 0)",
       "frames": {
         "idle": {
-          "source": "assets/perfect_aurora/idle.png",
-          "sha256": "07aca6badea0eda497ca2ca34b5cd3dd64260dbb24ff7b3c700f343a066da662",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 48,
-          "feetBaselineY": 90,
+          "source": "card_pixel/art/pixel-v2/perfect_aurora/idle.png",
+          "sha256": "5b6b1dee60ba6d2558015530ad5df9f2bbac3df4a19900432799c5c4228e87ad",
+          "width": 116,
+          "height": 73,
+          "bodyCenterX": 36,
+          "feetBaselineY": 72,
           "alphaBounds": {
-            "x": 16,
-            "y": 15,
-            "width": 53,
-            "height": 76,
-            "right": 68,
-            "bottom": 90,
-            "pixels": 2778
+            "x": 4,
+            "y": 0,
+            "width": 77,
+            "height": 73,
+            "right": 81,
+            "bottom": 73,
+            "pixels": 3253
           }
         },
         "attack": {
-          "source": "assets/perfect_aurora/attack.png",
-          "sha256": "daae261695e450a5542caedb7147a5767b93bf6c5ee914c3eb70a8585a06c1a0",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 48,
-          "feetBaselineY": 90,
+          "source": "card_pixel/art/pixel-v2/perfect_aurora/attack.png",
+          "sha256": "7a89d8eba7ca35e77d6340ff4a310a4bb16c2e5c5812faf11e94fb4a70d7105a",
+          "width": 116,
+          "height": 73,
+          "bodyCenterX": 36,
+          "feetBaselineY": 72,
           "alphaBounds": {
-            "x": 13,
-            "y": 15,
-            "width": 61,
-            "height": 76,
-            "right": 73,
-            "bottom": 90,
-            "pixels": 2869
+            "x": 0,
+            "y": 2,
+            "width": 116,
+            "height": 71,
+            "right": 116,
+            "bottom": 73,
+            "pixels": 4428
           }
         },
         "hurt": {
-          "source": "assets/perfect_aurora/hurt.png",
-          "sha256": "be86ae7e0c73d52f9da08e888416cdf5d2f14c4bd024b685d1cb6c5d3df38b83",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 48,
-          "feetBaselineY": 90,
+          "source": "card_pixel/art/pixel-v2/perfect_aurora/hurt.png",
+          "sha256": "8df602f07ab6ae844b3d6071308a0be980ebdf537abcdd54539a8208ac8aab53",
+          "width": 116,
+          "height": 73,
+          "bodyCenterX": 36,
+          "feetBaselineY": 72,
           "alphaBounds": {
-            "x": 13,
-            "y": 17,
-            "width": 60,
-            "height": 74,
-            "right": 72,
-            "bottom": 90,
-            "pixels": 2711
+            "x": 0,
+            "y": 5,
+            "width": 89,
+            "height": 68,
+            "right": 89,
+            "bottom": 73,
+            "pixels": 3307
           }
         }
       },
       "marks": {
         "idle": {
           "pose": "idle",
+          "derived": true,
           "crown": [
-            46,
-            24
+            38,
+            7
           ],
           "chin": [
-            50,
-            54
-          ],
-          "span": [
-            30,
-            65
+            38,
+            38
           ],
           "eye": [
-            46,
-            47
-          ],
-          "sole": [
-            48,
-            90
-          ],
-          "tip": [
-            39,
-            16
-          ],
-          "bodyCenter": [
-            48,
-            68
-          ],
-          "u": [
-            2,
-            1
-          ],
-          "eyeUncertainty": 1,
-          "soleUncertainty": 1,
-          "coordinateSpace": "final-canvas"
+            38,
+            26
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": [
-            46,
-            25
-          ],
-          "chin": [
-            51,
-            55
-          ],
-          "span": [
-            29,
-            61
-          ],
-          "eye": [
-            46,
-            48
-          ],
-          "sole": [
-            48,
-            90
-          ],
-          "tip": [
-            39,
-            16
-          ],
-          "bodyCenter": [
-            48,
-            68
-          ],
-          "u": [
-            2,
-            1
-          ],
-          "eyeUncertainty": 1,
-          "soleUncertainty": 1,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": [
-            45,
-            28
-          ],
-          "chin": [
-            53,
-            58
-          ],
-          "span": [
-            30,
-            64
-          ],
-          "eye": null,
-          "sole": [
-            48,
-            90
-          ],
-          "tip": [
-            44,
-            18
-          ],
-          "bodyCenter": [
-            48,
-            68
-          ],
-          "u": [
-            2,
-            1
-          ],
-          "eyeUncertainty": 1,
-          "soleUncertainty": 1,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -19216,57 +18268,57 @@
       "kind": "ally",
       "heightGroup": "normal",
       "posture": "standing",
-      "revision": "pixel-v1",
-      "marksSource": "assets/rumi_bunny/metadata.json",
+      "revision": "same-person-forms-20261122",
+      "marksSource": "face box chosen for the same-person-forms-20261122 frames (match rumi_bunny rms 46)",
       "frames": {
         "idle": {
-          "source": "assets/rumi_bunny/idle.png",
-          "sha256": "1e74d3f91f71109872629f81e9a960e23c8d4a70e40ce4989b7b25cef622809d",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.760000000000005,
-          "feetBaselineY": 90.08000000000001,
+          "source": "card_pixel/art/pixel-v2/rumi_bunny/idle.png",
+          "sha256": "c8a9bfe6e8772a51e54e3dea32d39132125dea8b38e8a124453bd38745da9abb",
+          "width": 63,
+          "height": 83,
+          "bodyCenterX": 29,
+          "feetBaselineY": 82,
           "alphaBounds": {
-            "x": 23,
-            "y": 8,
+            "x": 4,
+            "y": 0,
             "width": 47,
             "height": 82,
-            "right": 69,
-            "bottom": 89,
+            "right": 51,
+            "bottom": 82,
             "pixels": 2468
           }
         },
         "attack": {
-          "source": "assets/rumi_bunny/attack.png",
-          "sha256": "c905193de50cb6f634cbfece7b8cbdc752af7601301ca3a385be64a39475d549",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.760000000000005,
-          "feetBaselineY": 89.96000000000001,
+          "source": "card_pixel/art/pixel-v2/rumi_bunny/attack.png",
+          "sha256": "0fff8e890246b3f4bbde28c768418a5b346bb22782567c483ab8d0a88377e016",
+          "width": 63,
+          "height": 83,
+          "bodyCenterX": 29,
+          "feetBaselineY": 82,
           "alphaBounds": {
-            "x": 19,
-            "y": 8,
-            "width": 54,
+            "x": 0,
+            "y": 0,
+            "width": 63,
             "height": 83,
-            "right": 72,
-            "bottom": 90,
-            "pixels": 2454
+            "right": 63,
+            "bottom": 83,
+            "pixels": 2513
           }
         },
         "hurt": {
-          "source": "assets/rumi_bunny/hurt.png",
-          "sha256": "a0f912a3cde5cec81aa9fe0c0f11f9284b128c9518d2ed6335b6b27af9671d38",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.760000000000005,
-          "feetBaselineY": 89.96000000000001,
+          "source": "card_pixel/art/pixel-v2/rumi_bunny/hurt.png",
+          "sha256": "342fb26ce781d230d76c6000d206ccc8bfecd8f3d98b5323323d07229cb6f99c",
+          "width": 63,
+          "height": 83,
+          "bodyCenterX": 29,
+          "feetBaselineY": 82,
           "alphaBounds": {
-            "x": 20,
-            "y": 19,
+            "x": 1,
+            "y": 11,
             "width": 54,
             "height": 72,
-            "right": 73,
-            "bottom": 90,
+            "right": 55,
+            "bottom": 83,
             "pixels": 2321
           }
         }
@@ -19274,118 +18326,22 @@
       "marks": {
         "idle": {
           "pose": "idle",
-          "crown": null,
-          "coverCrown": [
-            46.64000000000001,
-            22.880000000000003
+          "derived": true,
+          "crown": [
+            30,
+            15
           ],
           "chin": [
-            51.120000000000005,
-            53.120000000000005
-          ],
-          "span": [
-            25.360000000000003,
-            65.68
+            30,
+            45
           ],
           "eye": [
-            46.64000000000001,
-            44.160000000000004
-          ],
-          "sole": [
-            47.760000000000005,
-            90.08000000000001
-          ],
-          "tip": [
-            36.56,
-            9.440000000000001
-          ],
-          "bodyCenter": [
-            47.760000000000005,
-            65.44000000000001
-          ],
-          "u": [
-            null,
-            1.12
-          ],
-          "eyeUncertainty": 1.12,
-          "soleUncertainty": 1.12,
-          "coordinateSpace": "final-canvas"
+            30,
+            33
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": null,
-          "coverCrown": [
-            45.52,
-            21.64
-          ],
-          "chin": [
-            52.24000000000001,
-            50.760000000000005
-          ],
-          "span": [
-            26.480000000000004,
-            65.68
-          ],
-          "eye": [
-            46.64000000000001,
-            40.68000000000001
-          ],
-          "sole": [
-            46.64000000000001,
-            89.96000000000001
-          ],
-          "tip": [
-            56.720000000000006,
-            9.32
-          ],
-          "bodyCenter": [
-            47.760000000000005,
-            66.44000000000001
-          ],
-          "u": [
-            null,
-            1.12
-          ],
-          "eyeUncertainty": 1.12,
-          "soleUncertainty": 1.12,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": null,
-          "coverCrown": [
-            50.00000000000001,
-            32.84
-          ],
-          "chin": [
-            55.60000000000001,
-            59.720000000000006
-          ],
-          "span": [
-            27.6,
-            65.68
-          ],
-          "eye": null,
-          "sole": [
-            47.760000000000005,
-            89.96000000000001
-          ],
-          "tip": [
-            50.00000000000001,
-            19.400000000000002
-          ],
-          "bodyCenter": [
-            47.760000000000005,
-            66.44000000000001
-          ],
-          "u": [
-            null,
-            1.12
-          ],
-          "eyeUncertainty": 1.12,
-          "soleUncertainty": 1.12,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -19394,57 +18350,57 @@
       "kind": "ally",
       "heightGroup": "normal",
       "posture": "standing",
-      "revision": "pixel-v2-body-proportion",
-      "marksSource": "assets/rumi_miko/metadata.json",
+      "revision": "same-person-forms-20261122",
+      "marksSource": "face box chosen for the same-person-forms-20261122 frames (match rumi_miko rms 54)",
       "frames": {
         "idle": {
-          "source": "assets/rumi_miko/idle.png",
-          "sha256": "f1d529bf0fbb5ec9777fba4796a799042fdd4b821a98e2f8ac594b92390e3d7b",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.239999999999995,
-          "feetBaselineY": 89.89999999999999,
+          "source": "card_pixel/art/pixel-v2/rumi_miko/idle.png",
+          "sha256": "62edc8a0977f1bd6577b8440348d219a56855b22d1846ade2cbc075b7a0ec10c",
+          "width": 61,
+          "height": 76,
+          "bodyCenterX": 29,
+          "feetBaselineY": 75,
           "alphaBounds": {
-            "x": 22,
-            "y": 15,
+            "x": 4,
+            "y": 0,
             "width": 45,
             "height": 76,
-            "right": 66,
-            "bottom": 90,
+            "right": 49,
+            "bottom": 76,
             "pixels": 2302
           }
         },
         "attack": {
-          "source": "assets/rumi_miko/attack.png",
-          "sha256": "ab7b3ac6b6317fca157b00eed90751988d122e17007e0dcfa0c9d15e99a9b64c",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.239999999999995,
-          "feetBaselineY": 89.89999999999999,
+          "source": "card_pixel/art/pixel-v2/rumi_miko/attack.png",
+          "sha256": "7d1d223b19a20f79190b467d68807e8550e464214d4a0fcad131d18176750e13",
+          "width": 61,
+          "height": 76,
+          "bodyCenterX": 29,
+          "feetBaselineY": 75,
           "alphaBounds": {
-            "x": 18,
-            "y": 15,
+            "x": 0,
+            "y": 0,
             "width": 61,
             "height": 76,
-            "right": 78,
-            "bottom": 90,
+            "right": 61,
+            "bottom": 76,
             "pixels": 2439
           }
         },
         "hurt": {
-          "source": "assets/rumi_miko/hurt.png",
-          "sha256": "73efbe73101da6beadd465b059223377b302eb6597ec3b3cb05934869042703d",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.239999999999995,
-          "feetBaselineY": 89.89999999999999,
+          "source": "card_pixel/art/pixel-v2/rumi_miko/hurt.png",
+          "sha256": "ea1ca7bf60b836dd7c6094e185c9bad497a75e5155d12b0a2ce457718c845c98",
+          "width": 61,
+          "height": 76,
+          "bodyCenterX": 29,
+          "feetBaselineY": 75,
           "alphaBounds": {
-            "x": 20,
-            "y": 19,
+            "x": 2,
+            "y": 4,
             "width": 54,
             "height": 72,
-            "right": 73,
-            "bottom": 90,
+            "right": 56,
+            "bottom": 76,
             "pixels": 2213
           }
         }
@@ -19452,115 +18408,22 @@
       "marks": {
         "idle": {
           "pose": "idle",
+          "derived": true,
           "crown": [
-            44.419999999999995,
-            25.04
+            29,
+            10
           ],
           "chin": [
-            50.059999999999995,
-            55.12
-          ],
-          "span": [
-            31.259999999999998,
-            63.22
+            29,
+            40
           ],
           "eye": [
-            47.239999999999995,
-            47.599999999999994
-          ],
-          "sole": [
-            47.239999999999995,
-            89.89999999999999
-          ],
-          "tip": [
-            45.36,
-            16.58
-          ],
-          "bodyCenter": [
-            47.239999999999995,
-            68.28
-          ],
-          "u": [
-            1.88,
-            0.94
-          ],
-          "eyeUncertainty": 0.94,
-          "soleUncertainty": 0.94,
-          "coordinateSpace": "final-canvas"
+            29,
+            28
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": [
-            45.36,
-            25.04
-          ],
-          "chin": [
-            51,
-            54.18
-          ],
-          "span": [
-            31.259999999999998,
-            63.22
-          ],
-          "eye": [
-            48.18,
-            46.66
-          ],
-          "sole": [
-            47.239999999999995,
-            89.89999999999999
-          ],
-          "tip": [
-            44.419999999999995,
-            16.58
-          ],
-          "bodyCenter": [
-            47.239999999999995,
-            68.28
-          ],
-          "u": [
-            1.88,
-            0.94
-          ],
-          "eyeUncertainty": 0.94,
-          "soleUncertainty": 0.94,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": [
-            44.419999999999995,
-            30.68
-          ],
-          "chin": [
-            52.879999999999995,
-            60.76
-          ],
-          "span": [
-            31.259999999999998,
-            64.16
-          ],
-          "eye": null,
-          "sole": [
-            47.239999999999995,
-            89.89999999999999
-          ],
-          "tip": [
-            45.36,
-            23.16
-          ],
-          "bodyCenter": [
-            47.239999999999995,
-            68.28
-          ],
-          "u": [
-            1.88,
-            0.94
-          ],
-          "eyeUncertainty": 0.94,
-          "soleUncertainty": 0.94,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -19569,57 +18432,57 @@
       "kind": "ally",
       "heightGroup": "normal",
       "posture": "standing",
-      "revision": "pixel-v1",
-      "marksSource": "assets/rumi_wedding/metadata.json",
+      "revision": "same-person-forms-20261122",
+      "marksSource": "face box chosen for the same-person-forms-20261122 frames (match rumi_wedding rms 42)",
       "frames": {
         "idle": {
-          "source": "assets/rumi_wedding/idle.png",
-          "sha256": "a08cd8940a1005712179975f8fbabd7206a118a75af29a93131b9d9c8c860fbe",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.900000000000006,
-          "feetBaselineY": 90.2,
+          "source": "card_pixel/art/pixel-v2/rumi_wedding/idle.png",
+          "sha256": "eb85929f333b9f317fa2c7d83b9fa7b3698de5a5cc7693c0597cd4103d48cb6d",
+          "width": 76,
+          "height": 81,
+          "bodyCenterX": 38,
+          "feetBaselineY": 80,
           "alphaBounds": {
-            "x": 14,
-            "y": 10,
+            "x": 4,
+            "y": 0,
             "width": 56,
             "height": 81,
-            "right": 69,
-            "bottom": 90,
+            "right": 60,
+            "bottom": 81,
             "pixels": 3342
           }
         },
         "attack": {
-          "source": "assets/rumi_wedding/attack.png",
-          "sha256": "dcf41fb59059d41be8c5e985de5bb8f1119c5abda6bb046e0a447de8604536c2",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.900000000000006,
-          "feetBaselineY": 90.2,
+          "source": "card_pixel/art/pixel-v2/rumi_wedding/attack.png",
+          "sha256": "703f1f155f3fcdddccd294f2eb0114352af917ef0be58145de958d694c2ed5c8",
+          "width": 76,
+          "height": 81,
+          "bodyCenterX": 38,
+          "feetBaselineY": 80,
           "alphaBounds": {
-            "x": 10,
-            "y": 10,
+            "x": 0,
+            "y": 0,
             "width": 76,
             "height": 81,
-            "right": 85,
-            "bottom": 90,
+            "right": 76,
+            "bottom": 81,
             "pixels": 3427
           }
         },
         "hurt": {
-          "source": "assets/rumi_wedding/hurt.png",
-          "sha256": "54ccb89d0e1cd26f5b671fb5f3f4bab38b0f2298faba5d9038b2f0f608236275",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.900000000000006,
-          "feetBaselineY": 90.2,
+          "source": "card_pixel/art/pixel-v2/rumi_wedding/hurt.png",
+          "sha256": "b22cd4ca78cedd9407c528d95a87ff0e8ae471123932df28297a1e2f8eaa5113",
+          "width": 76,
+          "height": 81,
+          "bodyCenterX": 38,
+          "feetBaselineY": 80,
           "alphaBounds": {
-            "x": 11,
-            "y": 10,
+            "x": 1,
+            "y": 0,
             "width": 64,
             "height": 81,
-            "right": 74,
-            "bottom": 90,
+            "right": 65,
+            "bottom": 81,
             "pixels": 3320
           }
         }
@@ -19627,118 +18490,22 @@
       "marks": {
         "idle": {
           "pose": "idle",
-          "crown": null,
-          "coverCrown": [
-            46.800000000000004,
-            24.200000000000003
+          "derived": true,
+          "crown": [
+            40,
+            13
           ],
           "chin": [
-            51.2,
-            52.800000000000004
-          ],
-          "span": [
-            29.200000000000003,
-            66.60000000000001
+            40,
+            43
           ],
           "eye": [
-            47.900000000000006,
-            45.1
-          ],
-          "sole": [
-            47.900000000000006,
-            90.2
-          ],
-          "tip": [
-            43.50000000000001,
-            14.3
-          ],
-          "bodyCenter": [
-            47.900000000000006,
-            68.2
-          ],
-          "u": [
-            null,
-            1.1
-          ],
-          "eyeUncertainty": 1.1,
-          "soleUncertainty": 1.1,
-          "coordinateSpace": "final-canvas"
+            40,
+            31
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": null,
-          "coverCrown": [
-            46.800000000000004,
-            23.1
-          ],
-          "chin": [
-            51.2,
-            51.7
-          ],
-          "span": [
-            28.1,
-            66.60000000000001
-          ],
-          "eye": [
-            45.7,
-            44
-          ],
-          "sole": [
-            47.900000000000006,
-            90.2
-          ],
-          "tip": [
-            41.300000000000004,
-            13.200000000000001
-          ],
-          "bodyCenter": [
-            47.900000000000006,
-            68.2
-          ],
-          "u": [
-            null,
-            1.1
-          ],
-          "eyeUncertainty": 1.1,
-          "soleUncertainty": 1.1,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": null,
-          "coverCrown": [
-            47.900000000000006,
-            26.400000000000002
-          ],
-          "chin": [
-            53.400000000000006,
-            55.00000000000001
-          ],
-          "span": [
-            28.1,
-            66.60000000000001
-          ],
-          "eye": null,
-          "sole": [
-            47.900000000000006,
-            90.2
-          ],
-          "tip": [
-            40.2,
-            14.3
-          ],
-          "bodyCenter": [
-            47.900000000000006,
-            68.2
-          ],
-          "u": [
-            null,
-            1.1
-          ],
-          "eyeUncertainty": 1.1,
-          "soleUncertainty": 1.1,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -22016,179 +20783,80 @@
       "kind": "ally",
       "heightGroup": "normal",
       "posture": "standing",
-      "revision": "pixel-v3-body",
-      "marksSource": "assets/sylphid/metadata.json",
+      "revision": "head-recheck-20261122",
+      "marksSource": "face box chosen for the head-recheck-20261122 frames (head box ×1.00)",
       "frames": {
         "idle": {
-          "source": "assets/sylphid/idle.png",
-          "sha256": "896c74d4a936ee049064d58c891fc0724950aab92ec725425dec0fb588e7fd6c",
+          "source": "card_pixel/art/pixel-v2/sylphid/idle.png",
+          "sha256": "b46df375a22a111be84d1857c040e757813d9827910cfe5d27b3f4ada4c7d59c",
           "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.4144,
-          "feetBaselineY": 90.3384,
+          "height": 91,
+          "bodyCenterX": 47,
+          "feetBaselineY": 90,
           "alphaBounds": {
             "x": 4,
             "y": 0,
             "width": 82,
             "height": 90,
-            "right": 85,
-            "bottom": 89,
-            "pixels": 4587
+            "right": 86,
+            "bottom": 90,
+            "pixels": 4571
           }
         },
         "attack": {
-          "source": "assets/sylphid/attack.png",
-          "sha256": "9900b18f9f32394f6a273af885d096769757d0fb4a2b7c7b6cf00fcc8ab37937",
+          "source": "card_pixel/art/pixel-v2/sylphid/attack.png",
+          "sha256": "d30d986a0307babffff2c4fbc8829e96dd2d3932c69cf8002ab31861813d110f",
           "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.187999999999995,
-          "feetBaselineY": 90.3384,
+          "height": 91,
+          "bodyCenterX": 47,
+          "feetBaselineY": 90,
           "alphaBounds": {
             "x": 0,
             "y": 0,
             "width": 93,
             "height": 90,
-            "right": 92,
-            "bottom": 89,
-            "pixels": 4671
+            "right": 93,
+            "bottom": 90,
+            "pixels": 4628
           }
         },
         "hurt": {
-          "source": "assets/sylphid/hurt.png",
-          "sha256": "bb427f8ebbdb061d0ecd390bc44828cb2c6d2671b82aa134b78cea944a8e0302",
+          "source": "card_pixel/art/pixel-v2/sylphid/hurt.png",
+          "sha256": "98cefa83242596423c1c828beda10740ce136c06c532b36a4247c881ab342bb8",
           "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.4144,
-          "feetBaselineY": 90.3384,
+          "height": 91,
+          "bodyCenterX": 47,
+          "feetBaselineY": 90,
           "alphaBounds": {
             "x": 9,
             "y": 0,
             "width": 87,
             "height": 90,
-            "right": 95,
-            "bottom": 89,
-            "pixels": 4555
+            "right": 96,
+            "bottom": 90,
+            "pixels": 4598
           }
         }
       },
       "marks": {
         "idle": {
           "pose": "idle",
+          "derived": true,
           "crown": [
-            46.187999999999995,
-            25.339199999999998
+            49,
+            25
           ],
-          "coverCrown": null,
           "chin": [
-            52.31999999999999,
-            54.7728
+            49,
+            54
           ],
           "eye": [
-            48.6408,
-            44.9616
-          ],
-          "sole": [
-            47.4144,
-            90.3384
-          ],
-          "tip": [
-            27.792,
-            4.490399999999999
-          ],
-          "span": [
-            29.0184,
-            67.0368
-          ],
-          "registrationPivot": [
-            47.4144,
-            90.3384
-          ],
-          "u": [
-            2.4528,
-            1.2264
-          ],
-          "kind": "dense hair dome",
-          "note": "키에 머리밴드 핀·양갈래를 포함하지 않음. 중앙 머리돔28→52,발81을 관측. v3에서 몸 단축, 공통1.2264배로 실제머리29.4/본체65.",
-          "packingEstimate": null,
-          "coordinateSpace": "final-canvas"
+            49,
+            42
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": [
-            59.452,
-            26.565599999999996
-          ],
-          "coverCrown": null,
-          "chin": [
-            65.584,
-            55.9992
-          ],
-          "eye": [
-            61.904799999999994,
-            44.9616
-          ],
-          "sole": [
-            49.6408,
-            90.3384
-          ],
-          "tip": [
-            45.9616,
-            4.490399999999999
-          ],
-          "span": [
-            43.508799999999994,
-            80.3008
-          ],
-          "registrationPivot": [
-            47.187999999999995,
-            90.3384
-          ],
-          "u": [
-            2.4528,
-            1.2264
-          ],
-          "kind": "dense hair dome",
-          "note": "키에 머리밴드 핀·양갈래를 포함하지 않음. 중앙 머리돔28→52,발81을 관측. v3에서 몸 단축, 공통1.2264배로 실제머리29.4/본체65.",
-          "packingEstimate": null,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": [
-            47.4144,
-            31.471199999999996
-          ],
-          "coverCrown": null,
-          "chin": [
-            54.7728,
-            59.678399999999996
-          ],
-          "eye": null,
-          "sole": [
-            48.6408,
-            90.3384
-          ],
-          "tip": [
-            38.8296,
-            4.490399999999999
-          ],
-          "span": [
-            30.244799999999998,
-            69.4896
-          ],
-          "registrationPivot": [
-            47.4144,
-            90.3384
-          ],
-          "u": [
-            2.4528,
-            1.2264
-          ],
-          "kind": "dense hair dome",
-          "note": "키에 머리밴드 핀·양갈래를 포함하지 않음. 중앙 머리돔28→52,발81을 관측. v3에서 몸 단축, 공통1.2264배로 실제머리29.4/본체65.",
-          "packingEstimate": null,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -22372,173 +21040,80 @@
       "kind": "ally",
       "heightGroup": "tall",
       "posture": "standing",
-      "revision": "pixel-v1",
-      "marksSource": "assets/trans_ares/metadata.json",
+      "revision": "same-person-forms-20261122",
+      "marksSource": "face box chosen for the same-person-forms-20261122 frames (match trans_ares rms 63)",
       "frames": {
         "idle": {
-          "source": "assets/trans_ares/idle.png",
-          "sha256": "099352e817d6c2c988b12e8cb553881d265086e721bf59c4ef77046b908d857e",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.220000000000006,
-          "feetBaselineY": 89.74000000000001,
+          "source": "card_pixel/art/pixel-v2/trans_ares/idle.png",
+          "sha256": "6614a405d71d5039f594480faf1101fe1bc128f50399285f216299f849d0e2a6",
+          "width": 83,
+          "height": 76,
+          "bodyCenterX": 35,
+          "feetBaselineY": 75,
           "alphaBounds": {
-            "x": 23,
-            "y": 16,
-            "width": 54,
+            "x": 0,
+            "y": 0,
+            "width": 67,
             "height": 75,
-            "right": 76,
-            "bottom": 90,
-            "pixels": 2467
+            "right": 67,
+            "bottom": 75,
+            "pixels": 2872
           }
         },
         "attack": {
-          "source": "assets/trans_ares/attack.png",
-          "sha256": "7cae35ab3b18fe10c6619eedf40e0b3bb9dd1c78fb3088035b9b5d661fef59ce",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.220000000000006,
-          "feetBaselineY": 89.74000000000001,
+          "source": "card_pixel/art/pixel-v2/trans_ares/attack.png",
+          "sha256": "39a348225c161288e986318cdf4c47adc2693de0898b61321c29fee0e976659e",
+          "width": 83,
+          "height": 76,
+          "bodyCenterX": 35,
+          "feetBaselineY": 75,
           "alphaBounds": {
-            "x": 15,
-            "y": 15,
-            "width": 73,
-            "height": 75,
-            "right": 87,
-            "bottom": 89,
-            "pixels": 2823
+            "x": 0,
+            "y": 5,
+            "width": 83,
+            "height": 70,
+            "right": 83,
+            "bottom": 75,
+            "pixels": 3182
           }
         },
         "hurt": {
-          "source": "assets/trans_ares/hurt.png",
-          "sha256": "ba24710036a6bb71a704cf742fa702cf58254eb328433b32c5729375016fcff1",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.220000000000006,
-          "feetBaselineY": 89.74000000000001,
+          "source": "card_pixel/art/pixel-v2/trans_ares/hurt.png",
+          "sha256": "5e051c746c6192b6c6356f2e10e95282620e70eb9de03423752fd87c12e88cfd",
+          "width": 83,
+          "height": 76,
+          "bodyCenterX": 35,
+          "feetBaselineY": 75,
           "alphaBounds": {
-            "x": 16,
-            "y": 22,
-            "width": 59,
-            "height": 70,
-            "right": 74,
-            "bottom": 91,
-            "pixels": 2469
+            "x": 3,
+            "y": 7,
+            "width": 67,
+            "height": 68,
+            "right": 70,
+            "bottom": 75,
+            "pixels": 2636
           }
         }
       },
       "marks": {
         "idle": {
           "pose": "idle",
+          "derived": true,
           "crown": [
-            47.220000000000006,
-            22.330000000000002
+            36,
+            5
           ],
           "chin": [
-            50.43,
-            52.290000000000006
-          ],
-          "span": [
-            31.17,
-            65.41000000000001
+            36,
+            35
           ],
           "eye": [
-            49.36,
-            44.800000000000004
-          ],
-          "sole": [
-            47.220000000000006,
-            89.74000000000001
-          ],
-          "tip": [
-            45.080000000000005,
-            14.84
-          ],
-          "bodyCenter": [
-            47.220000000000006,
-            67.27000000000001
-          ],
-          "u": [
-            2.14,
-            1.07
-          ],
-          "eyeUncertainty": 1.07,
-          "soleUncertainty": 1.07,
-          "coordinateSpace": "final-canvas"
+            36,
+            23
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": [
-            45.080000000000005,
-            23.400000000000002
-          ],
-          "chin": [
-            52.57,
-            52.290000000000006
-          ],
-          "span": [
-            29.03,
-            63.27000000000001
-          ],
-          "eye": [
-            50.43,
-            45.870000000000005
-          ],
-          "sole": [
-            48.290000000000006,
-            89.74000000000001
-          ],
-          "tip": [
-            44.010000000000005,
-            16.98
-          ],
-          "bodyCenter": [
-            47.220000000000006,
-            67.27000000000001
-          ],
-          "u": [
-            2.14,
-            1.07
-          ],
-          "eyeUncertainty": 1.07,
-          "soleUncertainty": 1.07,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": [
-            45.080000000000005,
-            27.68
-          ],
-          "chin": [
-            53.64,
-            56.57
-          ],
-          "span": [
-            31.17,
-            66.48
-          ],
-          "eye": null,
-          "sole": [
-            48.290000000000006,
-            89.74000000000001
-          ],
-          "tip": [
-            45.080000000000005,
-            21.26
-          ],
-          "bodyCenter": [
-            47.220000000000006,
-            67.27000000000001
-          ],
-          "u": [
-            2.14,
-            1.07
-          ],
-          "eyeUncertainty": 1.07,
-          "soleUncertainty": 1.07,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -22547,173 +21122,80 @@
       "kind": "ally",
       "heightGroup": "tall",
       "posture": "standing",
-      "revision": "pixel-v2-body-proportion",
-      "marksSource": "assets/trans_behemoth/metadata.json",
+      "revision": "same-person-forms-20261122",
+      "marksSource": "face box chosen for the same-person-forms-20261122 frames (match behemoth rms 0)",
       "frames": {
         "idle": {
-          "source": "assets/trans_behemoth/idle.png",
-          "sha256": "d9c78dde5cb4b8f9cbc7964168384b50e7d65bf09fe5afdef38b1c62cf232194",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.410000000000004,
-          "feetBaselineY": 90.49000000000001,
+          "source": "card_pixel/art/pixel-v2/trans_behemoth/idle.png",
+          "sha256": "cf7bb82f8a8b33d6cafdbd02ba9ebefb815594851650aa27af2c9eab07dcb7a5",
+          "width": 76,
+          "height": 82,
+          "bodyCenterX": 38,
+          "feetBaselineY": 80,
           "alphaBounds": {
-            "x": 24,
-            "y": 12,
-            "width": 44,
-            "height": 80,
-            "right": 67,
-            "bottom": 91,
-            "pixels": 2416
+            "x": 2,
+            "y": 0,
+            "width": 64,
+            "height": 81,
+            "right": 66,
+            "bottom": 81,
+            "pixels": 3068
           }
         },
         "attack": {
-          "source": "assets/trans_behemoth/attack.png",
-          "sha256": "c7d9972fdc24cd0617abecb1c88df5cdfffedefc5847bd7016f00603b63f0fa3",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.410000000000004,
-          "feetBaselineY": 90.49000000000001,
+          "source": "card_pixel/art/pixel-v2/trans_behemoth/attack.png",
+          "sha256": "a8c75c686a8e51be9d471aab047a89f0aef02afc4d4779ead850ecadee1cac33",
+          "width": 76,
+          "height": 82,
+          "bodyCenterX": 38,
+          "feetBaselineY": 80,
           "alphaBounds": {
-            "x": 22,
-            "y": 16,
-            "width": 52,
-            "height": 77,
-            "right": 73,
-            "bottom": 92,
-            "pixels": 2575
+            "x": 0,
+            "y": 10,
+            "width": 76,
+            "height": 72,
+            "right": 76,
+            "bottom": 82,
+            "pixels": 3397
           }
         },
         "hurt": {
-          "source": "assets/trans_behemoth/hurt.png",
-          "sha256": "9a91568a42de0bb1995b9e23e2e35f1339401595cc11bd0c77e5e91255568997",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.410000000000004,
-          "feetBaselineY": 90.46000000000001,
+          "source": "card_pixel/art/pixel-v2/trans_behemoth/hurt.png",
+          "sha256": "cae4a30e546fe4a94d49cdcde7122177cc02ad4b31d7487c54d569cd8da08f90",
+          "width": 76,
+          "height": 82,
+          "bodyCenterX": 38,
+          "feetBaselineY": 80,
           "alphaBounds": {
-            "x": 28,
-            "y": 22,
-            "width": 51,
-            "height": 70,
-            "right": 78,
-            "bottom": 91,
-            "pixels": 2366
+            "x": 5,
+            "y": 6,
+            "width": 59,
+            "height": 74,
+            "right": 64,
+            "bottom": 80,
+            "pixels": 2812
           }
         }
       },
       "marks": {
         "idle": {
           "pose": "idle",
+          "derived": true,
           "crown": [
-            47.410000000000004,
-            22.51
+            39,
+            12
           ],
           "chin": [
-            51.53,
-            52.38
-          ],
-          "span": [
-            28.87,
-            62.86
+            39,
+            40
           ],
           "eye": [
-            48.44,
-            43.11
-          ],
-          "sole": [
-            46.38,
-            90.49000000000001
-          ],
-          "tip": [
-            55.65,
-            11.18
-          ],
-          "bodyCenter": [
-            47.410000000000004,
-            67.83
-          ],
-          "u": [
-            2.06,
-            1.03
-          ],
-          "eyeUncertainty": 1.03,
-          "soleUncertainty": 1.03,
-          "coordinateSpace": "final-canvas"
+            39,
+            29
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": [
-            49.47,
-            27.66
-          ],
-          "chin": [
-            55.65,
-            56.5
-          ],
-          "span": [
-            30.93,
-            65.95
-          ],
-          "eye": [
-            52.56,
-            49.29
-          ],
-          "sole": [
-            49.47,
-            90.49000000000001
-          ],
-          "tip": [
-            57.71,
-            16.33
-          ],
-          "bodyCenter": [
-            47.410000000000004,
-            67.83
-          ],
-          "u": [
-            2.06,
-            1.03
-          ],
-          "eyeUncertainty": 1.03,
-          "soleUncertainty": 1.03,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": [
-            53.59,
-            28.66
-          ],
-          "chin": [
-            59.77,
-            57.5
-          ],
-          "span": [
-            34.02,
-            68.01
-          ],
-          "eye": null,
-          "sole": [
-            49.47,
-            90.46000000000001
-          ],
-          "tip": [
-            68.01,
-            20.42
-          ],
-          "bodyCenter": [
-            47.410000000000004,
-            68.83
-          ],
-          "u": [
-            2.06,
-            1.03
-          ],
-          "eyeUncertainty": 1.03,
-          "soleUncertainty": 1.03,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -22722,176 +21204,80 @@
       "kind": "ally",
       "heightGroup": "normal",
       "posture": "standing",
-      "revision": "pixel-v1",
-      "marksSource": "assets/trans_chaos_lord/metadata.json",
+      "revision": "same-person-forms-20261122",
+      "marksSource": "face box chosen for the same-person-forms-20261122 frames (match joker rms 0)",
       "frames": {
         "idle": {
-          "source": "assets/trans_chaos_lord/idle.png",
-          "sha256": "622d16ebe1f838e835b1aa63c8866ed73f68ac17f99a94ab6aaa8ab66bf277fa",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.44,
-          "feetBaselineY": 90.49000000000001,
+          "source": "card_pixel/art/pixel-v2/trans_chaos_lord/idle.png",
+          "sha256": "4e628af5eb756eb5e53d35b5a808b175fb4867203edc9fd00016654ca5762561",
+          "width": 94,
+          "height": 85,
+          "bodyCenterX": 48,
+          "feetBaselineY": 84,
           "alphaBounds": {
-            "x": 16,
-            "y": 13,
-            "width": 58,
-            "height": 78,
-            "right": 73,
-            "bottom": 90,
-            "pixels": 2634
+            "x": 7,
+            "y": 0,
+            "width": 72,
+            "height": 84,
+            "right": 79,
+            "bottom": 84,
+            "pixels": 3146
           }
         },
         "attack": {
-          "source": "assets/trans_chaos_lord/attack.png",
-          "sha256": "65c0c80bd3d7a6c43cff91b23284ffa1afb95f5dd65068fc91ad4347a66726e7",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.44,
-          "feetBaselineY": 90.49000000000001,
+          "source": "card_pixel/art/pixel-v2/trans_chaos_lord/attack.png",
+          "sha256": "fc1efb6266b229c514176675f7926e41b9d6d9e28181baa056c78959f8a4f266",
+          "width": 94,
+          "height": 85,
+          "bodyCenterX": 48,
+          "feetBaselineY": 84,
           "alphaBounds": {
-            "x": 7,
-            "y": 13,
-            "width": 77,
-            "height": 78,
-            "right": 83,
-            "bottom": 90,
-            "pixels": 2844
+            "x": 0,
+            "y": 0,
+            "width": 94,
+            "height": 84,
+            "right": 94,
+            "bottom": 84,
+            "pixels": 3579
           }
         },
         "hurt": {
-          "source": "assets/trans_chaos_lord/hurt.png",
-          "sha256": "d001abce5d42eda6be13bb654e597e2d4e1359fa3bf6a3e6a15b9888836b9ec6",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.44,
-          "feetBaselineY": 90.46000000000001,
+          "source": "card_pixel/art/pixel-v2/trans_chaos_lord/hurt.png",
+          "sha256": "8e3c19e61e305dd54f4cec3f44a6d896c141db6f7ff5e05f01d9ed0add905c09",
+          "width": 94,
+          "height": 85,
+          "bodyCenterX": 48,
+          "feetBaselineY": 84,
           "alphaBounds": {
-            "x": 17,
-            "y": 20,
-            "width": 60,
-            "height": 72,
-            "right": 76,
-            "bottom": 91,
-            "pixels": 2568
+            "x": 8,
+            "y": 5,
+            "width": 72,
+            "height": 79,
+            "right": 80,
+            "bottom": 84,
+            "pixels": 3125
           }
         }
       },
       "marks": {
         "idle": {
           "pose": "idle",
-          "crown": null,
-          "coverCrown": [
-            48.47,
-            25.6
+          "derived": true,
+          "crown": [
+            50,
+            18
           ],
           "chin": [
-            51.56,
-            55.47
-          ],
-          "span": [
-            30.96,
-            62.89
+            50,
+            48
           ],
           "eye": [
-            46.410000000000004,
-            45.17
-          ],
-          "sole": [
-            47.44,
-            90.49000000000001
-          ],
-          "tip": [
-            45.38,
-            13.24
-          ],
-          "bodyCenter": [
-            47.44,
-            67.83
-          ],
-          "u": [
-            null,
-            1.03
-          ],
-          "eyeUncertainty": 1.03,
-          "soleUncertainty": 1.03,
-          "coordinateSpace": "final-canvas"
+            50,
+            36
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": null,
-          "coverCrown": [
-            48.47,
-            24.57
-          ],
-          "chin": [
-            51.56,
-            53.410000000000004
-          ],
-          "span": [
-            29.93,
-            61.86
-          ],
-          "eye": [
-            45.38,
-            44.14
-          ],
-          "sole": [
-            47.44,
-            90.49000000000001
-          ],
-          "tip": [
-            37.14,
-            12.21
-          ],
-          "bodyCenter": [
-            47.44,
-            67.83
-          ],
-          "u": [
-            null,
-            1.03
-          ],
-          "eyeUncertainty": 1.03,
-          "soleUncertainty": 1.03,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": null,
-          "coverCrown": [
-            50.53,
-            36.900000000000006
-          ],
-          "chin": [
-            54.65,
-            62.65
-          ],
-          "span": [
-            31.990000000000002,
-            65.98
-          ],
-          "eye": null,
-          "sole": [
-            47.44,
-            90.46000000000001
-          ],
-          "tip": [
-            49.5,
-            19.39
-          ],
-          "bodyCenter": [
-            47.44,
-            68.83
-          ],
-          "u": [
-            null,
-            1.03
-          ],
-          "eyeUncertainty": 1.03,
-          "soleUncertainty": 1.03,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -22900,188 +21286,80 @@
       "kind": "ally",
       "heightGroup": "normal",
       "posture": "floating",
-      "revision": "pixel-v1",
-      "marksSource": "assets/trans_cinderella/metadata.json",
+      "revision": "same-person-forms-20261122",
+      "marksSource": "face box chosen for the same-person-forms-20261122 frames (match cinderella rms 0)",
       "frames": {
         "idle": {
-          "source": "assets/trans_cinderella/idle.png",
-          "sha256": "6d8bfb8d8ecea74ea4724f627ac0b9c6a08d2cf909d4e9cb7e2b962537ecbc3c",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.900000000000006,
-          "feetBaselineY": 90.30000000000001,
+          "source": "card_pixel/art/pixel-v2/trans_cinderella/idle.png",
+          "sha256": "7f3c1c2289c5e58a795ccb9b1a00386c050aa8dc0754a1f483df1b6b6379f377",
+          "width": 89,
+          "height": 80,
+          "bodyCenterX": 55,
+          "feetBaselineY": 79,
           "alphaBounds": {
-            "x": 14,
-            "y": 15,
-            "width": 59,
-            "height": 68,
-            "right": 72,
-            "bottom": 82,
-            "pixels": 2664
+            "x": 6,
+            "y": 0,
+            "width": 83,
+            "height": 72,
+            "right": 89,
+            "bottom": 72,
+            "pixels": 3252
           }
         },
         "attack": {
-          "source": "assets/trans_cinderella/attack.png",
-          "sha256": "5b551a5cedce41d700aced28b3c1e923146b7356cf80fb956b5c3b3c4797c7ef",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.900000000000006,
-          "feetBaselineY": 90.30000000000001,
+          "source": "card_pixel/art/pixel-v2/trans_cinderella/attack.png",
+          "sha256": "eb117fbc9c44df4fefde2eb0a5c41f7ca6a0a7b0d29f1818e68995e6abbb39e6",
+          "width": 89,
+          "height": 80,
+          "bodyCenterX": 55,
+          "feetBaselineY": 79,
           "alphaBounds": {
-            "x": 12,
-            "y": 15,
+            "x": 19,
+            "y": 4,
             "width": 64,
             "height": 68,
-            "right": 75,
-            "bottom": 82,
-            "pixels": 2804
+            "right": 83,
+            "bottom": 72,
+            "pixels": 2794
           }
         },
         "hurt": {
-          "source": "assets/trans_cinderella/hurt.png",
-          "sha256": "9273be01a118fa5095f095071b6210cab9eb186c1074cb6b55a5a62c1fc258e0",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.900000000000006,
-          "feetBaselineY": 90.30000000000001,
+          "source": "card_pixel/art/pixel-v2/trans_cinderella/hurt.png",
+          "sha256": "f4604ab660bf9a9484b79f94319e0747fd9867f15f194a6daed9864f1a0a3e85",
+          "width": 89,
+          "height": 80,
+          "bodyCenterX": 55,
+          "feetBaselineY": 79,
           "alphaBounds": {
-            "x": 11,
-            "y": 18,
-            "width": 68,
-            "height": 65,
-            "right": 78,
-            "bottom": 82,
-            "pixels": 2565
+            "x": 0,
+            "y": 0,
+            "width": 83,
+            "height": 72,
+            "right": 83,
+            "bottom": 72,
+            "pixels": 3388
           }
         }
       },
       "marks": {
         "idle": {
           "pose": "idle",
+          "derived": true,
           "crown": [
-            43.50000000000001,
-            21
+            58,
+            6
           ],
           "chin": [
-            50.1,
-            50.7
-          ],
-          "span": [
-            31.400000000000006,
-            62.2
+            58,
+            35
           ],
           "eye": [
-            47.900000000000006,
-            41.900000000000006
-          ],
-          "sole": [
-            47.900000000000006,
-            81.5
-          ],
-          "tip": [
-            36.900000000000006,
-            15.5
-          ],
-          "bodyCenter": [
-            47.900000000000006,
-            61.7
-          ],
-          "registrationPivot": [
-            47.900000000000006,
-            90.30000000000001
-          ],
-          "u": [
-            2.2,
-            1.1
-          ],
-          "eyeUncertainty": 1.1,
-          "soleUncertainty": 1.1,
-          "ground": null,
-          "coordinateSpace": "final-canvas"
+            58,
+            23
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": [
-            43.50000000000001,
-            21
-          ],
-          "chin": [
-            51.2,
-            50.7
-          ],
-          "span": [
-            31.400000000000006,
-            62.2
-          ],
-          "eye": [
-            49.00000000000001,
-            41.900000000000006
-          ],
-          "sole": [
-            47.900000000000006,
-            81.5
-          ],
-          "tip": [
-            38,
-            15.5
-          ],
-          "bodyCenter": [
-            47.900000000000006,
-            61.7
-          ],
-          "registrationPivot": [
-            47.900000000000006,
-            90.30000000000001
-          ],
-          "u": [
-            2.2,
-            1.1
-          ],
-          "eyeUncertainty": 1.1,
-          "soleUncertainty": 1.1,
-          "ground": null,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": [
-            45.7,
-            25.400000000000002
-          ],
-          "chin": [
-            53.400000000000006,
-            54.00000000000001
-          ],
-          "span": [
-            32.5,
-            65.5
-          ],
-          "eye": null,
-          "sole": [
-            49.00000000000001,
-            81.5
-          ],
-          "tip": [
-            40.2,
-            18.8
-          ],
-          "bodyCenter": [
-            47.900000000000006,
-            61.7
-          ],
-          "registrationPivot": [
-            47.900000000000006,
-            90.30000000000001
-          ],
-          "u": [
-            2.2,
-            1.1
-          ],
-          "eyeUncertainty": 1.1,
-          "soleUncertainty": 1.1,
-          "ground": null,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -23090,173 +21368,80 @@
       "kind": "ally",
       "heightGroup": "tall",
       "posture": "standing",
-      "revision": "pixel-v2-hurt-hands",
-      "marksSource": "assets/trans_executor/metadata.json",
+      "revision": "same-person-forms-20261122",
+      "marksSource": "face box chosen for the same-person-forms-20261122 frames (match time_ruler rms 4)",
       "frames": {
         "idle": {
-          "source": "assets/trans_executor/idle.png",
-          "sha256": "201e365199e4765e4140062b7576fb114bfa0813460b581a24c4e91079879360",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 48,
-          "feetBaselineY": 90,
+          "source": "card_pixel/art/pixel-v2/trans_executor/idle.png",
+          "sha256": "93bd6b87ac28e958f0c423f31591648628968bdca0961250f5f0a5e33a393f35",
+          "width": 59,
+          "height": 73,
+          "bodyCenterX": 39,
+          "feetBaselineY": 72,
           "alphaBounds": {
-            "x": 15,
-            "y": 20,
-            "width": 62,
-            "height": 70,
-            "right": 76,
-            "bottom": 89,
-            "pixels": 2865
+            "x": 8,
+            "y": 0,
+            "width": 49,
+            "height": 72,
+            "right": 57,
+            "bottom": 72,
+            "pixels": 2476
           }
         },
         "attack": {
-          "source": "assets/trans_executor/attack.png",
-          "sha256": "c238a3ea9283e644cf15327c2064c6b0d63f4e1894a58eae94f316656523553f",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 48,
-          "feetBaselineY": 90,
+          "source": "card_pixel/art/pixel-v2/trans_executor/attack.png",
+          "sha256": "0893fb721d898f4ff3505744e55ed14ab1b2060d175de17520f808a95edb4210",
+          "width": 59,
+          "height": 73,
+          "bodyCenterX": 39,
+          "feetBaselineY": 72,
           "alphaBounds": {
-            "x": 15,
-            "y": 20,
-            "width": 69,
-            "height": 70,
-            "right": 83,
-            "bottom": 89,
-            "pixels": 2991
+            "x": 0,
+            "y": 0,
+            "width": 56,
+            "height": 72,
+            "right": 56,
+            "bottom": 72,
+            "pixels": 2535
           }
         },
         "hurt": {
-          "source": "assets/trans_executor/hurt.png",
-          "sha256": "7c1504c998bddab847208947f1364cc23e6697177dd00a75e02d3998abbe9d87",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 48,
-          "feetBaselineY": 90,
+          "source": "card_pixel/art/pixel-v2/trans_executor/hurt.png",
+          "sha256": "25f16d884fe40c80219247b2f0d6632375f59f82afd4d1c013c133f1485ad82d",
+          "width": 59,
+          "height": 73,
+          "bodyCenterX": 39,
+          "feetBaselineY": 72,
           "alphaBounds": {
-            "x": 15,
-            "y": 23,
-            "width": 63,
-            "height": 67,
-            "right": 77,
-            "bottom": 89,
-            "pixels": 2797
+            "x": 7,
+            "y": 2,
+            "width": 52,
+            "height": 70,
+            "right": 59,
+            "bottom": 72,
+            "pixels": 2403
           }
         }
       },
       "marks": {
         "idle": {
           "pose": "idle",
+          "derived": true,
           "crown": [
-            44,
-            22
+            40,
+            7
           ],
           "chin": [
-            49,
-            52
-          ],
-          "span": [
-            27,
-            61
+            40,
+            37
           ],
           "eye": [
-            44,
-            46
-          ],
-          "sole": [
-            50,
-            90
-          ],
-          "tip": [
-            44,
-            21
-          ],
-          "bodyCenter": [
-            48,
-            70
-          ],
-          "u": [
-            2,
-            1
-          ],
-          "eyeUncertainty": 1,
-          "soleUncertainty": 1,
-          "coordinateSpace": "final-canvas"
-        },
-        "attack": {
-          "pose": "attack",
-          "crown": [
-            45,
-            22
-          ],
-          "chin": [
-            50,
-            52
-          ],
-          "span": [
-            27,
-            62
-          ],
-          "eye": [
-            45,
-            46
-          ],
-          "sole": [
-            49,
-            90
-          ],
-          "tip": [
-            45,
-            21
-          ],
-          "bodyCenter": [
-            48,
-            70
-          ],
-          "u": [
-            2,
-            1
-          ],
-          "eyeUncertainty": 1,
-          "soleUncertainty": 1,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": [
-            45,
+            40,
             25
-          ],
-          "chin": [
-            50,
-            56
-          ],
-          "span": [
-            27,
-            61
-          ],
-          "eye": null,
-          "sole": [
-            50,
-            90
-          ],
-          "tip": [
-            44,
-            25
-          ],
-          "bodyCenter": [
-            48,
-            71
-          ],
-          "u": [
-            2,
-            1
-          ],
-          "eyeUncertainty": 1,
-          "soleUncertainty": 1,
-          "coordinateSpace": "final-canvas"
-        }
+          ]
+        },
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -23265,179 +21450,80 @@
       "kind": "ally",
       "heightGroup": "normal",
       "posture": "seated",
-      "revision": "pixel-v1",
-      "marksSource": "assets/trans_flora/metadata.json",
+      "revision": "same-person-forms-20261122",
+      "marksSource": "face box chosen for the same-person-forms-20261122 frames (match trans_flora rms 90)",
       "frames": {
         "idle": {
-          "source": "assets/trans_flora/idle.png",
-          "sha256": "be98789c73958b32f9be5d22daa4e7dbe7e04a86ac235bc1561d50970742e16f",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.199999999999996,
-          "feetBaselineY": 89.69999999999999,
+          "source": "card_pixel/art/pixel-v2/trans_flora/idle.png",
+          "sha256": "ac583be09eca946ca3c9424ebd5f19e4db79e1d7c8cb43141c82f0e6cccda1fd",
+          "width": 81,
+          "height": 77,
+          "bodyCenterX": 40,
+          "feetBaselineY": 76,
           "alphaBounds": {
-            "x": 12,
-            "y": 17,
-            "width": 62,
-            "height": 70,
-            "right": 73,
-            "bottom": 86,
-            "pixels": 3153
+            "x": 4,
+            "y": 2,
+            "width": 64,
+            "height": 71,
+            "right": 68,
+            "bottom": 73,
+            "pixels": 3356
           }
         },
         "attack": {
-          "source": "assets/trans_flora/attack.png",
-          "sha256": "79b006398d2d9d6767354c7d83374898e0ca80bf8ff8b823e43ff3829469f64f",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.199999999999996,
-          "feetBaselineY": 89.69999999999999,
+          "source": "card_pixel/art/pixel-v2/trans_flora/attack.png",
+          "sha256": "c378082b51817d51d3b8df1ae6d728121948fb9e8f792368e681e973afea4a04",
+          "width": 81,
+          "height": 77,
+          "bodyCenterX": 40,
+          "feetBaselineY": 76,
           "alphaBounds": {
-            "x": 7,
-            "y": 15,
-            "width": 80,
-            "height": 72,
-            "right": 86,
-            "bottom": 86,
-            "pixels": 3364
+            "x": 0,
+            "y": 0,
+            "width": 81,
+            "height": 73,
+            "right": 81,
+            "bottom": 73,
+            "pixels": 3720
           }
         },
         "hurt": {
-          "source": "assets/trans_flora/hurt.png",
-          "sha256": "c1dc191b1b8c319e2806b0d707953829b9e35d15b416868d50a1a4e4c3a86c2e",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.199999999999996,
-          "feetBaselineY": 89.69999999999999,
+          "source": "card_pixel/art/pixel-v2/trans_flora/hurt.png",
+          "sha256": "605227234100ba0ad3084a239c6b05e7ccf452d316908f40ab589173db4e1723",
+          "width": 81,
+          "height": 77,
+          "bodyCenterX": 40,
+          "feetBaselineY": 76,
           "alphaBounds": {
-            "x": 10,
-            "y": 18,
-            "width": 66,
-            "height": 69,
-            "right": 75,
-            "bottom": 86,
-            "pixels": 3060
+            "x": 2,
+            "y": 3,
+            "width": 69,
+            "height": 70,
+            "right": 71,
+            "bottom": 73,
+            "pixels": 3372
           }
         }
       },
       "marks": {
         "idle": {
           "pose": "idle",
+          "derived": true,
           "crown": [
-            48.349999999999994,
-            26.45
+            39,
+            13
           ],
           "chin": [
-            52.949999999999996,
-            56.349999999999994
-          ],
-          "span": [
-            29.949999999999996,
-            62.14999999999999
+            39,
+            43
           ],
           "eye": [
-            49.49999999999999,
-            47.15
-          ],
-          "sole": null,
-          "tip": [
-            43.74999999999999,
-            16.099999999999998
-          ],
-          "bodyCenter": [
-            47.199999999999996,
-            66.69999999999999
-          ],
-          "registrationPivot": [
-            47.199999999999996,
-            89.69999999999999
-          ],
-          "u": [
-            2.3,
-            1.15
-          ],
-          "eyeUncertainty": 1.15,
-          "soleUncertainty": 1.15,
-          "ground": null,
-          "coordinateSpace": "final-canvas"
+            39,
+            31
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": [
-            48.349999999999994,
-            26.45
-          ],
-          "chin": [
-            52.949999999999996,
-            56.349999999999994
-          ],
-          "span": [
-            29.949999999999996,
-            62.14999999999999
-          ],
-          "eye": [
-            49.49999999999999,
-            47.15
-          ],
-          "sole": null,
-          "tip": [
-            43.74999999999999,
-            16.099999999999998
-          ],
-          "bodyCenter": [
-            47.199999999999996,
-            66.69999999999999
-          ],
-          "registrationPivot": [
-            47.199999999999996,
-            89.69999999999999
-          ],
-          "u": [
-            2.3,
-            1.15
-          ],
-          "eyeUncertainty": 1.15,
-          "soleUncertainty": 1.15,
-          "ground": null,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": [
-            49.49999999999999,
-            28.749999999999996
-          ],
-          "chin": [
-            54.099999999999994,
-            58.65
-          ],
-          "span": [
-            32.25,
-            63.3
-          ],
-          "eye": null,
-          "sole": null,
-          "tip": [
-            44.9,
-            16.099999999999998
-          ],
-          "bodyCenter": [
-            47.199999999999996,
-            66.69999999999999
-          ],
-          "registrationPivot": [
-            47.199999999999996,
-            89.69999999999999
-          ],
-          "u": [
-            2.3,
-            1.15
-          ],
-          "eyeUncertainty": 1.15,
-          "soleUncertainty": 1.15,
-          "ground": null,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -23446,57 +21532,57 @@
       "kind": "ally",
       "heightGroup": "normal",
       "posture": "floating",
-      "revision": "pixel-v2-head-consistency",
-      "marksSource": "assets/trans_gray/metadata.json",
+      "revision": "same-person-forms-20261122",
+      "marksSource": "face box chosen for the same-person-forms-20261122 frames (match trans_gray rms 0)",
       "frames": {
         "idle": {
-          "source": "assets/trans_gray/idle.png",
-          "sha256": "38a9c959d3197c1bbfa10c4ce0b88cb464f74f2116a57a811b8c27669a050173",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.33,
-          "feetBaselineY": 90.11,
+          "source": "card_pixel/art/pixel-v2/trans_gray/idle.png",
+          "sha256": "4296aacbd36f3df54d63b55d045115daa6e35dfe65662727cf280416b2756b08",
+          "width": 83,
+          "height": 87,
+          "bodyCenterX": 43,
+          "feetBaselineY": 86,
           "alphaBounds": {
-            "x": 10,
-            "y": 4,
+            "x": 6,
+            "y": 0,
             "width": 61,
             "height": 84,
-            "right": 70,
-            "bottom": 87,
+            "right": 67,
+            "bottom": 84,
             "pixels": 3123
           }
         },
         "attack": {
-          "source": "assets/trans_gray/attack.png",
-          "sha256": "e88009b4cdf96e8dd52501b17a37f9f04b50b0bf5aafe4fb20d654427215ce69",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.33,
-          "feetBaselineY": 90.11,
+          "source": "card_pixel/art/pixel-v2/trans_gray/attack.png",
+          "sha256": "3263151d3b841dc24748bb6193bc597bc00edc046001365827f6b8c214b37d27",
+          "width": 83,
+          "height": 87,
+          "bodyCenterX": 43,
+          "feetBaselineY": 86,
           "alphaBounds": {
-            "x": 4,
-            "y": 21,
+            "x": 0,
+            "y": 17,
             "width": 83,
             "height": 67,
-            "right": 86,
-            "bottom": 87,
+            "right": 83,
+            "bottom": 84,
             "pixels": 2948
           }
         },
         "hurt": {
-          "source": "assets/trans_gray/hurt.png",
-          "sha256": "03747a7e480639f8e61329ec09a5536738a14b394699362151c5da1dc16e386b",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.33,
-          "feetBaselineY": 90.11,
+          "source": "card_pixel/art/pixel-v2/trans_gray/hurt.png",
+          "sha256": "c3fb89aa9bdcc0a47ba02c600f22e758db325abddfdc48173b6b7df4ca36dd57",
+          "width": 83,
+          "height": 87,
+          "bodyCenterX": 43,
+          "feetBaselineY": 86,
           "alphaBounds": {
-            "x": 8,
-            "y": 10,
+            "x": 4,
+            "y": 6,
             "width": 70,
             "height": 78,
-            "right": 77,
-            "bottom": 87,
+            "right": 74,
+            "bottom": 84,
             "pixels": 2911
           }
         }
@@ -23504,130 +21590,22 @@
       "marks": {
         "idle": {
           "pose": "idle",
+          "derived": true,
           "crown": [
-            47.33,
-            22.25
+            45,
+            18
           ],
           "chin": [
-            50.839999999999996,
-            51.5
-          ],
-          "span": [
-            32.12,
-            63.709999999999994
+            45,
+            47
           ],
           "eye": [
-            47.33,
-            43.309999999999995
-          ],
-          "sole": [
-            48.5,
-            87.77
-          ],
-          "tip": [
-            37.97,
-            8.209999999999999
-          ],
-          "bodyCenter": [
-            47.33,
-            64.36999999999999
-          ],
-          "registrationPivot": [
-            47.33,
-            90.11
-          ],
-          "u": [
-            2.34,
-            1.17
-          ],
-          "eyeUncertainty": 1.17,
-          "soleUncertainty": 1.17,
-          "ground": null,
-          "coordinateSpace": "final-canvas"
+            45,
+            35
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": [
-            42.65,
-            22.25
-          ],
-          "chin": [
-            48.5,
-            52.669999999999995
-          ],
-          "span": [
-            25.099999999999994,
-            60.19999999999999
-          ],
-          "eye": [
-            44.989999999999995,
-            44.48
-          ],
-          "sole": [
-            43.81999999999999,
-            87.77
-          ],
-          "tip": [
-            41.48,
-            22.25
-          ],
-          "bodyCenter": [
-            47.33,
-            64.36999999999999
-          ],
-          "registrationPivot": [
-            47.33,
-            90.11
-          ],
-          "u": [
-            2.34,
-            1.17
-          ],
-          "eyeUncertainty": 1.17,
-          "soleUncertainty": 1.17,
-          "ground": null,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": [
-            49.669999999999995,
-            26.93
-          ],
-          "chin": [
-            55.519999999999996,
-            57.349999999999994
-          ],
-          "span": [
-            32.12,
-            67.22
-          ],
-          "eye": null,
-          "sole": [
-            48.5,
-            87.77
-          ],
-          "tip": [
-            32.12,
-            11.719999999999999
-          ],
-          "bodyCenter": [
-            47.33,
-            64.36999999999999
-          ],
-          "registrationPivot": [
-            47.33,
-            90.11
-          ],
-          "u": [
-            2.34,
-            1.17
-          ],
-          "eyeUncertainty": 1.17,
-          "soleUncertainty": 1.17,
-          "ground": null,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -23636,188 +21614,80 @@
       "kind": "ally",
       "heightGroup": "normal",
       "posture": "duo",
-      "revision": "pixel-v1",
-      "marksSource": "assets/trans_luna_jasmine/metadata.json",
+      "revision": "same-person-forms-20261122",
+      "marksSource": "face box chosen for the same-person-forms-20261122 frames (match luna rms 0)",
       "frames": {
         "idle": {
-          "source": "assets/trans_luna_jasmine/idle.png",
-          "sha256": "0abb9db2d62ee53d5eda5562fb362c69a6d47fd4dd3b5147461670cd59b766ec",
-          "width": 128,
-          "height": 128,
-          "bodyCenterX": 63.64,
-          "feetBaselineY": 122.00000000000001,
+          "source": "card_pixel/art/pixel-v2/trans_luna_jasmine/idle.png",
+          "sha256": "8070aac10bac5bde6349bd350cbdd37aae1f847a3e247f06bfef5e97e4241e69",
+          "width": 135,
+          "height": 79,
+          "bodyCenterX": 65,
+          "feetBaselineY": 78,
           "alphaBounds": {
-            "x": 11,
-            "y": 42,
-            "width": 98,
-            "height": 82,
-            "right": 108,
-            "bottom": 123,
-            "pixels": 5472
+            "x": 10,
+            "y": 0,
+            "width": 100,
+            "height": 78,
+            "right": 110,
+            "bottom": 78,
+            "pixels": 6097
           }
         },
         "attack": {
-          "source": "assets/trans_luna_jasmine/attack.png",
-          "sha256": "6b3d9c08e2ff187213e46a8d885793b6bf90749d0af3f2bf856177a0a48eca1c",
-          "width": 128,
-          "height": 128,
-          "bodyCenterX": 63.64,
-          "feetBaselineY": 122.00000000000001,
+          "source": "card_pixel/art/pixel-v2/trans_luna_jasmine/attack.png",
+          "sha256": "a192f9bb878c8f59e5e6b5946a231437ede039762edaa32472a2529dd9eb8264",
+          "width": 135,
+          "height": 79,
+          "bodyCenterX": 65,
+          "feetBaselineY": 78,
           "alphaBounds": {
-            "x": 5,
-            "y": 45,
-            "width": 108,
+            "x": 4,
+            "y": 0,
+            "width": 131,
             "height": 79,
-            "right": 112,
-            "bottom": 123,
-            "pixels": 5559
+            "right": 135,
+            "bottom": 79,
+            "pixels": 6439
           }
         },
         "hurt": {
-          "source": "assets/trans_luna_jasmine/hurt.png",
-          "sha256": "fda54fe63220b42e8d6278d0314419de7885cf699ece49d7ad62f773df3da58a",
-          "width": 128,
-          "height": 128,
-          "bodyCenterX": 63.64,
-          "feetBaselineY": 122.00000000000001,
+          "source": "card_pixel/art/pixel-v2/trans_luna_jasmine/hurt.png",
+          "sha256": "79c5f64c707d28ac669eaea4ce639c945cc2cb04bf1ea5ab4a539b0837821187",
+          "width": 135,
+          "height": 79,
+          "bodyCenterX": 65,
+          "feetBaselineY": 78,
           "alphaBounds": {
-            "x": 9,
-            "y": 44,
-            "width": 93,
-            "height": 80,
-            "right": 101,
-            "bottom": 123,
-            "pixels": 5249
+            "x": 0,
+            "y": 6,
+            "width": 115,
+            "height": 73,
+            "right": 115,
+            "bottom": 79,
+            "pixels": 6095
           }
         }
       },
       "marks": {
         "idle": {
           "pose": "idle",
-          "crown": null,
-          "coverCrown": [
-            44.6,
-            58.080000000000005
+          "derived": true,
+          "crown": [
+            90,
+            11
           ],
           "chin": [
-            51.400000000000006,
-            86.64
-          ],
-          "span": [
-            29.64,
-            62.28
+            90,
+            41
           ],
           "eye": [
-            45.96,
-            75.76
-          ],
-          "sole": [
-            63.64,
-            122.00000000000001
-          ],
-          "tip": [
-            47.32,
-            47.2
-          ],
-          "bodyCenter": [
-            63.64,
-            98.88000000000001
-          ],
-          "registrationPivot": [
-            63.64,
-            122.00000000000001
-          ],
-          "u": [
-            null,
-            1.36
-          ],
-          "eyeUncertainty": 1.36,
-          "soleUncertainty": 1.36,
-          "coordinateSpace": "final-canvas"
+            90,
+            29
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": null,
-          "coverCrown": [
-            39.160000000000004,
-            58.080000000000005
-          ],
-          "chin": [
-            44.6,
-            85.28
-          ],
-          "span": [
-            25.560000000000002,
-            54.120000000000005
-          ],
-          "eye": [
-            41.88,
-            74.4
-          ],
-          "sole": [
-            63.64,
-            122.00000000000001
-          ],
-          "tip": [
-            39.160000000000004,
-            45.84
-          ],
-          "bodyCenter": [
-            63.64,
-            98.88000000000001
-          ],
-          "registrationPivot": [
-            63.64,
-            122.00000000000001
-          ],
-          "u": [
-            null,
-            1.36
-          ],
-          "eyeUncertainty": 1.36,
-          "soleUncertainty": 1.36,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": null,
-          "coverCrown": [
-            44.6,
-            58.080000000000005
-          ],
-          "chin": [
-            50.040000000000006,
-            86.64
-          ],
-          "span": [
-            31,
-            58.2
-          ],
-          "eye": null,
-          "sole": [
-            63.64,
-            122.00000000000001
-          ],
-          "tip": [
-            47.32,
-            47.2
-          ],
-          "bodyCenter": [
-            63.64,
-            98.88000000000001
-          ],
-          "registrationPivot": [
-            63.64,
-            122.00000000000001
-          ],
-          "u": [
-            null,
-            1.36
-          ],
-          "eyeUncertainty": 1.36,
-          "soleUncertainty": 1.36,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -23826,180 +21696,80 @@
       "kind": "ally",
       "heightGroup": "tall",
       "posture": "standing",
-      "revision": "pixel-v1",
-      "marksSource": "assets/trans_poseidon/metadata.json",
+      "revision": "same-person-forms-20261122",
+      "marksSource": "face box chosen for the same-person-forms-20261122 frames (manual)",
       "frames": {
         "idle": {
-          "source": "assets/trans_poseidon/idle.png",
-          "sha256": "5d05a53a35a6e9d2b4b4f18d313976a31b23b9d39d8844091ccd90d1ec721bd7",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.349999999999994,
-          "feetBaselineY": 90.3,
+          "source": "card_pixel/art/pixel-v2/trans_poseidon/idle.png",
+          "sha256": "eaa04eeb125f25c10ed91b944b317d04767f26ee937df9061f9af965e0d228c7",
+          "width": 99,
+          "height": 83,
+          "bodyCenterX": 43,
+          "feetBaselineY": 82,
           "alphaBounds": {
-            "x": 15,
-            "y": 6,
-            "width": 58,
-            "height": 84,
-            "right": 72,
-            "bottom": 89,
-            "pixels": 3475
+            "x": 5,
+            "y": 0,
+            "width": 65,
+            "height": 83,
+            "right": 70,
+            "bottom": 83,
+            "pixels": 3457
           }
         },
         "attack": {
-          "source": "assets/trans_poseidon/attack.png",
-          "sha256": "1ca55165280fae31e1a2af0ea6c029d1a1daafe3fa8cd7a8502b9b8f2d88ea7b",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.349999999999994,
-          "feetBaselineY": 90.3,
+          "source": "card_pixel/art/pixel-v2/trans_poseidon/attack.png",
+          "sha256": "c8f7113bdbf3c17e3e94b91d68c9384f0bab665acf5e87bbe7d4c1146b077ae3",
+          "width": 99,
+          "height": 83,
+          "bodyCenterX": 43,
+          "feetBaselineY": 82,
           "alphaBounds": {
-            "x": 6,
-            "y": 11,
-            "width": 70,
-            "height": 83,
-            "right": 75,
-            "bottom": 93,
-            "pixels": 3675
+            "x": 0,
+            "y": 8,
+            "width": 99,
+            "height": 74,
+            "right": 99,
+            "bottom": 82,
+            "pixels": 4150
           }
         },
         "hurt": {
-          "source": "assets/trans_poseidon/hurt.png",
-          "sha256": "ac821b1467e65c773a3b3090d606482e48a4b79267ebf84f106cd978f179ad58",
-          "width": 96,
-          "height": 96,
-          "bodyCenterX": 47.349999999999994,
-          "feetBaselineY": 90.14999999999999,
+          "source": "card_pixel/art/pixel-v2/trans_poseidon/hurt.png",
+          "sha256": "bc362d997fb48e501a97167415d79a99f6c1869f1a3e4645d3730a81d9b35294",
+          "width": 99,
+          "height": 83,
+          "bodyCenterX": 43,
+          "feetBaselineY": 82,
           "alphaBounds": {
-            "x": 9,
-            "y": 11,
-            "width": 68,
-            "height": 79,
-            "right": 76,
-            "bottom": 89,
-            "pixels": 3382
+            "x": 8,
+            "y": 0,
+            "width": 67,
+            "height": 83,
+            "right": 75,
+            "bottom": 83,
+            "pixels": 3456
           }
         }
       },
       "marks": {
         "idle": {
           "pose": "idle",
-          "crown": null,
-          "coverCrown": [
-            43.9,
-            22.45
+          "derived": true,
+          "crown": [
+            51,
+            14
           ],
           "chin": [
-            51.949999999999996,
-            51.199999999999996
-          ],
-          "span": [
-            32.4,
-            65.75
+            51,
+            41
           ],
           "eye": [
-            50.8,
-            43.15
-          ],
-          "sole": [
-            47.349999999999994,
-            90.3
-          ],
-          "tip": [
-            48.49999999999999,
-            8.649999999999999
-          ],
-          "bodyCenter": [
-            47.349999999999994,
-            67.3
-          ],
-          "u": [
-            null,
-            1.15
-          ],
-          "eyeUncertainty": 1.15,
-          "soleUncertainty": 1.15,
-          "coordinateSpace": "final-canvas"
+            51,
+            30
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": null,
-          "coverCrown": [
-            53.099999999999994,
-            32.8
-          ],
-          "chin": [
-            58.849999999999994,
-            59.24999999999999
-          ],
-          "span": [
-            40.449999999999996,
-            70.35
-          ],
-          "eye": [
-            56.55,
-            50.05
-          ],
-          "sole": [
-            47.349999999999994,
-            86.85
-          ],
-          "tip": [
-            55.39999999999999,
-            14.399999999999999
-          ],
-          "bodyCenter": [
-            47.349999999999994,
-            67.3
-          ],
-          "registrationPivot": [
-            47.349999999999994,
-            90.3
-          ],
-          "u": [
-            null,
-            1.15
-          ],
-          "eyeUncertainty": 1.15,
-          "soleUncertainty": 1.15,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": null,
-          "coverCrown": [
-            48.49999999999999,
-            26.9
-          ],
-          "chin": [
-            56.55,
-            57.949999999999996
-          ],
-          "span": [
-            33.55,
-            68.05
-          ],
-          "eye": null,
-          "sole": [
-            49.65,
-            90.14999999999999
-          ],
-          "tip": [
-            51.949999999999996,
-            16.549999999999997
-          ],
-          "bodyCenter": [
-            47.349999999999994,
-            68.3
-          ],
-          "u": [
-            null,
-            1.15
-          ],
-          "eyeUncertainty": 1.15,
-          "soleUncertainty": 1.15,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {
@@ -24008,185 +21778,80 @@
       "kind": "ally",
       "heightGroup": "normal",
       "posture": "standing",
-      "revision": "pixel-v1",
-      "marksSource": "assets/trans_thor/metadata.json",
+      "revision": "same-person-forms-20261122",
+      "marksSource": "face box chosen for the same-person-forms-20261122 frames (match trans_thor rms 71)",
       "frames": {
         "idle": {
-          "source": "assets/trans_thor/idle.png",
-          "sha256": "d846836e9f06fe1859af67f0a6ae978a7547669b508075783ad85931bbd1c726",
-          "width": 128,
-          "height": 128,
-          "bodyCenterX": 63.45,
-          "feetBaselineY": 122.2,
+          "source": "card_pixel/art/pixel-v2/trans_thor/idle.png",
+          "sha256": "f9fac39e66be057f13c40c14c9c8f13d8c864dd4015489c075288774479a28e4",
+          "width": 77,
+          "height": 79,
+          "bodyCenterX": 44,
+          "feetBaselineY": 78,
           "alphaBounds": {
-            "x": 25,
-            "y": 44,
-            "width": 66,
-            "height": 79,
-            "right": 90,
-            "bottom": 122,
-            "pixels": 3259
+            "x": 4,
+            "y": 0,
+            "width": 65,
+            "height": 78,
+            "right": 69,
+            "bottom": 78,
+            "pixels": 3193
           }
         },
         "attack": {
-          "source": "assets/trans_thor/attack.png",
-          "sha256": "e64207ef94d9168b016d88322935fa709560464e8e1e44785d5d095bc9e3a5b6",
-          "width": 128,
-          "height": 128,
-          "bodyCenterX": 63.45,
-          "feetBaselineY": 122.2,
+          "source": "card_pixel/art/pixel-v2/trans_thor/attack.png",
+          "sha256": "1db0cde59ba3fa56c84a47e7b5e5062b2f40ef531e3baf91c32ca1515d5182f2",
+          "width": 77,
+          "height": 79,
+          "bodyCenterX": 44,
+          "feetBaselineY": 78,
           "alphaBounds": {
-            "x": 14,
-            "y": 49,
-            "width": 80,
-            "height": 73,
-            "right": 93,
-            "bottom": 121,
-            "pixels": 3031
+            "x": 0,
+            "y": 0,
+            "width": 77,
+            "height": 77,
+            "right": 77,
+            "bottom": 77,
+            "pixels": 3369
           }
         },
         "hurt": {
-          "source": "assets/trans_thor/hurt.png",
-          "sha256": "7b07d1cf13152d62a0506407be49e6f7e30a6a413c406fc28adbcdcda01706d6",
-          "width": 128,
-          "height": 128,
-          "bodyCenterX": 63.45,
-          "feetBaselineY": 122.2,
+          "source": "card_pixel/art/pixel-v2/trans_thor/hurt.png",
+          "sha256": "1448975e7ffc1960d215fe3a7c9645071c39b1d66cb16cfff89775bcda473367",
+          "width": 77,
+          "height": 79,
+          "bodyCenterX": 44,
+          "feetBaselineY": 78,
           "alphaBounds": {
-            "x": 20,
-            "y": 48,
-            "width": 72,
-            "height": 75,
-            "right": 91,
-            "bottom": 122,
-            "pixels": 3103
+            "x": 6,
+            "y": 2,
+            "width": 69,
+            "height": 77,
+            "right": 75,
+            "bottom": 79,
+            "pixels": 3258
           }
         }
       },
       "marks": {
         "idle": {
           "pose": "idle",
+          "derived": true,
           "crown": [
-            63.45,
-            57.1
+            44,
+            12
           ],
           "chin": [
-            67.65,
-            85.45
-          ],
-          "span": [
-            51.9,
-            81.3
+            44,
+            40
           ],
           "eye": [
-            65.55000000000001,
-            77.05000000000001
-          ],
-          "sole": [
-            62.400000000000006,
-            122.2
-          ],
-          "tip": [
-            50.85,
-            46.6
-          ],
-          "bodyCenter": [
-            63.45,
-            99.10000000000001
-          ],
-          "registrationPivot": [
-            63.45,
-            122.2
-          ],
-          "u": [
-            2.1,
-            1.05
-          ],
-          "eyeUncertainty": 1.05,
-          "soleUncertainty": 1.05,
-          "coordinateSpace": "final-canvas"
+            44,
+            29
+          ]
         },
-        "attack": {
-          "pose": "attack",
-          "crown": [
-            69.75,
-            60.25
-          ],
-          "chin": [
-            79.2,
-            89.65
-          ],
-          "span": [
-            57.15,
-            87.60000000000001
-          ],
-          "eye": [
-            76.05,
-            80.2
-          ],
-          "sole": [
-            73.95,
-            119.05
-          ],
-          "tip": [
-            64.5,
-            50.8
-          ],
-          "bodyCenter": [
-            63.45,
-            99.10000000000001
-          ],
-          "registrationPivot": [
-            63.45,
-            122.2
-          ],
-          "u": [
-            2.1,
-            1.05
-          ],
-          "eyeUncertainty": 1.05,
-          "soleUncertainty": 1.05,
-          "coordinateSpace": "final-canvas"
-        },
-        "hurt": {
-          "pose": "hurt",
-          "crown": [
-            65.55000000000001,
-            61.3
-          ],
-          "chin": [
-            70.80000000000001,
-            90.7
-          ],
-          "span": [
-            52.95,
-            81.3
-          ],
-          "eye": null,
-          "sole": [
-            66.6,
-            121.15
-          ],
-          "tip": [
-            50.85,
-            47.65
-          ],
-          "bodyCenter": [
-            63.45,
-            99.10000000000001
-          ],
-          "registrationPivot": [
-            63.45,
-            122.2
-          ],
-          "u": [
-            2.1,
-            1.05
-          ],
-          "eyeUncertainty": 1.05,
-          "soleUncertainty": 1.05,
-          "coordinateSpace": "final-canvas"
-        }
+        "attack": null,
+        "hurt": null
       }
     },
     {

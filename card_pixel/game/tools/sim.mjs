@@ -1,4 +1,6 @@
 // node card_pixel/game/tools/sim.mjs [runs] [--all | --dungeon=<id>] [--difficulty=easy|normal|nightmare] [--tempo=1|2]
+// Main runs default to a profile after its first main win. Use --profile=first-main for its first departure.
+// Use --legacy to reproduce the old rules and stdout format.
 // Add --contract=rescue|heirloom|elite for the nightmare audit seeds (120 per dungeon by default).
 // Use --boss-order-audit for 160 paired first-boss runs in each of the two starting main dungeons.
 // Use --daily-from=YYYY-MM-DD --days=60 for paired first attempts at the daily rift.
@@ -8,18 +10,23 @@
 // Use --easy-audit for 32 paired first departures in each early dungeon.
 // Use --entry-easy-audit for the same seeds with a fresh profile and the first-departure rules.
 // Use --relic-audit for paired before/after runs on both floor-2 paths.
+// Use --promise-audit for 64 paired Ember Journey seeds that offer the floor-3 promise.
+// Use --beetle-audit --all for paired first-shell decisions with a usable defense and no killing blow.
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { CONTRACTS } from '../src/content/contracts.js';
 import { DUNGEONS } from '../src/content/dungeons.js';
-import { RELIC_COMBOS } from '../src/content/relics.js';
+import { PROMISE_EVENTS } from '../src/content/events.js';
+import { RELIC_COMBOS, RELICS } from '../src/content/relics.js';
 import { ROSTER_LIMIT, TEMPO_VERSION, usesTempo } from '../src/content/tempo.js';
+import { replacementCount, usesRepeatDraws } from '../src/engine/awakenings.js';
 import * as Bridge from '../src/engine/bridge.js';
 import * as Daily from '../src/engine/daily-rift.js';
 import * as Meta from '../src/engine/meta.js';
 import * as RelayRoster from '../src/engine/roster.js';
+import { fitsRelic, joinCount } from '../src/engine/rooms.js';
 import * as R from '../src/engine/run.js';
 import { coreBundle } from './core-bundle.mjs';
 
@@ -37,13 +44,27 @@ if (![1, TEMPO_VERSION].includes(tempoVersion) || ![0, 1].includes(lessonVersion
 const dailyFrom = args.find(arg => arg.startsWith('--daily-from='))?.slice('--daily-from='.length);
 const days = Number(args.find(arg => arg.startsWith('--days='))?.slice('--days='.length) ?? 60);
 const contract = args.find(arg => arg.startsWith('--contract='))?.slice('--contract='.length) ?? null;
-const runs = Number(args.find(arg => /^\d+$/.test(arg)) || (flag('--easy-audit') || flag('--entry-easy-audit') ? 32 : contract === null ? 300 : 120));
+const runs = Number(args.find(arg => /^\d+$/.test(arg)) || (flag('--promise-audit') ? 64
+  : flag('--easy-audit') || flag('--entry-easy-audit') ? 32 : contract === null ? 300 : 120));
 const dungeon = args.find(arg => arg.startsWith('--dungeon='))?.slice('--dungeon='.length) || 'ember_volcano';
 const difficulty = args.find(arg => arg.startsWith('--difficulty='))?.slice('--difficulty='.length)
   ?? (flag('--nightmare') || contract !== null ? 'nightmare' : 'normal');
-const dungeons = flag('--all') ? Object.keys(DUNGEONS).filter(id => difficulty === 'normal' || DUNGEONS[id].nightmareRule) : [dungeon];
+const profileStage = argValue('--profile');
+const firstMain = profileStage === 'first-main';
+const firstMainDungeons = Object.values(DUNGEONS).filter(({ unlock }) => unlock.kind === 'intro_clear').map(({ id }) => id);
+const legacyCliRules = tempoVersion === 1 || lessonVersion === 0 || [
+  '--legacy', '--plain', '--no-heirloom', '--no-laststand', '--entry-audit', '--easy-audit',
+  '--first-main', '--boss-order-audit'
+].some(flag);
+const dungeons = flag('--all')
+  ? firstMain ? firstMainDungeons : Object.keys(DUNGEONS).filter(id => difficulty === 'normal' || DUNGEONS[id].nightmareRule)
+  : [dungeon];
 if (!['easy', 'normal', 'nightmare'].includes(difficulty)) throw new RangeError('Invalid difficulty: ' + difficulty);
 if (!runs || dungeons.some(id => !Object.hasOwn(DUNGEONS, id))) throw new RangeError('Invalid run count or dungeon');
+if (profileStage !== undefined && (!['first-main', 'after-main-win'].includes(profileStage) || legacyCliRules
+  || (firstMain && (contract !== null || dungeons.some(id => !firstMainDungeons.includes(id)))))) {
+  throw new RangeError('Unavailable profile: ' + profileStage);
+}
 if (contract !== null && (!Object.hasOwn(CONTRACTS, contract) || difficulty !== 'nightmare' || dungeons.some(id => !DUNGEONS[id].nightmareRule))) {
   throw new RangeError('Unavailable nightmare contract: ' + contract);
 }
@@ -62,6 +83,20 @@ const legacyProfile = () => {
   profile.ui.entry.legacy = true;
   return profile;
 };
+
+function releaseProfile(dungeonId, firstMain = false) {
+  const profile = Meta.createProfile();
+  if (DUNGEONS[dungeonId].layout !== 'intro') {
+    profile.records.clears.dawn_forest = { normal: 1 };
+    if (firstMain) profile.unlockedDungeons.push(...firstMainDungeons);
+    else {
+      profile.records.clears.ember_volcano = { normal: 1 };
+      profile.unlockedDungeons.push(dungeonId);
+      profile.nightmareUnlocks.push(dungeonId);
+    }
+  }
+  return profile;
+}
 
 const strength = id => RelayRoster.strength(roster.card(id));
 const strongest = ids => ids.slice().sort((a, b) => strength(b) - strength(a));
@@ -218,7 +253,7 @@ function resolveChoices(run, naive, { relicAudit, onRelicReplacement } = {}) {
       if (partner && (!id || (run.bench.length >= 4 && run.seed % 3 !== 0))) {
         checked(R.chooseGateReward(run, { kind: 'relic', id: partner }));
       } else if (id && (!pending.relic || (!naive && (run.bench.length < 4 || run.seed % 2)))) {
-        const replaceId = usesTempo(run) && run.bench.length === ROSTER_LIMIT ? weakestReserve(run) : null;
+        const [replaceId = null] = chooseReleases(run, replacementCount(run, 1));
         if (replaceId && naive) break;
         checked(R.chooseGateReward(run, { kind: 'join', id, replaceId }));
       }
@@ -227,7 +262,7 @@ function resolveChoices(run, naive, { relicAudit, onRelicReplacement } = {}) {
     } else if (pending.kind === 'reinforcement') {
       const id = naive ? pending.candidates[0] : strongest(pending.candidates)[0];
       const incoming = !run.drawRuleVersion || ![run.bench, run.fallen, run.released].some(ids => ids.includes(id));
-      const replaceId = incoming && run.bench.length === ROSTER_LIMIT ? weakestReserve(run) : null;
+      const [replaceId = null] = chooseReleases(run, replacementCount(run, Number(incoming)));
       const pass = replaceId && (naive || strength(id) <= strength(replaceId));
       checked(R.resolveReinforcement(run, { key: pending.key, id: pass ? null : id, replaceId: pass ? null : replaceId }));
     } else if (pending.kind === 'altar') {
@@ -241,7 +276,7 @@ function resolveChoices(run, naive, { relicAudit, onRelicReplacement } = {}) {
       const choice = buy || pending.choices.find(entry => entry.enabled && !entry.ops.some(op => op.type === 'release')
         && (!usesTempo(run) || !entry.ops.some(op => op.type === 'join' && run.bench.length + (op.ids?.length ?? 1) > ROSTER_LIMIT)));
       if (!choice) break;
-      checked(R.chooseEvent(run, choice.id, choice.targets ? strongest(choice.targets)[0] : undefined));
+      takeEvent(run, choice);
     } else if (pending.kind === 'relic') {
       onRelicReplacement?.(run);
       const replace = relicAudit ? pending.replace.find(id => !RELIC_COMBOS.some(({ ids }) =>
@@ -253,22 +288,40 @@ function resolveChoices(run, naive, { relicAudit, onRelicReplacement } = {}) {
   }
 }
 
-function weakestReserve(run) {
-  const reserves = run.bench.filter(id => !run.lastParty?.includes(id));
-  return strongest(reserves.length ? reserves : run.bench).at(-1);
+function chooseReleases(run, count) {
+  if (!count) return [];
+  // Release the weakest reserves first, then members of the last party. Keep the lead.
+  const weakestFirst = strongest(run.bench.filter(id => id !== run.lead)).reverse();
+  const inLastParty = id => run.lastParty?.includes(id);
+  return [...weakestFirst.filter(id => !inLastParty(id)), ...weakestFirst.filter(inLastParty)].slice(0, count);
+}
+
+function takeEvent(run, choice) {
+  const target = choice.targets ? strongest(choice.targets)[0] : undefined;
+  // A random awakening may boost an existing member or grant a memory instead of joining.
+  const randomJoin = usesRepeatDraws(run) && choice.ops.some(op => op.type === 'join' && op.random);
+  const count = randomJoin ? 0 : replacementCount(run, joinCount(choice.ops));
+  const result = R.chooseEvent(run, choice.id, target, chooseReleases(run, count));
+  if (result.reason === 'roster_full' && result.requiredReleases > 0 && !count) {
+    return checked(R.chooseEvent(run, choice.id, target, chooseReleases(run, result.requiredReleases)));
+  }
+  return checked(result);
 }
 
 export function playRun(dungeonId, seed, {
   profile, naive = false, bossSuggestion = false, opening, onBattle, onRoom, trace, actionOverride, doorOverride, serviceOverride,
-  firstMain = false, legacyDraws = false, difficulty: selectedDifficulty = difficulty, relicDoors = false,
+  firstMain = false, legacyDraws = false, difficulty: selectedDifficulty = difficulty, relicDoors,
+  tempoVersion: selectedTempo = tempoVersion,
+  legacyRules = legacyCliRules || legacyDraws || selectedTempo === 1,
   relicAudit = false, onRelicReplacement
 } = {}) {
-  const profileView = profile ? Meta.startView(profile, dungeonId) : { bossOrder: firstMain };
-  if (relicDoors) profileView.features = { ...profileView.features, relicDoors: true };
-  else if (profileView.features) delete profileView.features.relicDoors;
+  const simulatedProfile = profile ?? (legacyRules ? null : releaseProfile(dungeonId, firstMain));
+  const profileView = simulatedProfile ? Meta.startView(simulatedProfile, dungeonId) : { bossOrder: firstMain };
+  if (relicDoors !== undefined) profileView.features = { ...profileView.features, relicDoors };
+  else if (legacyRules && profileView.features) delete profileView.features.relicDoors;
   const intro = DUNGEONS[dungeonId].layout === 'intro';
   const run = R.createRun({ core, roster, dungeonId, difficulty: intro ? 'normal' : selectedDifficulty,
-    contract: intro ? null : contract, seed, profileView, tempoVersion, lessonVersion, plain: flag('--plain') });
+    contract: intro ? null : contract, seed, profileView, tempoVersion: selectedTempo, lessonVersion, plain: flag('--plain') });
   if (legacyDraws) delete run.drawRuleVersion;
   let heirloomsGained = 0;
   const rewards = { relicAudit, onRelicReplacement };
@@ -336,7 +389,7 @@ export function playDaily(key, { naive = false, bossOrder = null } = {}) {
     else if (door.type === 'event') {
       const id = naive ? run.pending.choices[0].id : DAILY_EVENTS[spec.eventId];
       const choice = run.pending.choices.find(entry => entry.id === id);
-      checked(R.chooseEvent(run, id, choice.targets ? strongest(choice.targets)[0] : undefined));
+      takeEvent(run, choice);
     }
     resolveChoices(run, naive);
     if (run.phase === 'result') checked(R.confirmResult(run));
@@ -404,14 +457,17 @@ function measureBossOrder() {
 
 function measureContracts() {
   console.log(`tempo ${tempoVersion} · lessons ${lessonVersion} · ${difficulty} · ${contract} · ${runs} seeds per dungeon · offset ${seedOffset}`);
+  if (!legacyCliRules) printReleaseRules(Meta.featureFlags(releaseProfile(dungeons[0])), difficulty);
   console.log('| Dungeon | Met | Paid | Stamped | Clear |');
   console.log('| --- | ---: | ---: | ---: | ---: |');
   const rate = (n, count) => `${n}/${count} (${percent(n, count)})`;
   const total = { met: 0, paid: 0, stamped: 0, clear: 0 };
   for (const id of dungeons) {
-    const profile = legacyProfile();
-    profile.unlockedDungeons.push(id);
-    profile.nightmareUnlocks.push(id);
+    const profile = legacyCliRules ? legacyProfile() : releaseProfile(id);
+    if (legacyCliRules) {
+      profile.unlockedDungeons.push(id);
+      profile.nightmareUnlocks.push(id);
+    }
     const counts = { met: 0, paid: 0, stamped: 0, clear: 0 };
     for (let i = 1; i <= runs; i++) {
       const { run, end } = playRun(id, seedOffset + 2000003 + 6151 * i, { profile });
@@ -499,6 +555,79 @@ function measureRelics() {
   console.log(routeRows.join('\n'));
 }
 
+function promiseRelicValue(run, id) {
+  if (!id || id === 'death_roulette' || run.relics.includes(id)) return 0;
+  const fit = Number(fitsRelic(run, roster, RELICS[id].fits));
+  const combo = Number(RELIC_COMBOS.some(({ ids }) => ids.includes(id) &&
+    ids.every(half => half === id || run.relics.includes(half))));
+  const broad = Number(['double_attack', 'support_boost', 'lucky_vicky', 'gale_storm'].includes(id));
+  return 1 + fit + 2 * combo + broad;
+}
+
+function promiseSample(dungeonId, seed, accept) {
+  const config = PROMISE_EVENTS[dungeonId];
+  let offered = false;
+  let tookTreasure = false;
+  let claimed = false;
+  let bossRelics = null;
+  const { end } = playRun(dungeonId, seed, {
+    relicDoors: true,
+    doorOverride(run) {
+      if (run.floor === config.offerFloor) return run.doors.find(door => door.event?.id === config.event.id);
+      if (run.floor === config.floor) {
+        const treasure = run.doors.find(door => door.type === 'treasure');
+        const promised = run.doors.find(door => door.promiseId);
+        if (promised && promiseRelicValue(run, promised.relic) > promiseRelicValue(run, treasure.relic)) {
+          claimed = true;
+          return promised;
+        }
+        tookTreasure = Boolean(promised);
+        return treasure;
+      }
+      if (run.floor === run.floors) bossRelics = run.relics.length;
+    },
+    serviceOverride(run) {
+      const deposit = run.room.event?.id === config.event.id && run.pending.choices.find(choice => choice.id === 'deposit');
+      if (!deposit?.enabled) return false;
+      offered = true;
+      checked(R.chooseEvent(run, accept ? deposit.id : 'take_crystal'));
+      return true;
+    }
+  });
+  return { offered, win: end.result === 'win', tookTreasure, claimed, bossRelics };
+}
+
+function measurePromises() {
+  if (dungeon !== 'ember_volcano' || dungeons.length !== 1 || difficulty !== 'normal'
+    || tempoVersion !== TEMPO_VERSION || !lessonVersion || flag('--plain')) {
+    throw new RangeError('Promise audit uses the current Ember Journey rules');
+  }
+  const decline = [], accept = [];
+  let screened = 0;
+  while (decline.length < runs) {
+    const seed = seedOffset + 1000003 + 7919 * ++screened;
+    const baseline = promiseSample(dungeon, seed, false);
+    if (!baseline.offered) continue;
+    decline.push(baseline);
+    accept.push(promiseSample(dungeon, seed, true));
+  }
+  console.log(`Ember Journey · ${runs} paired offers · first eligible seeds from ${seedOffset + 1000003} + 7919 × i · ${screened} screened`);
+  console.log('F5: unowned relic +1, party fit +1, completed combo +2, broad utility +1; Death Roulette 0; ties go to treasure.');
+  console.log('| F3 choice | Clear | Mean relics at boss (reached) | F5 promise | F5 treasure instead |');
+  console.log('| --- | ---: | ---: | ---: | ---: |');
+  for (const [label, samples] of [['Take ◆1', decline], ['Deposit ◆1', accept]]) {
+    const wins = samples.filter(sample => sample.win).length;
+    const bosses = samples.filter(sample => sample.bossRelics !== null);
+    const mean = bosses.length ? (bosses.reduce((sum, sample) => sum + sample.bossRelics, 0) / bosses.length).toFixed(2) : '—';
+    const claimed = samples.filter(sample => sample.claimed).length;
+    const treasure = samples.filter(sample => sample.tookTreasure).length;
+    const split = claimed + treasure;
+    console.log(`| ${label} | ${wins}/${runs} (${percent(wins, runs)}) | ${mean} (${bosses.length}) | ${split ? claimed : '—'} | ${split ? `${treasure}/${split} (${percent(treasure, split)})` : '—'} |`);
+  }
+  const difference = 100 * (accept.filter(sample => sample.win).length - decline.filter(sample => sample.win).length) / runs;
+  console.log(`Clear difference (deposit − take): ${difference.toFixed(2)} pp`);
+}
+
 function measureFirstMain() {
   console.log(`tempo ${tempoVersion} · first main · ${runs} seeds per dungeon · careless, default formation`);
   console.log('| Dungeon | Gate pass | Gate reached | Clear |');
@@ -572,11 +701,21 @@ function battleMetrics(rooms, run, state, summary, result) {
   }
 }
 
+function printReleaseRules(features, difficulty) {
+  const profile = features.firstMainCleared ? 'after-main-win' : features.introCleared ? 'first-main' : 'new';
+  const entries = Object.entries(features);
+  const enabled = entries.filter(([, on]) => on).map(([name]) => name).join(', ');
+  const disabled = entries.filter(([, on]) => !on).map(([name]) => name).join(', ');
+  console.log(`Rules: release · profile ${profile} · ${difficulty} · on: ${enabled} · off: ${disabled || 'none'}`);
+}
+
 function measureRuns() {
-  console.log(`tempo ${tempoVersion} · lessons ${lessonVersion} · ${difficulty} · ${runs} seeds per dungeon · offset ${seedOffset}${opening ? ` · ${opening}` : ''}`);
+  const difficultyLabel = firstMain ? `requested ${difficulty}` : difficulty;
+  console.log(`tempo ${tempoVersion} · lessons ${lessonVersion} · ${difficultyLabel} · ${runs} seeds per dungeon · offset ${seedOffset}${opening ? ` · ${opening}` : ''}`);
   console.log('Rooms: turns / deaths / MP left / battles with a death / win rate.');
   const summaries = [];
   for (const id of dungeons) {
+    console.log(`\n${id}`);
     const rooms = {};
     const lessons = { 2: { total: 0, reached: 0 }, 6: { total: 0, reached: 0 } };
     const counts = { wins: 0, bossLosses: 0, voluntary: 0, eligible: 0, bigHits: 0, retries: 0 };
@@ -596,12 +735,14 @@ function measureRuns() {
         previous = { party, allAlive: party.length === 3 && result.survivors.length === 3 };
         if (result.result === 'lose' && run.room.type === 'boss') counts.bossLosses++;
       };
-      const { end, stats } = playRun(id, seedOffset + seed * 7919, { opening, onBattle, naive: flag('--careless') });
+      const { run, end, stats } = playRun(id, seedOffset + seed * 7919, {
+        opening, onBattle, naive: flag('--careless'), firstMain
+      });
+      if (seed === 1 && !legacyCliRules) printReleaseRules(run.features, run.difficulty);
       counts.wins += Number(end.result === 'win');
       counts.bigHits += Number(stats.best >= 1000);
       counts.retries += stats.retries;
     }
-    console.log(`\n${id}`);
     console.log('| Room | Battles | Turns / deaths / MP / death chance / win rate |');
     console.log('| --- | ---: | --- |');
     for (const label of ROOM_LABELS) {
@@ -622,6 +763,62 @@ function measureRuns() {
   console.log('\n| Dungeon | Clear | Normal turns | Normal MP left | B2 preview | B6 preview | Final boss share of run losses | Voluntary change | 1,000+ hit | Intro retries |');
   console.log('| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |');
   console.log(summaries.join('\n'));
+}
+
+function measureBeetles() {
+  console.log(`Beetle shell · ${runs} seeds per dungeon · first eligible decision per run`);
+  console.log('If the bot would attack and cannot finish the beetle, use the best available physical defense on the shell. Resume the bot policy for the ram and later turns.');
+  console.log('| Dungeon | Pairs | Battle wins (bot → defend) | Turns (bot → defend) | Deaths (bot → defend) |');
+  console.log('| --- | ---: | ---: | ---: | ---: |');
+  for (const id of dungeons.filter(id => DUNGEONS[id].layout !== 'intro' && DUNGEONS[id].wild.includes('emerald_beetle'))) {
+    const matchesRoom = (run, branch) => branch && run.floor === branch.floor && run.room.index === branch.room;
+    const sameDecision = (wait, branch) => wait.s.turn === branch.turn && wait.s.enemy.idx === branch.enemy;
+    const tally = { bot: [], defend: [] };
+    for (let i = 1; i <= runs; i++) {
+      const seed = seedOffset + i * 7919;
+      let candidate, branch;
+      const record = policy => (run, state, summary, result) => {
+        if (matchesRoom(run, branch)) tally[policy].push({ seed, ...branch, ally: run.room.party[branch.ally],
+          win: Number(result.win), turns: summary.turns,
+          deaths: summary.survivors.filter((alive, index) => !alive && state.allies[index]).length });
+      };
+      playRun(id, seed, {
+        actionOverride(run, wait, bridge) {
+          candidate = null;
+          if (branch || wait.s.enemy.form !== 'wild_emerald_beetle' || wait.intent.localTurn !== 1) return;
+          const counter = wait.intent.conditions.find(c => c.kind === 'enemyHitThisTurn');
+          if (counter?.met !== null || counter.whenMet <= counter.otherwise) return;
+          const usable = bridge.options().filter(option => option.usable);
+          if (usable.some(option => option.preview?.kill)) return;
+          const defense = usable.filter(option => ['guard', 'damage_half', 'barrier'].includes(option.defense?.kind))
+            .sort((a, b) => b.defense.reduction - a.defense.reduction || a.cost - b.cost)[0];
+          if (defense) candidate = { floor: run.floor, room: run.room.index, turn: wait.s.turn,
+            enemy: wait.s.enemy.idx, ally: wait.s.cur, index: defense.index, defense: defense.name };
+        },
+        trace(run, wait, move) {
+          if (candidate && move.preview?.dmg > 0) branch = { ...candidate, attack: move.name };
+        },
+        onBattle: record('bot')
+      });
+      if (!branch) continue;
+      playRun(id, seed, {
+        actionOverride(run, wait) {
+          if (matchesRoom(run, branch) && sameDecision(wait, branch)) return branch.index;
+        },
+        onBattle: record('defend')
+      });
+    }
+    const totals = key => ['bot', 'defend'].map(policy => tally[policy].reduce((sum, row) => sum + row[key], 0)).join(' → ');
+    if (tally.bot.length !== tally.defend.length) throw new Error('Unpaired beetle battles: ' + id);
+    console.log(`| ${id} | ${tally.bot.length} | ${totals('win')} | ${totals('turns')} | ${totals('deaths')} |`);
+    const saves = tally.defend.flatMap((row, index) => {
+      const bot = tally.bot[index];
+      return row.win > bot.win || (row.win === bot.win && row.deaths < bot.deaths)
+        ? [`${row.seed}/F${row.floor} T${row.turn} (${row.ally}, ${row.attack} → ${row.defense}): ` +
+          `wins ${bot.win} → ${row.win}, deaths ${bot.deaths} → ${row.deaths}`] : [];
+    });
+    if (saves.length) console.log(`  Better outcomes: ${saves.length} · ${saves.slice(0, 3).join('; ')}`);
+  }
 }
 
 function measureIntents() {
@@ -677,6 +874,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   else if (flag('--easy-audit')) measureEasy();
   else if (flag('--entry-easy-audit')) measureEasy(true);
   else if (flag('--relic-audit')) measureRelics();
+  else if (flag('--promise-audit')) measurePromises();
+  else if (flag('--beetle-audit')) measureBeetles();
   else if (dailyFrom !== undefined) measureDaily();
   else if (flag('--first-main')) {
     if (difficulty !== 'normal') throw new RangeError('First main audit uses normal difficulty');

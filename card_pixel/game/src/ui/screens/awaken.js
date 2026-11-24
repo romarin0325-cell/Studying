@@ -55,7 +55,7 @@ export function awakenScreen(run, ui) {
       const split = Math.max(1, run.bench.length - START.draws);
       return completed(run.bench.slice(0, split), run.bench.slice(split), false);
     }
-    node.innerHTML = head(run, '동료 고르기', '2층') + '<div class="screen-split"><div class="fixed-top"><h3>이번 원정 합류</h3></div><div class="scroll-list"><div class="cards">' +
+    node.innerHTML = head(run, '동료 고르기', '2층') + '<div class="screen-split"><div class="fixed-top"><h3>' + TERMS.join.firstUse + '</h3></div><div class="scroll-list"><div class="cards">' +
       run.bench.map(id => cardRow(run, id, { sheet: true, skills: false })).join('') +
       '</div></div><div class="footer fixed-foot"><button class="btn go" id="b-depart">원정 출발</button></div></div>';
     show('awaken');
@@ -65,7 +65,7 @@ export function awakenScreen(run, ui) {
 
   const near = pending.near && card(pending.near);
   const info = TERMS.awakening.detail(pending.remaining, START.draws, pending.candidates.length > 0);
-  const allies = lead ? leadPlate(lead) : run.bench.length ? '<h3>이번 원정 합류</h3><div class="cards">' +
+  const allies = lead ? leadPlate(lead) : run.bench.length ? '<h3>' + TERMS.join.firstUse + '</h3><div class="cards">' +
     run.bench.map(id => cardRow(run, id, { sheet: true, skills: false, tag: id === run.lead ? TERMS.startCompanion.short : '' })).join('') + '</div>' : '';
 
   const candidates = intro ? pending.candidates.slice().sort((a, b) =>

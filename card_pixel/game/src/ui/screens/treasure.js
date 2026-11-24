@@ -18,7 +18,8 @@ export function treasureScreen(run, ui, id, { equipped = false, node = $('#treas
   const comparing = canEquip && run.relics.length === RELIC_LIMIT;
   const replaceable = comparing ? pending?.replace ?? run.relics : [];
   const { sfx } = ui.audio;
-  const title = run.room.type === 'treasure' ? '보물방' : '유물';
+  // The promised relic keeps the door's name, so the floor-3 deposit visibly pays off here.
+  const title = run.room.type === 'treasure' ? '보물방' : run.room.promiseId ? run.room.name : '유물';
   const cost = pending?.cost ?? 0;
   const short = Math.max(0, cost - run.crystals);
   let replacing = null;

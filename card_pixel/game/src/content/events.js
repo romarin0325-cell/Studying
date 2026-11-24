@@ -385,6 +385,21 @@ const TEMPO_EVENTS = [
 
 export const EVENTS = [...ORIGINAL_EVENTS, ...TEMPO_EVENTS.map(event => ({ ...event, minTempoVersion: 2 }))];
 
+export const PROMISE_EVENTS = {
+  ember_volcano: {
+    offerFloor: 3, floor: 5, chance: 1 / 4, doorName: '약속한 자리',
+    event: {
+      id: 'kept_chest', name: '맡겨 둔 상자',
+      text: '화산의 상자지기가 결정을 하나 내민다. “지금 가져가도 좋아. 네 결정 하나를 맡기면 5층에 이 유물을 남겨 둘게.”',
+      requires: {},
+      choices: [
+        { id: 'take_crystal', text: '지금 ◆1 받기', ops: [{ type: 'crystals', amount: 1 }] },
+        { id: 'deposit', text: '결정 맡기기', cost: 1, ops: [{ type: 'promise' }] }
+      ]
+    }
+  }
+};
+
 export function eventForRun(event, run) {
   if (!event || !run.lessonVersion) return event;
   const updated = structuredClone(event);

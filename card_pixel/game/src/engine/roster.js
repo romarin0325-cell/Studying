@@ -13,7 +13,7 @@ export const POSITION = ['선봉', '중견', '대장'];
 export const GRADE_BUCKETS = ['normal', 'rare', 'epic', 'legend'];
 export const gradeOf = grade => GRADE_BUCKETS.includes(grade) ? grade : 'legend';
 
-export const WILD_PATTERNS = { wild_golem: 'golemCharge', wild_night_bat: 'batOpening' };
+export const WILD_PATTERNS = { wild_golem: 'golemCharge', wild_night_bat: 'batOpening', wild_emerald_beetle: 'beetleShell' };
 
 const gradeRank = { normal: 0, rare: 1, epic: 2, legend: 3, transcendence: 3, event: 2 };
 

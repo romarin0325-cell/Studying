@@ -7,21 +7,23 @@ import { INTRO } from '../src/content/intro.js';
 import { LAYOUTS } from '../src/content/layouts.js';
 import { RELICS } from '../src/content/relics.js';
 import * as Bridge from '../src/engine/bridge.js';
-import { canJoin } from '../src/engine/awakenings.js';
+import { canJoin, rollBlessing } from '../src/engine/awakenings.js';
 import * as DailyStore from '../src/engine/daily-store.js';
 import * as Meta from '../src/engine/meta.js';
 import { openingModel } from '../src/engine/opening.js';
 import { create as makeRoster, expeditionPool, GRADE_BUCKETS, gradeOf } from '../src/engine/roster.js';
 import { resumePoint } from '../src/engine/resume.js';
-import { makeDoors } from '../src/engine/rooms.js';
+import { eventChoices, makeDoors } from '../src/engine/rooms.js';
 import * as Run from '../src/engine/run.js';
 import * as Save from '../src/engine/save.js';
 import { mulberry32, nextFloat, shuffle } from '../src/engine/rng.js';
 import { DAILY_KEY, DAMAGED_DAILY_KEY, SESSION_KEY, SETTINGS_KEY, slotStorage } from '../src/ui/storage.js';
+import { describeEventOffer } from '../src/ui/event-offers.js';
 import { resumeLabel } from '../src/ui/glossary.js';
 import { playRun as simulateRun } from '../tools/sim.mjs';
 import { registerEntryTests } from './run/entry.mjs';
 import { registerTempoEventTests } from './run/tempo-events.mjs';
+import { emberEventDoorFixture, eventDoorFixture, randomWakeCases } from './screens/event-doors.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
 const { core, roster, sp } = createCoreRoster();
@@ -94,6 +96,70 @@ function roundTrip(run, actualRoster = roster) {
   assert.deepEqual(restored, run);
   return restored;
 }
+
+function checkServiceDoorPreviews(run) {
+  const before = Save.serializeRun(run);
+  const previews = run.doors.map(door => Run.previewServiceDoor(run, door.index));
+  assert.equal(Save.serializeRun(run), before, 'Looking at every door leaves the run untouched');
+  for (const door of run.doors) {
+    const preview = previews[door.index];
+    if (door.type !== 'spring' && door.type !== 'altar') {
+      assert.equal(preview, null);
+      continue;
+    }
+    const control = Save.restoreRun(before, { core, roster });
+    const inspected = Save.restoreRun(before, { core, roster });
+    assert.ok(control);
+    assert.ok(inspected);
+    const label = `${run.id} F${run.floor} ${door.type}`;
+    assert.deepEqual(Run.previewServiceDoor(inspected, door.index), preview, label);
+    assert.equal(Save.serializeRun(inspected), before, label);
+    assert.deepEqual(ok(Run.chooseDoor(inspected, door.index)), ok(Run.chooseDoor(control, door.index)), label);
+    assert.equal(Save.serializeRun(inspected), Save.serializeRun(control), label);
+    const action = door.type === 'spring' ? Run.getSpringOffer : Run.altarRoll;
+    assert.deepEqual(action(inspected), preview, label);
+    assert.deepEqual(action(control), preview, label);
+    assert.equal(Save.serializeRun(inspected), Save.serializeRun(control), label);
+  }
+  return previews.filter(offer => offer !== null);
+}
+
+for (const { id, layout } of Object.values(DUNGEONS)) {
+  if (layout !== 'expedition') continue;
+  test(`service door previews match both entries for 300 seeds in ${id}`, () => {
+    for (let seed = 1; seed <= 300; seed++) {
+      const run = makeTempo({ dungeonId: id, seed: seed * 7919 });
+      for (const floor of [3, 7]) {
+        reach(run, floor);
+        const offers = checkServiceDoorPreviews(run);
+        assert.equal(offers.length, 2);
+        assert.ok(offers.every(offer => offer.ok));
+      }
+    }
+  });
+}
+
+test('service door previews use the rolled doors and draw rules from an old map save', () => {
+  const map = reach(make(), 3);
+  map.crystals = 0;
+  const old = JSON.parse(Save.serializeRun(map));
+  for (const key of ['entryRulesVersion', 'features', 'repeatStacks', 'rewardRuleVersion', 'participationTags']) delete old.run[key];
+  const run = Save.restoreRun(old, { core, roster });
+  assert.ok(run);
+  assert.deepEqual(run.doors, map.doors);
+  const [spring] = checkServiceDoorPreviews(run);
+  assert.equal(spring.cost, Run.COST.pick);
+  assert.equal(new Set(spring.candidates).size, 3);
+});
+
+test('service door previews also work in the intro and respect the spring pick unlock', () => {
+  const intro = reach(makeTempo({ dungeonId: 'dawn_forest' }), 4);
+  assert.equal(checkServiceDoorPreviews(intro).filter(offer => offer.ok).length, 1);
+  const locked = reach(makeTempo({ profileView: { features: { springPick: false } } }), 3);
+  const [spring, altar] = checkServiceDoorPreviews(locked);
+  assert.equal(spring.reason, 'spring_pick_locked');
+  assert.ok(altar.ok);
+});
 
 function profileWithSnowRabbit() {
   const intro = reach(make({ dungeonId: 'dawn_forest', seed: 7 }), 2);
@@ -917,6 +983,48 @@ test('the altar resumes the latest roll and limits one visit to three rolls', ()
   assert.equal(Run.altarKeep(run).ok, false);
 });
 
+test('only expedition altar rerolls use the wider blessing table', () => {
+  const roll = (grade, rolls, state, { type = 'altar', daily = null } = {}) => {
+    const run = { bench: ['ash'], rng: { state }, room: { type }, pending: { kind: 'altar', rolls }, daily };
+    return rollBlessing(run, { card: () => ({ grade }) });
+  };
+  // The second RNG sample is about 0.193 at state 17 and 0.325 at state 2.
+  for (const [grade, initial, ordinary, jackpot] of [
+    ['normal', 0.4, 0.16, 0.72], ['rare', 0.3, 0.13, 0.56], ['epic', 0.2, 0.1, 0.43],
+    ['legend', 0.1, 0.05, 0.23], ['transcendence', 0.1, 0.05, 0.23], ['event', 0.2, 0.1, 0.43]
+  ]) {
+    assert.deepEqual(roll(grade, 0, 17), { id: 'ash', multiplier: initial, jackpot: false });
+    for (const rolls of [1, 2]) {
+      assert.deepEqual(roll(grade, rolls, 2), { id: 'ash', multiplier: ordinary, jackpot: false });
+      assert.deepEqual(roll(grade, rolls, 17), { id: 'ash', multiplier: jackpot, jackpot: true });
+    }
+  }
+  for (const [rolls, mode] of [[0, {}], [2, { type: 'event' }], [2, { daily: {} }]]) {
+    assert.deepEqual(roll('normal', rolls, 0, mode), { id: 'ash', multiplier: 1, jackpot: true });
+    assert.deepEqual(roll('normal', rolls, 17, mode), { id: 'ash', multiplier: 0.4, jackpot: false });
+  }
+});
+
+test('a pre-W7 save keeps its stored second altar roll when resumed', () => {
+  const run = reach(make(), 3);
+  enter(run, 1);
+  ok(Run.altarRoll(run));
+  run.rng.state = 0;
+  const legacyRoll = rollBlessing({ ...run, room: { type: 'event' }, rng: { ...run.rng } }, roster);
+  const updatedRoll = ok(Run.altarRoll(run));
+  assert.equal(legacyRoll.id, updatedRoll.id);
+  assert.notEqual(legacyRoll.multiplier, updatedRoll.multiplier);
+
+  const snapshot = JSON.parse(Save.serializeRun(run));
+  snapshot.run.pending.roll = legacyRoll;
+  const restored = Save.restoreRun(snapshot, { core, roster });
+  assert.deepEqual(resumePoint(restored), { kind: 'altar', floor: 3 });
+  assert.deepEqual(restored.pending, { kind: 'altar', rolls: 2, roll: legacyRoll });
+  assert.deepEqual(restored.rng, run.rng);
+  assert.deepEqual(ok(Run.altarKeep(restored)), { ok: true, ...legacyRoll });
+  assert.equal(restored.blessings[legacyRoll.id], legacyRoll.multiplier);
+});
+
 test('meta enforces recruitment limits, bonds, seals and all seven notebook chapters', () => {
   let profile = legacyProfile();
   assert.deepEqual(Meta.availableDungeons(profile).map(entry => entry.id), ['dawn_forest']);
@@ -1458,13 +1566,13 @@ test('tempo 2 two-recruit event validates both releases and price before applyin
   roundTrip(run);
 });
 
-test('tempo 2 event doors offer 11 events per theme and 40 in the tower', () => {
+test('tempo 2 ordinary event doors offer 11 events per theme and 40 in the tower', () => {
   const newEvents = EVENTS.filter(event => event.minTempoVersion === 2);
   assert.equal(newEvents.length, 12);
   const collect = run => {
     const offered = new Set();
     for (let state = 0; state < 512; state++) {
-      const door = makeDoors({ ...run, rng: { state } }, roster).find(entry => entry.type === 'event');
+      const door = makeDoors({ ...run, promise: undefined, rng: { state } }, roster).find(entry => entry.type === 'event');
       if (door?.event) offered.add(door.event.id);
     }
     return offered;
@@ -1488,6 +1596,147 @@ test('tempo 2 event doors offer 11 events per theme and 40 in the tower', () => 
   const arena = reach(makeTempo({ dungeonId: 'arena', profileView: { companions: ['ash'] } }), 3);
   assert.ok(arena.pool.includes('ash'));
   assert.ok(!collect(arena).has('ash_split_wick'));
+});
+
+function openPromiseEvent() {
+  const run = reach(makeTempo({ seed: 7 }), 3);
+  const door = run.doors.find(entry => entry.type === 'event');
+  assert.equal(door.event.id, 'kept_chest');
+  enter(run, door.index);
+  const { offer } = run.pending.choices.find(choice => choice.id === 'deposit').ops[0];
+  return { run, offer };
+}
+
+function takePromiseToFloor5() {
+  const { run, offer } = openPromiseEvent();
+  ok(Run.chooseEvent(run, 'deposit'));
+  advance(run);
+  return { run: reach(run, 5), offer };
+}
+
+test('the floor-3 promise charges once, survives reload and grants the disclosed relic once on floor 5', () => {
+  const { run, offer } = openPromiseEvent();
+  const crystals = run.crystals;
+  assert.deepEqual(offer, { id: 'kept_chest', relic: offer.relic, floor: 5, deposit: 1 });
+  assert.ok(run.seenRelics.includes(offer.relic));
+  assert.equal(ok(Run.chooseEvent(run, 'deposit')).crystals, -1);
+  assert.equal(run.crystals, crystals - 1);
+  assert.equal(Run.chooseEvent(run, 'deposit').ok, false);
+  assert.deepEqual(run.promise, offer);
+  assert.equal(run.relics.includes(offer.relic), false);
+  advance(run);
+  const restored = roundTrip(run);
+  enter(restored);
+  settle(restored);
+  assert.notEqual(restored.pending.relic, offer.relic);
+  ok(Run.leaveRoom(restored));
+  const preview = Run.previewNextFloor(restored);
+  assert.deepEqual(restored.promise, offer);
+  ok(Run.nextFloor(restored));
+  assert.deepEqual(restored.doors, preview.doors);
+  const map = roundTrip(restored);
+  assert.deepEqual(map.doors.slice(0, 2).map(door => door.type), ['event', 'treasure']);
+  const door = map.doors[2];
+  assert.equal(door.name, '약속한 자리');
+  assert.equal(door.relic, offer.relic);
+  const beforeGrant = map.crystals;
+  assert.deepEqual(ok(Run.chooseDoor(map, door.index)).relic, { id: offer.relic, equipped: true });
+  assert.equal(map.promise, null);
+  assert.equal(map.crystals, beforeGrant);
+  const granted = roundTrip(map);
+  assert.equal(Run.chooseDoor(granted, door.index).ok, false);
+  assert.equal(granted.relics.filter(id => id === offer.relic).length, 1);
+});
+
+test('Ember seed 1063355 reserves the promised relic on floor 5 and preserves already saved offers', () => {
+  function floor5Save() {
+    let saved;
+    simulateRun(ember, 1063355, {
+      relicDoors: true,
+      doorOverride(run) {
+        if (run.floor === 3) return run.doors.find(door => door.event?.id === 'kept_chest');
+        if (run.floor === 5) saved = Save.serializeRun(run);
+      },
+      serviceOverride(run) {
+        if (run.room.event?.id !== 'kept_chest') return false;
+        ok(Run.chooseEvent(run, 'deposit'));
+        return true;
+      }
+    });
+    assert.ok(saved);
+    return saved;
+  }
+
+  const saved = floor5Save();
+  assert.equal(floor5Save(), saved);
+  const snapshot = JSON.parse(saved);
+  const { doors } = snapshot.run;
+  const promise = doors.find(door => door.promiseId);
+  const treasure = doors.find(door => door.type === 'treasure');
+  assert.equal(promise.relic, 'double_attack');
+  assert.ok(treasure.relic);
+  assert.notEqual(treasure.relic, promise.relic);
+
+  assert.deepEqual(Save.restoreRun(saved, { core, roster }).doors, doors);
+  treasure.relic = promise.relic; // Floor-5 doors saved before the reservation fix.
+  const old = Save.restoreRun(snapshot, { core, roster });
+  assert.deepEqual(old.doors, doors);
+  enter(old, treasure.index);
+  assert.equal(ok(Run.takeTreasure(old)).relic.id, promise.relic);
+});
+
+test('the promise relic uses the existing free replacement flow when the rack is full', () => {
+  const { run, offer } = takePromiseToFloor5();
+  run.relics = Object.keys(RELICS).filter(id => id !== offer.relic).slice(0, 4);
+  const crystals = run.crystals;
+  const door = run.doors.find(entry => entry.promiseId);
+  assert.equal(ok(Run.chooseDoor(run, door.index)).relic.chooseReplacement, true);
+  assert.equal(run.promise, null);
+  const restored = roundTrip(run);
+  const replace = restored.relics[0];
+  assert.equal(restored.pending.cost, 0);
+  ok(Run.equipRelic(restored, offer.relic, replace));
+  assert.equal(Run.equipRelic(restored, offer.relic, replace).ok, false);
+  assert.equal(restored.relics[0], offer.relic);
+  assert.equal(restored.crystals, crystals);
+});
+
+test('taking the immediate crystal leaves the two ordinary floor-5 doors', () => {
+  const { run } = openPromiseEvent();
+  assert.equal(ok(Run.chooseEvent(run, 'take_crystal')).crystals, 1);
+  assert.equal(run.promise, null);
+  advance(run);
+  assert.deepEqual(reach(run, 5).doors.map(door => door.type), ['event', 'treasure']);
+  assert.ok(run.doors.every(door => !door.promiseId));
+});
+
+test('entering a different floor-5 door forfeits the deposit and removes the promise door', () => {
+  for (const type of ['treasure', 'event']) {
+    const { run } = takePromiseToFloor5();
+    const promise = run.doors.find(door => door.promiseId);
+    const crystals = run.crystals;
+    enter(run, run.doors.find(door => door.type === type && !door.promiseId).index);
+    assert.equal(run.crystals, crystals);
+    assert.equal(run.promise, null);
+    assert.ok(run.doors.every(door => !door.promiseId));
+    if (type === 'treasure') assert.equal(ok(Run.takeTreasure(run)).relic?.id, run.room.relic);
+    const restored = roundTrip(run);
+    assert.equal(Run.chooseDoor(restored, promise.index).ok, false);
+    advance(restored);
+    assert.ok(restored.doors.every(door => !door.promiseId));
+  }
+});
+
+test('an old Ember save without promise state restores the old floor-3 and floor-5 doors', () => {
+  const run = reach(makeTempo({ seed: 7 }), 2);
+  const old = JSON.parse(Save.serializeRun(run));
+  delete old.run.promise;
+  const restored = Save.restoreRun(old, { core, roster });
+  assert.ok(restored);
+  assert.deepEqual(restored.doors, old.run.doors);
+  assert.equal(Object.hasOwn(restored, 'promise'), false);
+  assert.notEqual(reach(restored, 3).doors.find(door => door.type === 'event').event.id, 'kept_chest');
+  assert.deepEqual(roundTrip(reach(restored, 5)).doors.map(door => door.type), ['event', 'treasure']);
 });
 
 registerTempoEventTests({ core, roster, makeTempo: makeOldTempo, reach, advance, enter, settle, ok });
@@ -1794,6 +2043,43 @@ test('tempo 2 spring draws and gate claims share the roster limit without automa
   ok(Run.chooseGateReward(run, { ...pick, replaceId: run.bench[0] }));
   assert.equal(run.bench.length, 6);
   assert.ok(run.bench.includes(captive));
+});
+
+test('tempo 1 sim replaces the weakest reserve at the full gate on Cathedral seed 102947', () => {
+  let gate;
+  const { run } = simulateRun('twilight_cathedral', 102947, {
+    tempoVersion: 1,
+    onRoom(run) {
+      if (run.floor === 4) gate = { bench: run.bench.slice(), released: run.released.slice() };
+    }
+  });
+  assert.deepEqual(gate, {
+    bench: ['gumiho', 'priest_of_end', 'lightning_sage', 'santa', 'ghost_king', 'galaxy_whale'],
+    released: ['void_knight']
+  });
+  assert.equal(run.phase, 'done');
+});
+
+test('tempo 1 sim retries a full random awakening and keeps the lead on Tower seed 150461', () => {
+  const profile = legacyProfile();
+  profile.records.clears.dawn_forest = { normal: 1 };
+  profile.unlockedDungeons.push('creation_tower');
+  profile.notebook.chapters = [1];
+  profile.lead = 'joker';
+  profile.recruits.joker = { bond: 0 };
+  let eventBench;
+  const { run } = simulateRun('creation_tower', 150461, {
+    profile, tempoVersion: 1, difficulty: 'easy',
+    doorOverride(run) {
+      if (run.floor === 5) return run.doors.find(door => door.event?.id === 'empty_role');
+    },
+    onRoom(run) {
+      if (run.room.event?.id === 'empty_role') eventBench = run.bench.slice();
+    }
+  });
+  assert.deepEqual(eventBench, ['fallen_angel', 'unicorn', 'trans_cinderella', 'joker', 'behemoth', 'paladin']);
+  const event = run.chronicle.find(entry => entry.eventId === 'empty_role');
+  assert.deepEqual(event?.released, ['snow_rabbit']);
 });
 
 test('main assist follows the first-main guide while nightmare keeps its separate floor scale', () => {
@@ -2433,8 +2719,9 @@ test('last good and file recovery preserve real checkpoints and allow a new real
   const { run, end } = playRun('twilight_cathedral', 21, { profile: restored.profile, difficulty: 'easy' });
   assert.equal(end.result, 'win');
   assert.equal(run.stats.battles, 5);
-  const recruit = 'void_knight';
-  assert.equal(end.recruitable[0], recruit);
+  // Which companion is first depends on the battles (wild patterns change them); any real recruit proves the path.
+  const recruit = end.recruitable[0];
+  assert.ok(recruit, 'The won run offers a recruit');
   const recruited = Meta.applyRunEnd(restored.profile, run, { recruits: [recruit] });
   assert.deepEqual(ok(recruited.announce).recruits, [recruit]);
   store.save({ profile: recruited.profile });
@@ -2444,4 +2731,91 @@ test('last good and file recovery preserve real checkpoints and allow a new real
   assert.equal(store.clear(), true);
   assert.equal(entries.size, 0);
   assert.equal(store.loadLastGood().status, 'empty');
+});
+
+test('seeded event wakes show the actual companion and outcome before and after entry', () => {
+  const artifacts = new Map(core.ARTIFACT_LIST.map(relic => [relic.id, relic]));
+  for (const fixture of randomWakeCases) {
+    const { run, door } = eventDoorFixture({ core, roster }, fixture);
+    const before = Save.serializeRun(run);
+    const offerAt = room => {
+      const choice = eventChoices(run, core, roster, room).find(entry => entry.id === fixture.choiceId);
+      return describeEventOffer(run, choice, { room, core, artifacts, card: roster.card });
+    };
+    const mapOffer = offerAt(door);
+    assert.equal(Save.serializeRun(run), before);
+    ok(Run.chooseDoor(run, door.index));
+    const entered = Save.serializeRun(run);
+    const roomOffer = offerAt(run.room);
+    assert.equal(Save.serializeRun(run), entered);
+
+    let outcome = Run.chooseEvent(run, fixture.choiceId);
+    if (fixture.requiresRelease) {
+      assert.equal(outcome.reason, 'roster_full');
+      assert.equal(outcome.requiredReleases, 1);
+      assert.equal(Save.serializeRun(run), entered);
+      outcome = Run.chooseEvent(run, fixture.choiceId, undefined, [run.bench.find(id => id !== run.lead)]);
+    }
+    const draw = ok(outcome).effects.find(effect => effect.draw).draw;
+    assert.equal(draw.id, fixture.id);
+    assert.equal(draw.kind, fixture.kind);
+    for (const offer of [mapOffer, roomOffer]) {
+      assert.equal(offer.shortName, fixture.label);
+      assert.ok(offer.detail.includes(fixture.label), offer.detail);
+      assert.equal(offer.releaseNote, fixture.requiresRelease ? '보낼 동료 1명 필요' : '');
+    }
+  }
+});
+
+test('Ember seed 150461 discloses Ash’s saved offers and prices before entry without consuming RNG', () => {
+  const { run, door } = emberEventDoorFixture({ core, roster });
+  const artifacts = new Map(core.ARTIFACT_LIST.map(relic => [relic.id, relic]));
+  const list = room => eventChoices(run, core, roster, room)
+    .map(choice => describeEventOffer(run, choice, { room, core, artifacts, card: roster.card }));
+  const checkpoint = Save.serializeRun(run);
+  const rng = run.rng.state;
+  const choices = eventChoices(run, core, roster, door);
+  const offers = list(door);
+  assert.deepEqual(offers.map(offer => [offer.shortName, offer.compactPrice, offer.condition]), [
+    ['드림파이어', '무료', ''], ['아마겟돈', '◆2', '']
+  ]);
+  assert.match(offers[0].detail, /^무료 · .*유품 드림파이어$/);
+  assert.match(offers[1].detail, /^◆2 · .*유품 아마겟돈$/);
+  assert.equal(Save.serializeRun(run), checkpoint);
+
+  ok(Run.chooseDoor(run, door.index));
+  assert.equal(run.rng.state, rng);
+  assert.deepEqual(run.room.event, door.event);
+  assert.deepEqual(run.pending.choices, choices);
+  assert.deepEqual(list(run.room), offers);
+
+  const old = JSON.parse(Save.serializeRun(run));
+  delete old.run.lessonVersion;
+  const restored = Save.restoreRun(old, { core, roster });
+  assert.ok(restored);
+  assert.deepEqual(restored.room.event, door.event);
+  assert.deepEqual(restored.pending.choices, choices);
+  assert.deepEqual(eventChoices(restored, core, roster), choices);
+  const target = choices[0].targets[0];
+  ok(Run.chooseEvent(restored, 'veil', target));
+  assert.equal(restored.heirlooms[target].name, '드림파이어');
+});
+
+test('an event preview keeps unaffordable choices and names the relic stored on an event door', () => {
+  const run = reach(makeTempo({ seed: 21 }), 3);
+  const door = run.doors.find(entry => entry.type === 'event');
+  const event = EVENTS.find(entry => entry.id === 'grand_merchant');
+  const relic = 'companion';
+  Object.assign(door, { name: event.name, event, relic });
+  run.crystals = 1;
+  const artifacts = new Map(core.ARTIFACT_LIST.map(relic => [relic.id, relic]));
+  const choices = eventChoices(run, core, roster, door);
+  assert.equal(choices.length, event.choices.length);
+  const choice = choices.find(entry => entry.id === 'relic');
+  assert.equal(choice.enabled, false);
+  const offer = describeEventOffer(run, choice, { room: door, core, artifacts, card: roster.card });
+  assert.equal(offer.condition, '조건 · 결정 3개 부족');
+  assert.equal(offer.detail, '◆4 · 이번 원정 끝까지 · ' + artifacts.get(relic).name);
+  ok(Run.chooseDoor(run, door.index));
+  assert.deepEqual(eventChoices(run, core, roster), choices);
 });

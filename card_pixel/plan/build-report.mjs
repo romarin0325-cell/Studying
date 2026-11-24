@@ -3,7 +3,8 @@
 //   default content: entry-report-content.mjs (the 2026-11-21 night report → entry-report.html)
 // The content module exports REPORT = { title?, subtitle, out, store, toc, summary, answers?, requests, screens, decisions,
 //   checked, unchecked, files }. With the two directories the builder first refreshes <store>/{before,after}/*.jpg
-//   (390 px wide, quality 82) from <dir>/<name>.png. A shot missing on one side is shown alone.
+//   (390 px wide, quality 82) from <dir>/<name>.png. A shot missing on one side is shown alone. A screen with `wide: true`
+//   (a composite such as a row of effect frames) is stored 780 px wide and spans the whole row.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
@@ -23,12 +24,12 @@ const dataUrl = file => 'data:image/jpeg;base64,' + fs.readFileSync(file).toStri
 
 async function refresh() {
   for (const side of ['before', 'after']) fs.mkdirSync(path.join(store, side), { recursive: true });
-  for (const { before, after } of REPORT.screens) {
+  for (const { before, after, wide } of REPORT.screens) {
     for (const [side, dir, name] of [['before', beforeDir, before], ['after', afterDir, after]]) {
       if (!name) continue;
       const source = path.join(dir, name + '.png');
       if (!fs.existsSync(source)) throw new Error('missing ' + source);
-      await sharp(source).resize({ width: 390 }).jpeg({ quality: 82, mozjpeg: true }).toFile(shotFile(side, name));
+      await sharp(source).resize({ width: wide ? 780 : 390 }).jpeg({ quality: 82, mozjpeg: true }).toFile(shotFile(side, name));
     }
   }
 }
@@ -38,8 +39,8 @@ const figure = (side, name, title) => name && fs.existsSync(shotFile(side, name)
   ? `<figure class="${side}"><figcaption>${side === 'before' ? '이전' : '이후'}</figcaption>` +
     `<img loading="lazy" alt="${esc(title)} ${side === 'before' ? '이전' : '이후'}" src="${dataUrl(shotFile(side, name))}"></figure>`
   : '';
-const screens = REPORT.screens.map(({ before, after, title, note }, index) => `
-  <article class="pair${before ? '' : ' only-after'}" id="s${index}">
+const screens = REPORT.screens.map(({ before, after, title, note, wide }, index) => `
+  <article class="pair${before ? '' : ' only-after'}${wide ? ' wide' : ''}" id="s${index}">
     <header><b>${index + 1}. ${esc(title)}</b><span>${esc(note)}</span></header>
     <div class="shots">${figure('before', before, title)}${figure('after', after, title)}</div>
   </article>`).join('');
@@ -81,6 +82,7 @@ ul.plain { margin: 6px 0; padding-left: 20px; } ul.plain li { margin: 4px 0; }
 .pair header b { color: var(--navy); } .pair header span { color: var(--ink2); font-size: 13px; }
 .shots { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .pair.only-after .shots { grid-template-columns: minmax(0, 260px); justify-content: center; }
+.pair.wide { grid-column: 1 / -1; } .pair.wide .shots { grid-template-columns: minmax(0, 780px); }
 figure { margin: 0; } figcaption { font-size: 12px; color: var(--ink2); margin-bottom: 2px; }
 figure.after figcaption { color: var(--aqua-lo); font-weight: 700; }
 figure img { width: 100%; display: block; cursor: zoom-in; box-shadow: 0 0 0 var(--u) var(--line); }

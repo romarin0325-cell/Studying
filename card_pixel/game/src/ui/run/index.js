@@ -248,7 +248,9 @@ export function enterRun(run, host) {
       return battle.startBattle(run, options, (summary, log) => {
         const result = Run.settleBattle(run, summary);
         if (result.ok) {
-          command(Run.recordBattleLog, appendSettlement(log, result));
+          Run.recordBattleLog(run, appendSettlement(log, result));
+          // The settled result is written before the last hit and the victory/defeat plate play.
+          host.save(run);
         }
         return result;
       }, afterBattle, {

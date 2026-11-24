@@ -1,50 +1,54 @@
-import { BASIC_MOTION, SKILL_MOTIONS } from '../../content/skill-motions.js';
+import { BASIC_MOTION, FORM_MARKERS, SKILL_MOTIONS } from '../../content/skill-motions.js';
 
-const FORM_SPRITES = new Set(['mirror_cocoon', 'aurora_wing', 'abyss_wing']);
 const ATTACK_FRAME = { red_dragon: 'phy', ash: 'mag', flame_sage: 'mag', luna: 'phy', zeke: 'phy', cherry_prince: 'phy', golem: 'phy' };
 export const MOTION_FRAME = 0.03;
 
-export function isBigMove({ skill, side, heirloom, salience, isBasic }) {
+function isBigMove({ skill, side, salience, isBasic }) {
   const { type, tier, val } = skill;
-  return !isBasic && type !== 'sup' && (salience === 'boss' || !!heirloom ||
+  return !isBasic && type !== 'sup' && (salience === 'boss' ||
     (side === 'ally' && tier >= 3 && (!Number.isFinite(val) || val >= 2)));
 }
 
-function defaultMotion(skill, casterSprite, big, basePower) {
+function defaultMotion(skill, casterSprite, big) {
   const phy = skill.type === 'phy';
   const frame = skill.type === 'sup' || (ATTACK_FRAME[casterSprite] && ATTACK_FRAME[casterSprite] !== skill.type) ? 'idle' : 'attack';
-  const fx = skill.effects ?? [];
+  const fx = (skill.effects ?? []).map(effect => effect.type ?? effect);
   if (skill.type === 'sup') {
     if (fx.includes('field_buff')) return { family: 'field', variant: 'circle', range: 'ranged', frame, socket: 'hand' };
     return { family: 'mark', variant: fx.includes('debuff') ? 'curse' : 'heal', range: 'ranged', frame, socket: 'hand' };
   }
   if (!big) return phy ? { ...BASIC_MOTION, frame } : { family: 'orb', variant: 'bolt', range: 'ranged', frame, socket: 'hand' };
-  if (fx.includes('random_mult') || fx.includes('multi_hit')) return phy
+  if (fx.some(type => ['random_mult', 'random_mult_moon_boost', 'delayed_random_attack', 'multi_hit'].includes(type))) return phy
     ? { family: 'blade', variant: 'double', range: 'melee', frame }
     : { family: 'fall', variant: 'rain', range: 'ranged', frame, socket: 'top' };
   if (fx.includes('consume_debuff_all') || fx.includes('consume_field_all')) {
     return { family: 'blast', variant: 'burst', range: 'ranged', frame, socket: 'hand' };
   }
-  if (fx.includes('self_hp_cost_ratio') || (basePower ?? skill.val) >= 4) {
+  if (fx.includes('self_hp_cost_ratio') || skill.val >= 4) {
     return { family: 'fall', variant: 'meteor', range: 'ranged', frame, socket: 'top' };
   }
   return phy ? { family: 'impact', variant: 'body', range: 'melee', frame } :
     { family: 'ray', variant: 'straight', range: 'ranged', frame, socket: 'hand' };
 }
 
-export function resolveMotion({ sourceKey, skill, side, heirloom, salience, isBasic, casterSprite, basePower }) {
+export function resolveMotion({ sourceKey, skill, sourceSkill, side, salience, isBasic, casterSprite, casterForm }) {
   const [role, owner, slot] = sourceKey?.split('/') ?? [];
-  const key = role === 'ally' && FORM_SPRITES.has(owner) ? `form/${owner}/${slot}` : sourceKey;
+  const key = role === 'ally' && Object.hasOwn(FORM_MARKERS, owner) ? `form/${owner}/${slot}` : sourceKey;
   const entry = Object.hasOwn(SKILL_MOTIONS, key) ? SKILL_MOTIONS[key] : null;
   const exact = entry?.expectedName === skill.name ? entry : null;
-  const big = (!isBasic && exact?.forceBig) || isBigMove({ skill, side, heirloom, salience, isBasic });
+  const native = role === 'ally' || role === 'form';
+  const original = sourceSkill ?? skill;
+  const big = (!isBasic && exact?.forceBig) || isBigMove({
+    skill: original, side: native ? 'ally' : side, salience: native ? undefined : salience, isBasic
+  });
   const { family, variant, range, frame, socket, tint } = isBasic && skill.type === 'phy' ? BASIC_MOTION :
-    exact ?? defaultMotion(skill, casterSprite, big, basePower);
-  // A roulette caster has their own art, so use a neutral pose for the borrowed strike.
-  const borrowed = role === 'ally' && casterSprite && owner !== casterSprite;
+    exact ?? defaultMotion(original, native ? owner : casterSprite, big);
+  // Borrowed slots keep their FX, while the caster uses a pose available on their own art.
+  const borrowed = native && casterSprite && owner !== (casterForm ?? casterSprite);
   return {
-    family, variant, range, frame: borrowed && !heirloom ? 'idle' : frame,
+    family, variant, range, frame: borrowed ? 'idle' : frame,
     ...(socket && { socket }), ...(tint && { tint }),
+    ...(Object.hasOwn(FORM_MARKERS, casterForm) && { marker: casterForm }),
     size: big ? 'big' : 'quiet'
   };
 }
@@ -83,7 +87,7 @@ export function rangedTiming({ family, variant, from, to, big, still, fallHeight
   const flight = Math.min(big ? 0.26 : 0.145, distance / speed);
   if (family === 'fall') {
     const falling = Math.max(2, Math.min(3, Math.round(fallHeight / speed / MOTION_FRAME)));
-    return { flight: falling * MOTION_FRAME, travel: (1 + falling + (variant === 'rain' ? 2 : 0)) * MOTION_FRAME, hold: 0.12 };
+    return { flight: falling * MOTION_FRAME, travel: (1 + falling) * MOTION_FRAME, hold: 0.12 };
   }
   if (family === 'breath') return { travel: Math.max(0.06, flight), hold: 0.12, linger: big ? 4 : 2 };
   if (family === 'ray') return { travel: Math.max(0.06, flight), hold: big ? 0.18 : 0.12 };

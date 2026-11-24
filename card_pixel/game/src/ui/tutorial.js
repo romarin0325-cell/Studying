@@ -33,7 +33,7 @@ const ENTRY = {
 };
 
 const TOURS = {
-  heirloom: ['', '쓰러진 동료가 남긴 기술이야. 전투에서 한 번, MP 없이 쓸 수 있어.'],
+  heirloom: ['', TERMS.heirloom.firstUse + '이야. 전투에서 한 번, MP 없이 쓸 수 있어.'],
   'last-stand': ['', '마지막 한 명은 공격·마공 ×1.5, 치명타율 +25%p를 받아.'],
   relic: ['', '이 유물은 이번 원정 동안 적용돼.'],
   'relic-replace': ['[data-replace]', '네 칸이 찼어. 새 유물로 바꿀 칸을 골라.'],

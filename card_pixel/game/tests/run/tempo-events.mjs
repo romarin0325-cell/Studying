@@ -5,6 +5,8 @@ import * as Bridge from '../../src/engine/bridge.js';
 import { mulberry32 } from '../../src/engine/rng.js';
 import * as Run from '../../src/engine/run.js';
 import * as Save from '../../src/engine/save.js';
+import { WILD_PATTERNS } from '../../src/engine/roster.js';
+import { wildBeatPattern } from '../../src/content/tempo.js';
 
 export function registerTempoEventTests({ core, roster, makeTempo, reach, advance, enter, settle, ok }) {
   function testTempoEvent(id, choices) {
@@ -390,7 +392,9 @@ export function registerTempoEventTests({ core, roster, makeTempo, reach, advanc
       const { start, intent } = eventBattle(run);
       assert.equal(start.enemy.buffs.silence, 1);
       assert.equal(start.enemy.buffs.weak, 1);
-      assert.equal(intent.name, run.difficulty === 'normal' && run.floor === 6 ? '물리 충전' : '일반 공격');
+      // A wild species with its own pattern opens with that pattern's first beat.
+      const opening = wildBeatPattern(WILD_PATTERNS[run.room.enemies[0].id])?.beats[0].name;
+      assert.equal(intent.name, opening ?? (run.difficulty === 'normal' && run.floor === 6 ? '물리 충전' : '일반 공격'));
     }
   });
 }

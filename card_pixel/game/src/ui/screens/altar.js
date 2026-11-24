@@ -1,7 +1,7 @@
 import { $, esc, show, sleep } from '../dom.js';
 import { head } from '../widgets.js';
-import { GRADE } from '../../engine/roster.js';
 import { altarKeep, altarRoll } from '../../engine/run.js';
+import { describeAltarRoll } from '../service-offers.js';
 
 export function altarScreen(run, ui, kept = null) {
   ui.playMusic();
@@ -11,12 +11,10 @@ export function altarScreen(run, ui, kept = null) {
   const pending = run.pending;
   const current = pending?.roll || kept;
   const left = pending ? 3 - pending.rolls : 0;
-  const fighter = current && card(current.id);
-  const percent = multiplier => '+' + Math.round(multiplier * 100) + '%';
-  const previous = fighter ? percent(kept?.previous ?? run.blessings[current.id] ?? 0) : '';
-  const slot = fighter ? '<span class="pic">' + sprite(current.id) + '</span><span class="txt"><b>' + esc(fighter.name) +
-    '</b><small>기존 축복 ' + previous + '</small><strong>새 축복 ' + percent(current.multiplier) + '</strong><small>' +
-    (current.jackpot ? '대성공! · ' : '') + (GRADE[fighter.grade] || '') + ' · 모든 능력치 상승</small></span>' :
+  const blessing = current && describeAltarRoll(run, current, card, kept?.previous);
+  const slot = blessing ? '<span class="pic">' + sprite(current.id) + '</span><span class="txt"><b>' + esc(blessing.name) +
+    '</b><small>' + esc(blessing.previous) + '</small><strong>' + esc(blessing.next) + '</strong><small>' +
+    esc(blessing.effect) + '</small></span>' :
     '<span class="empty">?</span>';
   const actions = pending ? '<button class="btn" id="b-roll"' + (left && run.bench.length ? '' : ' disabled') +
     '>굴리기 (' + left + ')</button><button class="btn' + (current ? ' go' : '') + '" id="b-keep"' +

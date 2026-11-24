@@ -51,7 +51,8 @@ export function createHistoryCases({ storedSession, enterObservatory }) {
       assert.ok(end.recruitable.includes('sunflower') && end.recruitable.includes('gold_dragon'));
       assert.equal(history.sunflower.outcome, 'reserve');
       assert.deepEqual(history.gold_dragon.used, [
-        { fromId: 'red_dragon', skillName: '파이어브레스', floor: 8, roomType: 'boss', won: true }
+        // Seeded fixture: since E6 (2026-11-23 wild beat patterns) the volcano run hands Gold Dragon Sakura's seal.
+        { fromId: 'sakura', skillName: '봉인부', floor: 8, roomType: 'boss', won: true }
       ]);
       return {
         session: storedSession({ profile, run }), proof: 'Sunflower returned from reserve and Gold Dragon used an heirloom in the final battle',

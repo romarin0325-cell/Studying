@@ -40,12 +40,16 @@ export function drawCard(run, widgets, draw) {
     widgets.cardRow(run, draw.targetId ?? draw.id, { skills: false, sheet: true }) + '</div>';
 }
 
+export function allowsSummonFlash(flashOn, reducedMotion) {
+  return flashOn && !reducedMotion;
+}
+
 /** A summon. Silhouettes roll, then rare and better glow in their grade colour before the face shows,
     then the card lands with its grade's effect. The card is placed once and stays (no second pop). */
 export async function reveal(run, widgets, sfx, box, draw, o) {
   const { id } = draw;
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (draw.kind !== 'join' || reduce) {
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (draw.kind !== 'join' || reducedMotion.matches) {
     box.insertAdjacentHTML(o?.first ? 'afterbegin' : 'beforeend', drawCard(run, widgets, draw));
     (o?.first ? box.firstElementChild : box.lastElementChild).scrollIntoView({ block: 'nearest' });
     sfx.awaken();
@@ -76,9 +80,13 @@ export async function reveal(run, widgets, sfx, box, draw, o) {
       return '<b style="left:' + Math.round(8 + Math.random() * 84) + '%;top:' + Math.round(15 + Math.random() * 70) + '%;--dx:' + Math.round(Math.cos(a) * r) + 'px;--dy:' + Math.round(Math.sin(a) * r) + 'px;animation-delay:' + Math.round(Math.random() * 160) + 'ms"></b>';
     }).join('') + '</span>' : '');
   slot.replaceWith(wrap);
-  if (g === 'legend') { sfx.jackpot(); flashFrame('gold'); }
-  else if (g === 'epic') { sfx.awaken(); flashFrame('violet'); }
+  if (g === 'legend') sfx.jackpot();
   else sfx.awaken();
+  const flashOn = !document.documentElement.classList.contains('meta-no-flash');
+  if (allowsSummonFlash(flashOn, reducedMotion.matches)) {
+    if (g === 'legend') flashFrame('gold');
+    else if (g === 'epic') flashFrame('violet');
+  }
   await sleep(g === 'legend' ? 900 : g === 'epic' ? 420 : 240);
 }
 function flashFrame(kind) { const f = document.createElement('div'); f.className = 'flash ' + kind; $('#frame').appendChild(f); setTimeout(() => f.remove(), 800); }

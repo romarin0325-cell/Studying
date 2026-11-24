@@ -1,5 +1,6 @@
 import { DUNGEONS } from '../content/dungeons.js';
 import { resumePoint } from '../engine/resume.js';
+import { josa } from './text.js';
 
 export const RESUME = {
   battle: {
@@ -41,11 +42,44 @@ export const EPISODE = {
   saveFailed: '읽은 상태를 저장하지 못했습니다.'
 };
 
+const puzzleCompanionStatus = value => ({ alive: '생존', fallen: '쓰러짐', didNotFight: '싸우지 않음' })[value];
+
+export const RIFT_PUZZLE = {
+  title: '균열 퍼즐',
+  met: '목표 달성',
+  missed: '목표 미달성',
+  list: '퍼즐 목록',
+  choose: '결말 고르기',
+  other: title => `다른 결말 · ${title}`,
+  conditionMet: '달성',
+  conditionMissed: '미달',
+  noRecord: '기록 없음',
+  best: '최고 기록',
+  survivors: count => `출전 생존 ${count}명`,
+  conditions: {
+    win: () => '보스 격파',
+    survive: (id, name) => `${josa(name(id), '이/가')} 직접 싸우고 생존`,
+    fall: (id, name) => `${josa(name(id), '이/가')} 쓰러짐`,
+    heirloomUsed: (id, name) => `다른 동료가 ${name(id)}의 유품 사용`,
+    survivors: count => `출전 생존 ${count}명 이상`,
+    maxTurns: count => `${count}턴 이내`
+  },
+  values: {
+    win: value => value === 'win' ? '격파' : '실패',
+    survive: puzzleCompanionStatus,
+    fall: puzzleCompanionStatus,
+    heirloomUsed: (ids, name) => ids.length ? ids.map(name).join(', ') : '사용 안 함',
+    survivors: count => `${count}명`,
+    maxTurns: count => `${count}턴`
+  }
+};
+
 export const TERMS = {
   crystal: { short: '결정', firstUse: '결정 ◆ · 이번 원정에서 쓰는 재화', detail: '소환의 샘과 원정 중 거래에 사용합니다.', scope: '원정' },
   join: { short: '합류', firstUse: '이번 원정 합류', detail: '이번 원정에 함께할 동료가 됩니다.', scope: '원정' },
   recruit: { short: '영입', firstUse: '돌아온 동료를 관측소에 맞이', detail: '영입한 동료는 다음 원정에도 함께할 수 있습니다.', scope: '관측소' },
   returned: { short: '생환' },
+  stamp: { short: '도장' },
   relayOrder: { short: '싸우는 순서', current: '지금', next: '다음' },
   awakening: {
     picked: '직접 고름', random: '무작위 합류',
@@ -63,6 +97,7 @@ export const TERMS = {
   heirloom: { short: '유품', firstUse: '쓰러진 동료가 남긴 기술', detail: '다음 동료가 물려받습니다. 위력 ×1.5 · MP 0 · 전투당 1회', use: 'MP 0 · 1회', scope: '원정' },
   relic: { short: '유물', firstUse: '이번 원정에 장착한 물건', detail: '전투에 효과를 주며 최대 4개를 장착합니다.', scope: '원정' },
   retreat: { short: '물러나기', firstUse: '이번 전투에서 살아서 빠짐', detail: '다음 동료가 이번 공격을 받음', scope: '전투' },
+  cleanse: { short: '정화' },
   wild: { short: '전투 · 몽마', firstUse: '일반 적', detail: '적을 물리치고 다음 층으로 갑니다.', scope: '층' },
   elite: { short: '강한 적 · 정예', firstUse: '강한 적', detail: '강한 적이 기다리는 전투입니다.', scope: '층' },
   gate: { short: '중간 보스 · 문지기', firstUse: '중간 보스', detail: '문지기를 쓰러뜨리고 다음 길을 엽니다.', scope: '층' },
@@ -71,4 +106,10 @@ export const TERMS = {
   treasure: { short: '보물방', firstUse: '유물을 얻는 곳', detail: '유물을 장착할 수 있습니다.', scope: '층' },
   event: { short: '사건', firstUse: '선택에 따라 보상이 달라지는 만남', detail: '선택의 조건과 효과를 확인할 수 있습니다.', scope: '층' },
   legend: { short: '전설군', firstUse: '전설군 · 전설·초월·이벤트 포함', detail: '전설·초월·이벤트 포함', scope: '뽑기' }
+};
+
+export const PREPARATION = {
+  otherStartCompanion: name => `${name} 말고 다른 ${TERMS.startCompanion.short}`,
+  startCompanionReady: name => `조건 충족 · ${TERMS.startCompanion.short} ${name}`,
+  contractRewards: payout => `계약 달성 시 · ${TERMS.crystal.short} ${josa('◆' + payout, '은/는')} 6층 승리 뒤 / ${josa(TERMS.stamp.short, '은/는')} 원정 ${TERMS.returned.short} 뒤`
 };

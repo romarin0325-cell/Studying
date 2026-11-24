@@ -1,6 +1,11 @@
 import { $ } from '../dom.js';
+import { riftPuzzlesUnlocked } from '../../engine/daily-rift.js';
+import { STALE_SAVE_EVENT } from '../../engine/save.js';
 import { enterRun } from '../run/index.js';
-import { dailyResultScreen, dailyResultTitle, openDailyHistory, openDailyPreparation, openEarlierRift, shortRiftDate } from '../screens/daily-rift.js';
+import {
+  dailyResultScreen, dailyResultTitle, mountPuzzleFormation, openDailyHistory, openDailyPreparation, openEarlierRift,
+  openPuzzleEndings, openRiftPuzzles, puzzleResultScreen, puzzleResultTitle, riftPuzzleEntry, shortRiftDate
+} from '../screens/daily-rift.js';
 
 export function createDailyNavigation({
   currentProfile, dailyStore, roster, widgets, details, assets, runtime,
@@ -10,12 +15,20 @@ export function createDailyNavigation({
   let dailyRun = null;
   let unsavedDailyResult = null;
 
+  function showStale(result) {
+    if (result?.reason !== 'stale_tab') return false;
+    window.dispatchEvent(new Event(STALE_SAVE_EVENT));
+    return true;
+  }
+
   const dailyHost = {
     profile: currentProfile,
     assets,
     runtime,
     save(current) {
-      if (current === dailyRun && !dailyStore?.save?.(current)?.ok) warnSave();
+      if (current !== dailyRun) return;
+      const result = dailyStore?.save?.(current);
+      if (!result?.ok && !showStale(result)) warnSave();
     },
     finish: finishDaily
   };
@@ -25,7 +38,8 @@ export function createDailyNavigation({
     return unsavedDailyResult ? { ...rift, unsavedResult: unsavedDailyResult.daily?.spec?.dayKey } : rift;
   }
 
-  function showDailyHistory(node) {
+  function showDailyHistory(node, puzzleEntry) {
+    puzzleEntry?.addEventListener('click', openPuzzles);
     const cursors = [null];
     function render() {
       const history = dailyStore.history({ before: cursors.at(-1), limit: 7 }) ?? {};
@@ -46,17 +60,23 @@ export function createDailyNavigation({
     if (!view?.unlocked) return;
     if (view.active) {
       const today = view.dayKey ?? view.spec?.dayKey;
-      if (view.active.dayKey && today && view.active.dayKey !== today) return promptDailyResume(view.active);
+      if (riftPuzzlesUnlocked(currentProfile()) || (view.active.dayKey && today && view.active.dayKey !== today)) {
+        return promptDailyResume(view.active);
+      }
       return resumeDaily();
     }
     openDailyPreparation(view, {
       roster, widgets, sheets, message, start: startDaily,
+      openPuzzles: riftPuzzlesUnlocked(currentProfile()) ? openPuzzles : null,
       inspectLoan: (id, onClose) => details.charSheet(null, id, { loaned: true, onClose })
     });
   }
 
   function promptDailyResume(active) {
-    openEarlierRift(active, { sheets, resume: resumeDaily, abandon: abandonDaily });
+    openEarlierRift(active, {
+      sheets, resume: resumeDaily, abandon: abandonDaily,
+      openPuzzles: riftPuzzlesUnlocked(currentProfile()) ? openPuzzles : null
+    });
   }
 
   function startDaily(expectedDayKey, kind) {
@@ -87,6 +107,7 @@ export function createDailyNavigation({
 
   function abandonDaily(runId) {
     const result = dailyStore?.abandon?.(runId);
+    if (showStale(result)) return;
     if (result?.ok) {
       showHub();
       showDaily();
@@ -101,6 +122,56 @@ export function createDailyNavigation({
     audio.unlockAudio();
     if (current.phase === 'done') return finishDaily(current);
     setReview(enterRun(current, dailyHost) || null);
+  }
+
+  function openPuzzles() {
+    const puzzles = dailyStore.puzzles(currentProfile());
+    if (puzzles.length) openRiftPuzzles(puzzles, { sheets, choose: puzzle => {
+      openPuzzleEndings(puzzle, { sheets, widgets, start: startPuzzle, list: openPuzzles });
+    } });
+  }
+
+  function returnToPuzzles() {
+    dailyRun = null;
+    setReview(null);
+    showHub();
+    openPuzzles();
+  }
+
+  function startPuzzle(puzzleId, endingId) {
+    const result = dailyStore.startPuzzle({ profile: currentProfile(), puzzleId, endingId });
+    if (!result.ok) return sessionNotice('퍼즐을 시작하지 못했습니다.');
+    const { puzzle, ending, run } = result;
+    dailyRun = run;
+    setReview(null);
+    sheets.closeSheet();
+    audio.unlockAudio();
+    let saveFailure;
+    setReview(enterRun(run, {
+      ...dailyHost,
+      save(current) {
+        if (current !== dailyRun || current.phase !== 'result' || current.result !== 'win') return;
+        const result = dailyStore.finishPuzzle(current);
+        if (!result.ok) {
+          saveFailure = result;
+          warnSave();
+        }
+      },
+      finish: current => finishPuzzle(current, puzzle, ending, saveFailure)
+    }) || null);
+    mountPuzzleFormation(puzzle, ending, { widgets, exit: returnToPuzzles });
+  }
+
+  function finishPuzzle(run, puzzle, ending, result = dailyStore.finishPuzzle(run)) {
+    if (!result.score) return;
+    dailyRun = null;
+    setReview(null);
+    const { score } = result;
+    const node = page('daily-result', { title: puzzleResultTitle(score), track: score.goalMet ? 'victory' : 'defeat' });
+    puzzleResultScreen(node, { puzzle, ending, score, saved: result.ok }, {
+      widgets, again: () => startPuzzle(puzzle.id, ending.id), list: returnToPuzzles, hub: showHub,
+      retry: () => finishPuzzle(run, puzzle, ending)
+    });
   }
 
   function showResult(current, result) {
@@ -132,6 +203,7 @@ export function createDailyNavigation({
   function finishDaily(current) {
     if (current !== (dailyRun ?? unsavedDailyResult) || current.phase !== 'done') return;
     const result = dailyStore?.finish?.(current);
+    if (showStale(result)) return;
     if (!result?.ok) {
       unsavedDailyResult = current;
       if (result?.reason === 'storage_failed') warnSave();
@@ -140,7 +212,9 @@ export function createDailyNavigation({
       actions.innerHTML = `
         <button class="btn go" data-backup-action="export">기록 내보내기</button>
         <button class="btn" id="meta-rift-retry">다시 저장</button>
-        <button class="btn" id="meta-rift-hub">관측소로 돌아가기</button>`;
+        <button class="btn" id="meta-rift-hub">관측소로 돌아가기</button>
+        ${riftPuzzlesUnlocked(currentProfile()) ? riftPuzzleEntry() : ''}`;
+      $('#meta-rift-puzzles', node)?.addEventListener('click', openPuzzles);
       $('#meta-rift-retry', node).addEventListener('click', () => finishDaily(current));
       $('#meta-rift-hub', node).addEventListener('click', () => {
         dailyRun = null;
@@ -164,6 +238,6 @@ export function createDailyNavigation({
   return {
     hubView, showDaily, showDailyHistory, reset,
     get run() { return dailyRun; },
-    get backupRun() { return unsavedDailyResult ?? dailyRun; }
+    get backupRun() { return unsavedDailyResult ?? (dailyRun?.daily?.puzzleId ? null : dailyRun); }
   };
 }

@@ -64,6 +64,7 @@ export function createSettings(St, audio, music, sheets, clearRecords, replayTut
   function syncReading() {
     const root = document.documentElement;
     root.classList.toggle('meta-rim', St.RIM.on);
+    root.classList.toggle('meta-no-flash', !St.S.flashOn);
     root.classList.toggle('large-text', textScale === 1.25);
     root.classList.toggle('emphasize-markers', markers);
     syncBattleSpeed(St);

@@ -5,6 +5,7 @@ export function createAudio(clock) {
     if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
     try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { ac = null; }
   }
+  const canPlay = () => soundOn && ac?.state === 'running' && !clock.fast;
   function tone(freq, dur, type, vol, slide, delay) {
     if (!soundOn || !ac || clock.fast) return;
     const t0 = ac.currentTime + (delay || 0), o = ac.createOscillator(), g = ac.createGain();
@@ -37,7 +38,12 @@ export function createAudio(clock) {
     debuff: () => [0, 1].forEach(i => tone(330 - i * 70, 0.12, 'sawtooth', 0.03, 0, i * 0.08)),
     guard: () => { noise(0.05, 0.05); tone(980, 0.09, 'square', 0.04, 760); },
     miss: () => tone(700, 0.12, 'sine', 0.04, 1100),
-    warn: () => { tone(104, 0.4, 'sawtooth', 0.06, 78); tone(104, 0.4, 'sawtooth', 0.05, 78, 0.45); },
+    warn: () => {
+      if (!canPlay()) return false;
+      tone(104, 0.4, 'sawtooth', 0.06, 78);
+      tone(104, 0.4, 'sawtooth', 0.05, 78, 0.45);
+      return true;
+    },
     fall: () => { tone(260, 0.5, 'triangle', 0.07, 60); noise(0.3, 0.06); },
     shatter: () => [0, 1, 2, 3, 4].forEach(i => tone(1300 - i * 150, 0.09, 'square', 0.03, 0, i * 0.06)),
     relay: () => [0, 1, 2, 3].forEach(i => tone(587 * Math.pow(1.19, i), 0.1, 'square', 0.04, 0, i * 0.07)),
@@ -49,8 +55,13 @@ export function createAudio(clock) {
     credit: () => tone(1175, 0.065, 'sine', 0.05, 1568),
     join: () => { tone(440, 0.075, 'triangle', 0.045); tone(660, 0.1, 'triangle', 0.05, 0, 0.075); },
     stamp: () => { noise(0.04, 0.08); tone(210, 0.095, 'triangle', 0.065, 110); },
+    seal: () => {
+      noise(0.025, 0.045);
+      tone(784, 0.07, 'sine', 0.045, 0, 0.02);
+      tone(1175, 0.115, 'sine', 0.045, 0, 0.09);
+    },
     restored: () => {
-      if (!soundOn || ac?.state !== 'running' || clock.fast) return false;
+      if (!canPlay()) return false;
       tone(440, 0.045, 'sine', 0.045);
       tone(554, 0.055, 'sine', 0.045, 0, 0.05);
       return true;

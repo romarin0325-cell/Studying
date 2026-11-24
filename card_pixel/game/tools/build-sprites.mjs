@@ -77,8 +77,9 @@ const heightClass = ({ kind, heightGroup }) => kind + ':' + heightGroup;
 function headMedians(characters) {
   const groups = new Map();
   for (const character of characters) {
-    const { crown, chin, eye } = character.marks.idle ?? {};
-    if (!crown || !chin || !eye) continue;
+    const { crown, chin, eye, derived } = character.marks.idle ?? {};
+    // Marks derived from a chosen face box (not measured on the art) must not move other characters' estimates.
+    if (!crown || !chin || !eye || derived) continue;
     const key = heightClass(character);
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push({ height: chin[1] - crown[1], eyeOffset: eye[1] - crown[1] });

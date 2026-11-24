@@ -18,7 +18,7 @@ import { eventChoices } from '../src/engine/rooms.js';
 import * as Save from '../src/engine/save.js';
 import { battleLog } from '../src/ui/battle/log.js';
 import { affixLines, intentLines, skyRelics } from '../src/ui/battle/hud.js';
-import { commandRelics, killLabel } from '../src/ui/battle/tiles.js';
+import { commandRelics, killLabel, relayOutcomeLines } from '../src/ui/battle/tiles.js';
 import { relicEffect } from '../src/ui/relics.js';
 import { ratesView } from '../src/engine/awakenings.js';
 import { TERMS } from '../src/ui/glossary.js';
@@ -31,15 +31,20 @@ import { createMotionCases } from './screens/motion.mjs';
 import { createResumeCases } from './screens/resume.mjs';
 import { createHistoryCases } from './screens/history.mjs';
 import { createAccessCases } from './screens/access.mjs';
+import { createEventDoorCases } from './screens/event-doors.mjs';
+import { createDoorPreviewCases } from './screens/door-previews.mjs';
 import { createGoalCases } from './screens/goals.mjs';
 import { createEpisodeCases } from './screens/episodes.mjs';
 import { createRelicCases } from './screens/relics.mjs';
 import { createPatternCases } from './screens/patterns.mjs';
+import { createPromiseCases } from './screens/promise.mjs';
+import { createPuzzleCases } from './screens/puzzles.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
 const sessionKey = 'relaymare.session';
 const dailyKey = 'relaymare.daily';
-const gameUrl = new URL('../dist/Relaymare.html', import.meta.url).href;
+// RELAY_GAME_URL points the gallery at another build (for example a frozen copy while the source is being edited).
+const gameUrl = process.env.RELAY_GAME_URL ?? new URL('../dist/Relaymare.html', import.meta.url).href;
 const viewportMode = process.env.RELAY_VIEWPORT;
 const viewportSize = /^([1-9]\d*)x([1-9]\d*)$/.exec(viewportMode ?? '390x844');
 assert.ok(viewportSize, 'RELAY_VIEWPORT must be WxH (for example, 360x740)');
@@ -919,7 +924,9 @@ function contractSheet() {
   const profile = nightmareProfile();
   const session = storedSession({ profile });
   const { name, rule } = CONTRACTS.heirloom;
-  const terms = `문지기 보상에서 ◆${CONTRACT_ESCROW} 맡김 · 6층까지 달성하면 ◆${CONTRACT_PAYOUT}`;
+  const terms = `문지기 보상에서 ◆${CONTRACT_ESCROW} 맡김`;
+  // W4C, corrected by W8B (11-23): the contract must be achieved, then each reward has its moment.
+  const rewards = `계약 달성 시 · 결정 ◆${CONTRACT_PAYOUT}은 6층 승리 뒤 / 도장은 원정 생환 뒤`;
   assert.equal(Meta.contractsFor(profile, 'ember_volcano').stamps.heirloom, null);
   return {
     session, proof: 'normal clear unlocked the three nightmare contracts in ember_volcano',
@@ -937,6 +944,7 @@ function contractSheet() {
       await text(option.locator('b'), name);
       await text(option.locator('small').filter({ hasText: rule }), rule);
       await text(option.locator('small').filter({ hasText: terms }), terms);
+      await text(option.locator('.meta-contract-rewards'), rewards, { exact: true });
       await text(option.locator('small').filter({ hasText: '도장 없음' }), '도장 없음');
       await capture();
       await option.click();
@@ -1136,21 +1144,20 @@ function retreatOutcomes() {
   const battle = Bridge.create(core, Run.battleOptions(run));
   const ready = battle.start().findLast(event => event.t === 'await');
   const { allies, cur } = battle.state();
-  const preview = battle.previewRetreat();
-  const next = allies[preview.next.idx];
-  const [low, high] = preview.dmg;
-  const after = Math.max(0, next.hp - high);
-  const maxAfter = Math.max(0, next.hp - low);
+  const preview = battle.previewRelay();
+  const lines = relayOutcomeLines(preview, allies[cur], ready.intent);
+  const { next } = preview.retreat;
+  const wide = preview.danger !== 'none' || next.evadeHp != null || !!next.mpOnHit;
   assert.ok(allies[cur].hp <= ready.intent.dmg[0]);
-  const retreat = `${next.name} HP ${next.hp} → ${after === maxAfter ? after : `${after}~${maxAfter}`}`;
   return {
-    session: storedSession({ run }), proof: `${allies[cur].hp} HP vs. minimum ${ready.intent.dmg[0]} damage; ${retreat}`,
+    session: storedSession({ run }), proof: `${allies[cur].hp} HP vs. minimum ${ready.intent.dmg[0]} damage; ${lines.join(' / ')}`,
     async show(page, { text }) {
       await battleIdle(page);
-      await page.locator('#b-retreat').click();
-      const button = page.locator('#b-retreat.armed');
-      await text(button, '물러나면 · ' + retreat);
-      await text(button, '남으면 · 애쉬 쓰러짐');
+      const button = page.locator('#b-retreat');
+      await button.click();
+      await text(button, TERMS.retreat.short + ' 확정');
+      assert.deepEqual(await button.locator('small').allTextContents(), lines);
+      assert.equal(await page.locator('#b-retreat.relay-outcomes').count(), wide ? 1 : 0);
       await text(page.locator('#turn'), '1턴');
     }
   };
@@ -1171,13 +1178,15 @@ function relayOutcomes() {
   const moves = ['드래곤스파클', '드래곤스파클', '일반 공격', '일반 공격', '일반 공격'];
   const safe = battle.previewRelay();
   assert.equal(safe.danger, 'none');
-  const safeAfter = safe.retreat.next.hpAfter[0];
+  // Expected lines come from the same pure formatter the tile uses, fed by the real preview.
+  const safeLines = relayOutcomeLines(safe, battle.state().allies[0], battle.previewRetreat().intent);
   for (const name of moves) act(battle, name);
   const { turn, allies } = battle.state();
   const hp = allies[0].hp;
   assert.equal(run.floor, 2);
   const preview = battle.previewRelay();
-  assert.equal(preview.danger, 'certain');
+  assert.notEqual(preview.danger, 'none');
+  const armedLines = relayOutcomeLines(preview, allies[0], battle.previewRetreat().intent);
   assert.equal(preview.stand.inheritor.name, '세이렌');
   assert.equal(preview.stand.heirloom.skill, '드래곤스파클');
   const after = preview.retreat.next.hpAfter[0];
@@ -1193,8 +1202,10 @@ function relayOutcomes() {
       const lines = button.locator('small');
       await button.click();
       await text(button, TERMS.retreat.short + ' 확정');
-      assert.deepEqual(await lines.allTextContents(), ['용혈의무녀 생존 · 다음 동료가 이번 공격을 받음', `세이렌 HP 500 → ${safeAfter}`]);
-      assert.equal(await page.locator('#b-retreat.relay-outcomes').count(), 0);
+      assert.deepEqual(await lines.allTextContents(), safeLines);
+      // The wide two-line layout is used only when a line carries a chance or an MP note.
+      const wide = safe.retreat.next.evadeHp != null || !!safe.retreat.next.mpOnHit;
+      assert.equal(await page.locator('#b-retreat.relay-outcomes').count(), wide ? 1 : 0);
       await capture('safe');
       for (const name of moves) await tapTile(page, name);
       await text(page.locator('#turn'), `${turn}턴`, { exact: true });
@@ -1205,8 +1216,8 @@ function relayOutcomes() {
       }));
       const before = await tileSizes();
       await button.click();
-      await text(lines.nth(0), `물러나면 · 세이렌 HP 500 → ${after}`, { exact: true });
-      await text(lines.nth(1), '남으면 · 용혈의무녀 쓰러짐 → 세이렌이 드래곤스파클 계승', { exact: true });
+      await text(lines.nth(0), armedLines[0], { exact: true });
+      await text(lines.nth(1), armedLines[1], { exact: true });
       assert.deepEqual(await tileSizes(), before, 'Arming retreat must keep command tile sizes');
       const misfits = await button.evaluate(node => {
         const panel = node.closest('#panel');
@@ -2179,6 +2190,37 @@ function applyReturn(profile, run, selection) {
   return result;
 }
 
+// Two real tabs of one game (one browser context shares localStorage): the second tab departs, which writes
+// the session, and the first tab must stop writing and offer to continue from the newest save.
+function staleTab() {
+  const profile = snowRabbitProfile();
+  return {
+    session: storedSession({ profile }), proof: 'A second tab saves; the first tab blocks itself and reloads the newest state',
+    async show(page, { text, capture }) {
+      await enterObservatory(page);
+      const other = await page.context().newPage();
+      try {
+        await other.goto(page.url());
+        await enterObservatory(other);
+        await other.locator('#hub.on #meta-depart').click();
+        await other.locator('#sheet.on #meta-start-expedition').click();
+        await other.locator('#hub.on').waitFor({ state: 'hidden' });
+        const notice = page.locator('#stale-session[open]');
+        await text(notice.locator('h3'), '다른 창에서 진행 중', { exact: true });
+        await text(notice.locator('#stale-session-resume'), '이 창에서 이어하기', { exact: true });
+        await capture();
+        await notice.locator('#stale-session-resume').click();
+        await page.waitForLoadState('load');
+        await page.locator('#stale-session[open]').waitFor({ state: 'detached', timeout: 3000 }).catch(() => {});
+        assert.equal(await page.locator('#stale-session[open]').count(), 0, 'The reloaded tab is the writer again');
+        await capture('reloaded');
+      } finally {
+        await other.close();
+      }
+    }
+  };
+}
+
 function nextGoalLine() {
   const profile = snowRabbitProfile();
   const goal = Meta.nextGoal(profile, null);
@@ -2663,7 +2705,7 @@ const reviewGardenRoute = run => run.doors[[0, 0, 1, 0, 0, 1, 0, 0][run.floor - 
 function gardenStartingFields() {
   let checkpoint;
   playRun('starlit_garden', 37, {
-    difficulty: 'easy', firstMain: true, doorOverride: reviewGardenRoute,
+    difficulty: 'easy', legacyRules: true, firstMain: true, doorOverride: reviewGardenRoute,
     onBattle(run) {
       if (run.floor === 4) command(Run.chooseGateReward, run, { kind: 'relic', id: 'buff_overload' });
     },
@@ -2703,7 +2745,7 @@ function gardenStartingFields() {
 function doubleRelicReceipt() {
   let checkpoint;
   playRun('twilight_cathedral', 64, {
-    difficulty: 'easy', firstMain: true, doorOverride: reviewGardenRoute,
+    difficulty: 'easy', legacyRules: true, firstMain: true, doorOverride: reviewGardenRoute,
     onRoom(run) {
       if (run.floor !== 5) return;
       assert.equal(run.room.event.id, 'whale_third_peal');
@@ -2749,7 +2791,7 @@ function doubleRelicReceipt() {
 function lowCrystalSpring() {
   let checkpoint;
   playRun('dawn_forest', 17, {
-    opening: 'stand',
+    legacyRules: true, opening: 'stand',
     serviceOverride(run) {
       if (run.room.type !== 'spring') return false;
       assert.equal(run.crystals, 3);
@@ -2915,12 +2957,16 @@ const tourCases = createTourCases({
 const motionCases = createMotionCases({ makeRun, startBattle, storedSession, act, openBattle, battleIdle, skillTile, shots });
 const resumeCases = createResumeCases({ makeRun, startBattle, settleWin, command, storedSession, snowRabbitProfile, sessionKey });
 const historyCases = createHistoryCases({ storedSession, enterObservatory });
+const eventDoorCases = createEventDoorCases({ core, roster, storedSession });
+const doorPreviewCases = createDoorPreviewCases({ core, roster, storedSession });
 const accessCases = createAccessCases({ makeRun, startBattle, storedSession, act, openBattle, battleIdle, snowRabbitProfile, enterObservatory });
 const goalCases = createGoalCases({ roster, storedSession, enterObservatory });
 const episodeCases = createEpisodeCases({ storedSession, enterObservatory });
 const relicCases = createRelicCases({ core, roster, storedSession });
 const patternCases = createPatternCases({ makeRun, startBattle, storedSession, act, openBattle, battleIdle, skillTile });
-const caseGroups = { entry: entryCases, tours: tourCases, motion: motionCases, resume: resumeCases, history: historyCases, access: accessCases, goals: goalCases, episodes: episodeCases, relics: relicCases, patterns: patternCases };
+const promiseCases = createPromiseCases({ core, makeRun, command, advance, reachFloor, storedSession });
+const puzzleCases = createPuzzleCases({ core, roster, dailyKey, storedSession, enterObservatory });
+const caseGroups = { entry: entryCases, tours: tourCases, motion: motionCases, resume: resumeCases, history: historyCases, access: accessCases, goals: goalCases, episodes: episodeCases, relics: relicCases, patterns: patternCases, promise: promiseCases, puzzles: puzzleCases };
 
 const cases = {
   'rift-save-failure': withFixedRiftResult(riftSaveFailure, '[data-backup-action="export"]'),
@@ -2934,6 +2980,7 @@ const cases = {
   'damaged-rift-recovery': damagedRiftRecovery,
   'malformed-profile-import': malformedProfileImport,
   'next-goal': nextGoalLine,
+  'stale-tab': staleTab,
   'ending-goal': endingGoal,
   'roster-table': preDepartureRoster,
   'difficulty-choice': difficultyChoice,
@@ -3014,7 +3061,11 @@ const cases = {
   ...goalCases,
   ...episodeCases,
   ...relicCases,
-  ...patternCases
+  ...patternCases,
+  ...promiseCases,
+  ...puzzleCases,
+  ...eventDoorCases,
+  ...doorPreviewCases
 };
 
 caseGroups['fixed-layouts'] = Object.fromEntries([
@@ -3152,7 +3203,11 @@ async function capturePage(page, { duringBattle = false } = {}) {
 }
 
 async function findOverflow(page) {
-  return page.evaluate(() => {
+  return page.evaluate(async () => {
+    // Measure the settled layout: a sheet sliding up (sheet-up, 0.2 s) is briefly 40 px below the viewport,
+    // which reported hundreds of scrollable cells as outside it. Looping animations (blinks) never finish and are skipped.
+    const settling = document.getAnimations().filter(animation => animation.effect?.getComputedTiming().iterations !== Infinity);
+    await Promise.race([Promise.allSettled(settling.map(animation => animation.finished)), new Promise(done => setTimeout(done, 1000))]);
     const documentWidth = document.documentElement.clientWidth;
     const contentWidth = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
     const issues = [];
@@ -3180,7 +3235,7 @@ async function findOverflow(page) {
 
     function measureAxis(node, rect, axis) {
       const horizontal = axis === 'X';
-      const [start, end, size] = horizontal ? ['left', 'right', 'width'] : ['top', 'bottom', 'height'];
+      const [start, end] = horizontal ? ['left', 'right'] : ['top', 'bottom'];
       const [clientStart, clientSize, scrollPosition, scrollSize] = horizontal
         ? ['clientLeft', 'clientWidth', 'scrollLeft', 'scrollWidth']
         : ['clientTop', 'clientHeight', 'scrollTop', 'scrollHeight'];
@@ -3195,13 +3250,22 @@ async function findOverflow(page) {
         const portEnd = portStart + parent[clientSize];
         min = Math.max(min, portStart);
         max = Math.min(max, portEnd);
-        // Controls reachable by scrolling a pane within the viewport are expected outside its current view.
-        if (outside && (overflow === 'auto' || overflow === 'scroll') && portStart >= -1 && portEnd <= viewportEnd + 1 &&
-          rect[size] <= parent[clientSize] + 1 &&
-          rect[start] + parent[scrollPosition] >= portStart - 1 &&
-          rect[end] + parent[scrollPosition] <= portStart + parent[scrollSize] + 1) outside = false;
       }
-      return { visible: max > min, outside };
+      // Controls reachable by scrolling are expected outside the current view. Scroll panes may nest
+      // (the preparation sheet scrolls, and so does its companion grid), so follow the chain of panes outward.
+      function reachable(element, from, to) {
+        if (from >= -1 && to <= viewportEnd + 1) return true;
+        for (let pane = element.parentElement; pane && pane !== document.body; pane = pane.parentElement) {
+          if (!/(auto|scroll)/.test(getComputedStyle(pane)['overflow' + axis])) continue;
+          const portStart = pane.getBoundingClientRect()[start] + pane[clientStart];
+          const contentStart = portStart - pane[scrollPosition];
+          if (to - from > pane[clientSize] + 1 || from < contentStart - 1 || to > contentStart + pane[scrollSize] + 1) return false;
+          return reachable(pane, portStart, portStart + pane[clientSize]);
+        }
+        return false;
+      }
+      if (outside && reachable(node, rect[start], rect[end])) outside = false;
+      return { visible: max > min, outside, min, max };
     }
 
     for (const node of nodes) {
@@ -3211,9 +3275,29 @@ async function findOverflow(page) {
       const x = measureAxis(node, rect, 'X');
       const y = measureAxis(node, rect, 'Y');
       const where = selector(node, node.closest(surface));
-      if (x.visible && y.visible && !node.matches('.map-door') && node.textContent.trim() && node.scrollWidth > node.clientWidth + 1 &&
+      // Art drawn past its tap box on purpose: map doors and walkers (sprites wider than the hit area),
+      // and the relay arrow glyph centred on its 18 px column.
+      if (x.visible && y.visible && !node.matches('.map-door, .map-actor, .relay-link') && node.textContent.trim() && node.scrollWidth > node.clientWidth + 1 &&
         getComputedStyle(node).overflowX !== 'hidden') {
         issues.push([where, `text ${node.scrollWidth}px > ${node.clientWidth}px`]);
+      }
+      // A control whose visible centre is under another element of the same surface cannot be tapped
+      // (11-23: at 360×740 the heirloom button covered the lower skill tiles and no text or bounds check saw it).
+      if (node.matches(button) && !node.disabled && x.visible && y.visible && !x.outside && !y.outside) {
+        const cover = document.elementFromPoint((x.min + x.max) / 2, (y.min + y.max) / 2);
+        const layer = element => element?.closest(surface);
+        // An open popover or dialog covers what is under it on purpose.
+        const popup = cover?.closest('[popover], [role="dialog"], [role="menu"]');
+        // A control under a pinned footer is fine when its own scroll pane can still lift it clear.
+        let pane = node.parentElement;
+        while (pane && pane !== document.body && !/(auto|scroll)/.test(getComputedStyle(pane).overflowY)) pane = pane.parentElement;
+        const coverTop = cover?.getBoundingClientRect().top ?? 0;
+        const liftable = pane && pane !== document.body && !pane.contains(cover) &&
+          pane.scrollHeight - pane.clientHeight - pane.scrollTop >= rect.bottom - coverTop;
+        if (cover && !node.contains(cover) && layer(cover) === layer(node) && !(popup && popup !== layer(node)) && !liftable) {
+          const name = cover.id ? '#' + cover.id : cover.localName + (cover.classList.length ? '.' + cover.classList[0] : '');
+          issues.push([where, `covered by ${name}`]);
+        }
       }
       if (node.matches(button) && (x.outside || y.outside)) {
         const bounds = [rect.left, rect.top, rect.right, rect.bottom].map(value => Math.round(value));
@@ -3334,9 +3418,11 @@ async function main() {
         } else {
           if (launchError) throw launchError;
           const found = await runCase(browser, name, fixture, captures, overflow);
-          const failed = strictOverflow && overflow.size > 0;
+          // A covered control cannot be tapped at all, so it always fails; other layout warnings fail with --strict-overflow.
+          const covered = [...overflow].filter(warning => warning.includes(' · covered by '));
+          const failed = covered.length > 0 || strictOverflow && overflow.size > 0;
           results.push({ case: name, result: failed ? 'FAIL' : 'PASS',
-            text: failed ? `${overflow.size} overflow warning(s)` : found });
+            text: covered.length ? `${covered.length} covered control(s)` : failed ? `${overflow.size} overflow warning(s)` : found });
         }
       } catch (error) {
         // Keep the first line and the closest fixture or gallery frame.

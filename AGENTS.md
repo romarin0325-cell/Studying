@@ -1,5 +1,7 @@
 # AGENTS.md
 
+> 이 저장소 밖 작업 공간(`게임` 폴더) 전체의 공통 규칙은 `..\AGENT-RULES.md`(역할, 지시문, 검증 단계, 화면 검수, 보고), 폴더 지도는 `..\WORKSPACE.md`에 있다. 이 파일과 각 프로젝트 `AGENTS.md`가 그 위에서 프로젝트별 규칙을 더한다.
+
 ## Priority
 Functional correctness of the browser app is more important than refactoring or style polish.
 

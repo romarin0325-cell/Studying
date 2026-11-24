@@ -6,12 +6,24 @@ import { chronicle } from '../src/engine/history.js';
 import * as Meta from '../src/engine/meta.js';
 import * as Run from '../src/engine/run.js';
 import * as Save from '../src/engine/save.js';
-import { outcomeText, storyLine } from '../src/ui/story-lines.js';
+import { outcomeText, retreatStoryLine, storyLine } from '../src/ui/story-lines.js';
 import { playRun } from '../tools/sim.mjs';
 import { createCoreRoster } from './support/core.mjs';
 
 const names = { ash: '애쉬', siren: '세이렌', silver_rabbit: '은토끼' };
 const card = id => names[id] && { name: names[id] };
+
+test('retreat story requires a recorded retreat and survival in the same battle', () => {
+  const run = {
+    chronicle: [{ floor: 8, party: ['ash', 'siren'] }],
+    lastBattleResult: { floor: 8, survivorIds: ['ash'] },
+    lastBattleLog: [{ turn: 4, rows: [{ kind: 'retreat', faces: [{ id: 'ash', side: 'ally' }] }] }]
+  };
+  assert.equal(retreatStoryLine(run, card), '애쉬가 물러나 살아남았다.');
+  assert.equal(retreatStoryLine({ ...run, lastBattleLog: [] }, card), '');
+  assert.equal(retreatStoryLine({ ...run, lastBattleResult: { floor: 8, survivorIds: ['siren'] } }, card), '');
+  assert.equal(retreatStoryLine({ ...run, chronicle: undefined }, card), '');
+});
 
 function finishedRun(changes = {}) {
   return {

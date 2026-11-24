@@ -94,6 +94,7 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 @keyframes sparkle { 0% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); } }
 .flash { position: absolute; inset: 0; pointer-events: none; z-index: 7; animation: flash .7s steps(6) forwards; }
 .flash.gold { background: #fff4cc; } .flash.violet { background: #e6dcff; }
+.meta-no-flash .flash { display: none; }
 @keyframes flash { from { opacity: .7; } to { opacity: 0; } }
 
 /* ---------- expedition screens ---------- */
@@ -178,6 +179,12 @@ img.sil { filter: brightness(0) drop-shadow(1px 0 0 #7a68ff) drop-shadow(-1px 0 
 .door-entry b, .door-entry small { display: block; }
 .door-entry b { font: normal 0.9375rem/1.25 var(--f-display); color: var(--ink); }
 .door-entry small { color: var(--ink2); }
+.door-entry .door-event-offer { display: flex; gap: 0.25em; white-space: nowrap; }
+.door-event-offer > :first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.door-service-preview { font-weight: 700; }
+:is(.door-event-offers, .door-spring-candidates) { display: grid; gap: 8px; list-style: none; margin: 8px 0; padding: 0; }
+:is(.door-event-offers, .door-spring-candidates) > li { border-top: 1px solid var(--line); padding-top: 8px; }
+#sh-body :is(.door-event-offers, .door-spring-candidates, .door-altar-roll) p { margin: 2px 0 0; }
 .door-lineup { display: flex; align-items: flex-end; gap: 2px; flex: none; padding: 4px 6px 2px;
   --pf-o: color-mix(in srgb, var(--kind) 26%, #fff); --pf-f: color-mix(in srgb, var(--kind) 10%, #fff); --pf-lo: var(--pf-o); --pf-sh: transparent; }
 .door-entry > .run-icon { flex: none; padding: 8px; width: 48px; height: 48px;
