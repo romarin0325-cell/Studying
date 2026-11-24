@@ -33,7 +33,6 @@ import {REQUESTS,REQUEST_HEROES,REQUEST_REWARD,AFTERWORDS} from './preview/reque
 // Every build uses the same in-game auto.
 const autoPlay=helperAuto;
 import {MEMORIAL_STORIES} from './memorial.js';
-import {PENDING_MEMORIAL_IDS} from './expansion-companions.js';
 import {burst,tapSpark,hearts,centerOf,floatText} from './fx.js';
 
 const $=id=>document.getElementById(id),storage={getItem:k=>window.localStorage.getItem(k),setItem:(k,v)=>window.localStorage.setItem(k,v)};
@@ -399,7 +398,7 @@ function renderBattle(){
     <div class="battle-stage"><div class="arena-wrap"><div class="aura-chips" id="aura-chips" aria-label="지속 중인 필살기"></div><canvas id="arena" tabindex="0" aria-label="5행 5열 전장. 드래그로만 이동·합성합니다. 탭 또는 방향키와 Enter는 동료 정보 확인입니다."></canvas><p id="battle-notice" class="battle-notice" hidden></p></div></div>
     <div class="battle-dock">
     <div class="battle-slot" id="battle-slot"><div class="wave-strip"><div class="wave-row"><span class="wave-pips" id="wave-pips"></span><span class="wave-left" id="wave-left"></span></div><div class="boss-line" id="boss-line" hidden><span class="boss-mark">${icon('crown')}</span><div class="boss-main"><div class="boss-head"><b id="boss-name"></b><em id="boss-state"></em></div><span class="boss-bar"><i id="boss-fill"></i></span><small id="boss-trait"></small></div></div>${p().cleared<3?'<p class="battle-hint">드래그: 이동·합성 · 탭: 동료 정보 · 필살기 길게: 설명</p>':''}</div><div id="unit-panel" class="unit-panel" hidden></div></div>
-    <div class="skills" style="--team-size:${TEAM_SIZE}">${run.deck.map(id=>`<button class="skill-button" data-skill="${id}" aria-label="${HERO[id].name}의 ${E.skillName(run,id)}">${image(id)}<small>${icon('star')}${E.skillCost(run,id)}${HERO[id].skill.goldCost?` · ${HERO[id].skill.goldCost}G`:''}</small><span class="skill-duration" hidden></span><span class="skill-rank" hidden></span></button>`).join('')}</div>
+    <div class="skills" style="--team-size:${TEAM_SIZE}">${run.deck.map(id=>`<button class="skill-button" data-skill="${id}" aria-label="${HERO[id].name}의 ${E.skillName(run,id)}">${image(id)}<span class="skill-name"><b>${E.skillName(run,id)}</b><em>${HERO[id].name}</em></span><small>${icon('star')}${E.skillCost(run,id)}${HERO[id].skill.goldCost?` · ${HERO[id].skill.goldCost}G`:''}</small><span class="skill-duration" hidden></span><span class="skill-rank" hidden></span></button>`).join('')}</div>
     <div class="battle-controls"><button class="primary" data-action="summon-battle">${icon('plus')}<span>동료 소환</span><b id="summon-cost"></b></button><button class="secondary" data-action="training">${icon('up')}훈련</button><button class="secondary toggle-auto" data-action="auto" aria-pressed="${p().settings.auto}"><span>자동</span><b>${p().settings.auto?'ON':'OFF'}</b></button></div>
     </div></section>`;
   hud=Object.fromEntries(['health','gold','gauge','gauge-fill','battle-time','wave-label','summon-cost','pause-button','battle-notice','battle','battle-slot','wave-pips','wave-left','boss-line','boss-name','boss-state','boss-fill','boss-trait'].map(id=>[id,$(id)]));
@@ -633,7 +632,7 @@ function showSettings(){
     <details class="more"><summary>알아두기</summary><p>같은 저장 공간을 두 창에서 동시에 수정하면 변경을 감지한 창이 멈춥니다. 오프라인 테스트 버전의 시간은 기기 시계를 사용합니다.</p></details>`,`<button class="primary wide" data-action="close">확인</button>`,'settings');
 }
 function show(title,kicker,body,footer='',kind='generic',info=null){hideSkillTip();if(run&&kind!=='reward'){saves.mark();saves.flush();}const scroll=modal===kind&&modalInfo===info?$('sheet-body').scrollTop:0;if(!modal)previousFocus=document.activeElement;releaseMemorial();modal=kind;modalInfo=info;$('sheet').classList.remove('spotting');$('sheet').dataset.kind=kind;$('sheet-title').textContent=title;$('sheet-kicker').textContent=kicker;$('sheet-body').innerHTML=body;$('sheet-footer').innerHTML=footer;$('overlay').hidden=false;$('app').setAttribute('aria-hidden','true');if('inert' in $('app'))$('app').inert=true;$('sheet-body').scrollTop=scroll;$('sheet').focus();coachTick();}
-function close(){hideStatusPeek();if(!modal)return;tutorAbort?.abort();const wasLeave=modal==='leave',wasResult=modal==='result',wasArrival=modal==='arrival',wasLate=modal==='late',wasDraw=modal==='draw';releaseMemorial();modal=null;modalInfo=null;if(wasDraw){clearRevealTimers();spotItems=[];}if(wasLeave&&!saveBlocked)paused=false;$('sheet').classList.remove('spotting');$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();if(wasResult&&arrival){const a=arrival;arrival=null;setTimeout(()=>showArrival(a),300);}else if((wasResult||wasArrival)&&!wasLate)setTimeout(maybeLateNotice,420);coachTick();if(!run)setTimeout(()=>{if(!modal)maybeUnlockNews();},460);}
+function close(){hideStatusPeek();if(!modal)return;if(modal==='news'&&unlockLater){const later=unlockLater;unlockLater=null;setTimeout(later,0);}tutorAbort?.abort();const wasLeave=modal==='leave',wasResult=modal==='result',wasArrival=modal==='arrival',wasLate=modal==='late',wasDraw=modal==='draw';releaseMemorial();modal=null;modalInfo=null;if(wasDraw){clearRevealTimers();spotItems=[];}if(wasLeave&&!saveBlocked)paused=false;$('sheet').classList.remove('spotting');$('overlay').hidden=true;$('app').removeAttribute('aria-hidden');if('inert' in $('app'))$('app').inert=false;if(previousFocus?.isConnected)previousFocus.focus();else $('content').focus();if(wasResult&&arrival){const a=arrival;arrival=null;setTimeout(()=>showArrival(a),300);}else if((wasResult||wasArrival)&&!wasLate)setTimeout(maybeLateNotice,420);coachTick();if(!run)setTimeout(()=>{if(!modal)maybeUnlockNews();},460);}
 function history(){
   show('소환 기록','최근 50회',p().history.map(h=>`<div class="history-row">${image(h.id)}<div><strong>${(HERO[h.id]||ARTIFACT[h.id]).name}</strong><small>${h.fresh?'신규':'중복 · 강화 재료'} · ${h.banner==='normal'?'일반':h.banner==='season'?'시즌':'유물'} · ${calendar(h.at).day}</small></div>${badge((HERO[h.id]||ARTIFACT[h.id]).rarity)}</div>`).join('')||'<p class="empty">아직 소환 기록이 없습니다.</p>',`<button class="secondary wide" data-action="close">확인</button>`,'history');
 }
@@ -758,16 +757,16 @@ function giveGift(id,gift,button){
 }
 function bondUp(id,before){
   const e=p().heroes[id];if(e.bond<=before)return;
-  if(e.bond>=BOND_MAX){const pending=PENDING_MEMORIAL_IDS.includes(id);toast(pending?`${HERO[id].name}과(와) 가장 가까운 사이가 되었어요! · 메모리얼 준비 중`:`${HERO[id].name}과(와)의 인연의 기억이 열렸어요!`);const c=partnerPoint();burst(c.x,c.y,{count:26,spread:150,size:14,duration:1200,color:'#ff9ec0'});if(!pending&&screen==='home'&&modal!=='bond')setTimeout(()=>{if(!modal)openMemorial(id);},900);}
+  if(e.bond>=BOND_MAX){toast(`${HERO[id].name}과(와)의 인연의 기억이 열렸어요!`);const c=partnerPoint();burst(c.x,c.y,{count:26,spread:150,size:14,duration:1200,color:'#ff9ec0'});if(screen==='home'&&modal!=='bond')setTimeout(()=>{if(!modal)openMemorial(id);},900);}
   else toast(`${HERO[id].name} 호감도 ${e.bond}`);
 }
 // Bond sheet: hearts, the favourite gift, giving gifts, and the memory this bond opens.
 function bondSheet(id,reply=null){
-  const h=HERO[id],e=p().heroes[id];if(!h||!e?.owned)return;const max=e.bond>=BOND_MAX,left=bondNeed(e.bond)-(e.bondXp||0),story=MEMORIAL_STORIES[id],pending=PENDING_MEMORIAL_IDS.includes(id),open=!!story&&e.bond>=story.unlockBond;
+  const h=HERO[id],e=p().heroes[id];if(!h||!e?.owned)return;const max=e.bond>=BOND_MAX,left=bondNeed(e.bond)-(e.bondXp||0),story=MEMORIAL_STORIES[id],open=e.bond>=story.unlockBond;
   show(h.name,'인연',`<div class="bond-head" data-rarity="${h.rarity}"><span class="bond-face">${image(id,true)}</span><div class="bond-meter"><small>${h.title}</small><span class="bond-hearts big" aria-hidden="true">${heartsOf(e.bond)}</span><b>호감도 ${e.bond}<em>/${BOND_MAX}</em></b><div class="progress"><span style="width:${Math.round(bondRatio(e)*100)}%"></span></div><small>${max?'가장 가까운 사이예요':`다음 하트까지 ${left}`}</small></div></div>
-    <p class="bond-reply ${reply?'show':''}" role="status">${escapeText(reply||(max?(pending?'메모리얼은 준비 중이지만, 쌓인 인연은 그대로 간직하고 있어요.':'함께한 기억이 열려 있어요.'):`${GIFTS[FAVORITE[id]].name}을(를) 가장 좋아해요.`))}</p>
+    <p class="bond-reply ${reply?'show':''}" role="status">${escapeText(reply||(max?'함께한 기억이 열려 있어요.':`${GIFTS[FAVORITE[id]].name}을(를) 가장 좋아해요.`))}</p>
     <div class="bond-gifts">${GIFT_IDS.map(g=>{const n=p().gifts[g],fav=FAVORITE[id]===g;return `<button class="tray-gift ${fav?'fav':''}" data-give="${g}" data-to="${id}" ${n<1||max?'disabled':''}>${giftArt(g)}<b>${n}</b><small>+${giftPoints(id,g)}</small>${fav?`<i class="fav-heart">${icon('heart')}</i>`:''}</button>`;}).join('')}</div>
-    <button class="bond-memory ${open?'open':''} ${pending?'pending':''}" data-memorial="${id}" ${pending?'disabled':''}><span class="bond-memory-art">${open&&window.__MEMORIAL_THUMBS__?.[id]?`<img src="${window.__MEMORIAL_THUMBS__[id]}" alt="" draggable="false">`:icon(pending?'clock':'lock')}</span><span><small>인연의 기억</small><strong>${escapeText(story?.title||'메모리얼 준비 중')}</strong><em>${pending?'새로운 이야기를 준비하고 있어요':open?'감상하기':`호감도 ${story.unlockBond}에서 열려요`}</em></span>${pending?'':icon('chevron')}</button>${bondRequests(id)}`,
+    <button class="bond-memory ${open?'open':''}" data-memorial="${id}"><span class="bond-memory-art">${open&&window.__MEMORIAL_THUMBS__?.[id]?`<img src="${window.__MEMORIAL_THUMBS__[id]}" alt="" draggable="false">`:icon('lock')}</span><span><small>인연의 기억</small><strong>${escapeText(story.title)}</strong><em>${open?'감상하기':`호감도 ${story.unlockBond}에서 열려요`}</em></span>${icon('chevron')}</button>${bondRequests(id)}`,
     `<div class="dialog-buttons">${id===p().partner?'<button class="secondary" data-action="partner">파트너 바꾸기</button>':`<button class="secondary" data-set-partner="${id}">파트너로</button>`}<button class="primary" data-action="close">닫기</button></div>`,'bond',id);
 }
 function partners(){
@@ -798,12 +797,11 @@ function relicCard(id){
 }
 // Companions added after part one stay out of the collection until its last stage (PART_STAGES) is cleared (or until owned).
 const shown=()=>HEROES.filter(h=>!LATE_COMPANIONS.includes(h.id)||p().cleared>=PART_STAGES||p().heroes[h.id].owned);
-const memoryOpen=id=>{const story=MEMORIAL_STORIES[id];return !!story&&p().heroes[id].owned&&p().heroes[id].bond>=story.unlockBond;};
-const memoryAvailable=()=>shown().filter(h=>MEMORIAL_STORIES[h.id]);
+const memoryOpen=id=>p().heroes[id].owned&&p().heroes[id].bond>=MEMORIAL_STORIES[id].unlockBond;
 function renderCollection(){
   const owned=shown().filter(h=>p().heroes[h.id].owned).length,relics=ARTIFACTS.filter(a=>p().relics[a.id].owned).length,memories=shown().filter(h=>memoryOpen(h.id)).length+p().study.library.unlocked.length;
   if(!featureOpen(p(),'relic')&&collection==='relic')collection='hero';
-  const tabs=[['hero','동료',`${owned}/${shown().length}`],...(featureOpen(p(),'relic')?[['relic','유물',`${relics}/${ARTIFACTS.length}`]]:[]),['album','기억',`${memories}/${memoryAvailable().length+CONSTELLATIONS.length}`]];
+  const tabs=[['hero','동료',`${owned}/${shown().length}`],...(featureOpen(p(),'relic')?[['relic','유물',`${relics}/${ARTIFACTS.length}`]]:[]),['album','기억',`${memories}/${shown().length+CONSTELLATIONS.length}`]];
   return `<section class="book">
     <div class="tabbar">${tabs.map(([id,name,count])=>`<button data-collection="${id}" aria-pressed="${collection===id}"><b>${name}</b><small>${count}</small></button>`).join('')}</div>
     ${collection==='album'?albumView():collection==='relic'?relicView():heroView()}${collection==='hero'&&p().cleared<PART_STAGES?`<p class="late-collection-note">${icon('lock')} 스테이지 ${PART_STAGES} 클리어 후 신규 동료 ${lateNew().length}명이 도감에 추가돼요</p>`:''}</section>`;
@@ -829,10 +827,10 @@ function relicInfo(){
 }
 // Album: memories (bond ten) and the star-library paintings, every tile the same size.
 function albumView(){
-  const open=memoryAvailable().filter(h=>memoryOpen(h.id)).length,arts=p().study.library.unlocked.length;
-  const tiles=[...shown()].sort((a,b)=>Number(memoryOpen(b.id))-Number(memoryOpen(a.id))||Number(!PENDING_MEMORIAL_IDS.includes(b.id))-Number(!PENDING_MEMORIAL_IDS.includes(a.id))||p().heroes[b.id].bond-p().heroes[a.id].bond).map(h=>{const e=p().heroes[h.id],on=memoryOpen(h.id),pending=PENDING_MEMORIAL_IDS.includes(h.id),story=MEMORIAL_STORIES[h.id],thumb=window.__MEMORIAL_THUMBS__?.[h.id];
-    return `<button class="mem-tile ${on?'open':''} ${pending?'pending':''}" data-memorial="${h.id}" ${pending?'disabled':''} aria-label="${h.name} · ${pending?'메모리얼 준비 중':on?escapeText(story.title):`호감도 ${e.bond}/10`}">${on&&thumb?`<img src="${thumb}" alt="" draggable="false" loading="lazy">`:`<span class="mem-shade">${image(h.id)}</span>`}<span class="mem-cap">${pending?'<b>준비 중</b>':on?`<b>${h.name}</b>`:`<span class="bond-hearts" aria-hidden="true">${heartsOf(e.owned?e.bond:0)}</span>`}</span></button>`;}).join('');
-  return `<div class="album-sec"><div class="album-head"><h3>인연의 기억</h3><span>${open}/${memoryAvailable().length}</span></div><p class="album-note">호감도 10이 되면 그 동료와의 그림과 이야기가 열려요. 준비 중인 메모리얼은 집계에서 제외돼요.</p><div class="mem-grid">${tiles}</div></div>
+  const open=shown().filter(h=>memoryOpen(h.id)).length,arts=p().study.library.unlocked.length;
+  const tiles=[...shown()].sort((a,b)=>Number(memoryOpen(b.id))-Number(memoryOpen(a.id))||p().heroes[b.id].bond-p().heroes[a.id].bond).map(h=>{const e=p().heroes[h.id],on=memoryOpen(h.id),thumb=window.__MEMORIAL_THUMBS__?.[h.id];
+    return `<button class="mem-tile ${on?'open':''}" data-memorial="${h.id}" aria-label="${h.name} · ${on?escapeText(MEMORIAL_STORIES[h.id].title):`호감도 ${e.bond}/10`}">${on&&thumb?`<img src="${thumb}" alt="" draggable="false" loading="lazy">`:`<span class="mem-shade">${image(h.id)}</span>`}<span class="mem-cap">${on?`<b>${h.name}</b>`:`<span class="bond-hearts" aria-hidden="true">${heartsOf(e.owned?e.bond:0)}</span>`}</span></button>`;}).join('');
+  return `<div class="album-sec"><div class="album-head"><h3>인연의 기억</h3><span>${open}/${shown().length}</span></div><p class="album-note">호감도 10이 되면 그 동료와의 그림과 이야기가 열려요.</p><div class="mem-grid">${tiles}</div></div>
     <div class="album-sec"><div class="album-head"><h3>별자리 그림</h3><span>${arts}/${CONSTELLATIONS.length}</span></div><p class="album-note">루미의 별의 서재에서 별자리를 완성하면 걸려요.</p>${artGrid()}</div>`;
 }
 
@@ -853,7 +851,7 @@ function heroDetail(id,opts={}){
     <div class="hd-skill"><span class="hd-tag">필살기 · 별빛 ${h.skill.type==='starfall'?`${h.skill.cost}+`:h.skill.cost}</span><h3>${h.skill.name}</h3><p>${statusLinks(liveText(h.skill.text,scaled.skill))}</p></div>
     <div class="hd-skill trait"><span class="hd-tag">특성</span><p>${statusLinks(liveText(h.trait.text,scaled.trait))}</p></div>
     ${id==='miracle_larva'?miracleFormsMarkup(mult*(1+collectionBonus(p().relics)),e.owned?specialMultiplier(e.enhance):1):''}
-    ${e.owned&&!opts.draft?`<button class="bond-row" data-action="bond" data-id="${id}"><span class="bond-hearts" aria-hidden="true">${heartsOf(e.bond)}</span><span><small>호감도 ${e.bond}</small><strong>${escapeText(story?.title||'메모리얼 준비 중')}</strong></span>${icon('chevron')}</button>`:''}
+    ${e.owned&&!opts.draft?`<button class="bond-row" data-action="bond" data-id="${id}"><span class="bond-hearts" aria-hidden="true">${heartsOf(e.bond)}</span><span><small>호감도 ${e.bond}</small><strong>${escapeText(story.title)}</strong></span>${icon('chevron')}</button>`:''}
     <details class="more"><summary>능력치 자세히</summary><div class="stat-line"><span><small>공격력</small><b>${e.owned?(h.damage*mult*(1+collectionBonus(p().relics))).toFixed(1):h.damage}</b></span><span><small>공격 주기</small><b>${(h.interval+E.ATTACK_WINDUP).toFixed(2)}초</b></span><span><small>사거리</small><b>${h.range}</b></span><span><small>공격</small><b>${SHAPE_TEXT[h.shape]||h.shape}</b></span></div>${e.owned?powerBreakdown(id):''}
       <p class="fineprint">${id==='storm_sage'?'강화마다 기본 공격력 +5%, 5단계마다 즉사율 +0.1%p.':scaled.trait.length+scaled.skill.length?'강화마다 기본 공격력 +5%, 5단계마다 <em class="scaled">색으로 표시된 수치</em> +10%.':'강화마다 기본 공격력 +5%.'} 전투 중에는 성급·훈련·오라·유물 효과가 더해져요.</p></details>`,
     opts.draft?'<button class="primary wide" data-action="close">드래프트로 돌아가기</button>':e.owned?`<div class="dialog-buttons"><button class="secondary" data-set-partner="${id}" ${p().partner===id?'disabled':''}>${p().partner===id?'지금 파트너':'파트너로'}</button><button class="primary" data-action="team" ${isAway?'disabled':''}>${isAway?'파견 중':'편성'}</button></div>`:`<button class="primary wide" data-action="go-summon">소환하러 가기</button>`,opts.draft?'draft-info':'hero',id);
@@ -918,8 +916,7 @@ function statusReturn(){const back=statusBack;statusBack=null;if(!back){close();
 // ───────── Memories ─────────
 // The painting fills the screen first; the story opens over it on request and remembers where reading stopped.
 function openMemorial(id){
-  const story=MEMORIAL_STORIES[id],e=p().heroes[id],h=HERO[id];if(!e||!h)return;
-  if(PENDING_MEMORIAL_IDS.includes(id)||!story){show(h.name,'인연의 기억',`<div class="mem-locked pending">${image(id,true)}<h3>메모리얼 준비 중</h3><p>${h.name}과(와)의 새로운 그림과 이야기를 준비하고 있어요.<br>호감도와 선물 기록은 그대로 쌓여요.</p></div>`,`<button class="secondary wide" data-action="close">닫기</button>`,'memorial-locked',id);return;}
+  const story=MEMORIAL_STORIES[id],e=p().heroes[id],h=HERO[id];if(!story||!e||!h)return;
   if(!memoryOpen(id)){
     show(h.name,'아직 열리지 않은 기억',`<div class="mem-locked">${image(id,true)}<h3>${escapeText(story.title)}</h3><span class="bond-hearts big" aria-hidden="true">${heartsOf(e.owned?e.bond:0)}</span><p>${e.owned?`호감도 ${story.unlockBond}에서 함께한 순간이 열려요. 지금 ${e.bond}`:'먼저 이 동료를 만나 주세요.'}</p></div>`,
       e.owned?`<button class="primary wide" data-action="bond" data-id="${id}">선물하러 가기</button>`:'<button class="secondary wide" data-action="close">닫기</button>','memorial-locked',id);return;
@@ -1732,7 +1729,7 @@ function battleCoach(step){
   const st=run.stats;
   if(step==='summon'){
     if(tutorialMark&&st.summons>tutorialMark.summons){ftueDone('summon');tutorialMark={...st};return;}
-    coachHold=true;guide('summon',()=>qs('[data-action="summon-battle"]'),'동료가 많을수록 든든하지! 아래 동료 소환을 눌러 봐, 형아.');return;
+    coachHold=true;guide('summon',()=>qs('[data-action="summon-battle"]'),'동료가 많을수록 든든하지! 동료 소환을 눌러 봐, 형아.');return;
   }
   if(step==='merge'){
     if(st.merges>(tutorialMark?.merges||0)){ftueDone('merge');tutorialMark={...run.stats};coachHold=false;coach.hide();selected=-1;updateUnit();return;}
@@ -1749,7 +1746,7 @@ function battleCoach(step){
       if(m){coachHold=true;guide('move:'+m.from+':'+m.to,()=>cellsRect(m.from,m.to),'동료는 빈 칸으로 끌어서 옮길 수도 있어. 적이 지나가는 길에 가까울수록 더 잘 맞혀!',{drag:{from:()=>cellScreen(m.from),to:()=>cellScreen(m.to)}});return;}
       coachHold=false;if(coach.active)coach.hide();return;
     }
-    coachHold=true;guide('cast:'+id,()=>qs(`[data-skill="${id}"]`),'별빛이 가득 찼어! 아래 동료 얼굴을 누르면 필살기가 나가. 지금이야, 형아!');return;
+    coachHold=true;guide('cast:'+id,()=>qs(`[data-skill="${id}"]`),'별빛이 가득 찼어! 반짝이는 동료 얼굴을 누르면 필살기가 나가. 지금이야, 형아!');return;
   }
   if(step==='auto'){
     if(p().settings.auto){ftueDone('auto');coachHold=false;coach.hide();return;}
@@ -1788,7 +1785,12 @@ function coachTick(){
   if(coach.id==='reward'){rewardTipDone=true;coach.hide();}
   if(!step&&draftCoach())return;
   if(tipStep){if(step||modal||screen!=='home'){tipStep=null;coach.hide();}return;}
-  if(!step){coachHold=false;tutorialRun=false;if(tourTick())return;if(coach.active)coach.hide();return;}
+  if(!step){coachHold=false;tutorialRun=false;if(tourTick())return;
+    if(returnTip){
+      if(screen==='adventure'||screen==='battle'||screen==='draft')returnTip=false;
+      else if(!modal&&qs('.nav-item[data-nav="adventure"]')){guide('back',()=>qs('.nav-item[data-nav="adventure"]'),'다 둘러봤으면 다시 모험으로 가자! 다음 스테이지가 형아를 기다리고 있어.',{onSkip:()=>{returnTip=false;coach.hide();},next:{label:'조금 더 볼래',onNext:()=>{returnTip=false;coach.hide();}}});return;}
+    }
+    if(coach.active)coach.hide();return;}
   if(step==='lobby'){
     if(modal==='prepare'){ftueDone('lobby');return coachTick();}
     if(screen==='home'&&!modal&&!lobbyView&&!$('splash'))guide('lobby',()=>qs('.lb-depart'),'형아, 어서 와! 오늘부터 대현자 루미가 하나하나 알려 줄게. 먼저 출격부터! (윙크)');else coach.hide();return;
@@ -1904,15 +1906,17 @@ const UNLOCK_NEWS={
   request:{name:'동료의 부탁',ic:'heart',line:'이제 동료들이 가끔 부탁하러 정원에 찾아올 거야. 들어 주면 그 동료랑 훨씬 가까워져!',go:'확인',to:null},
   event:{name:'이벤트',ic:'adventure',line:`이벤트가 열렸어! 별빛 서약이랑 쌍성 원정이 ${PACE.event} 번갈아 열려. 지금 열린 쪽부터 같이 보자!`,go:'모험으로',to:()=>{screen='adventure';mode=eventMode();render();}},
 };
-let unlockGo=null;
-function maybeUnlockNews(){
+// later: what the player was about to do (the next stage from a result). '계속 진행' runs it, so chaining stages never
+// skips the news; going to the feature instead leaves a one-line way back to the adventure once its tour is done.
+let unlockGo=null,unlockLater=null,returnTip=false;
+function maybeUnlockNews(later=null){
   if(modal||screen==='battle'||screen==='draft'||$('splash')||store.broken||store.conflict||FW.ftueNext(p())||coach.active&&!tour)return false;
   const fresh=FW.newlyOpened(p()).filter(id=>UNLOCK_NEWS[id]);if(!fresh.length)return false;
   if(tour){tour=null;coach.hide();}
   for(const id of fresh)act('ftue',{seen:id},false);
-  const first=UNLOCK_NEWS[fresh[0]];unlockGo=first.to;
+  const first=UNLOCK_NEWS[fresh[0]];unlockGo=first.to;unlockLater=later;
   show(fresh.length>1?'새로 열렸어요':first.name,'루미의 새 소식',`<div class="news"><span class="news-face">${image(GUIDE)}</span><p class="news-line">${escapeText(first.line)}</p></div><ul class="news-list">${fresh.map(id=>`<li>${icon(UNLOCK_NEWS[id].ic)}<b>${UNLOCK_NEWS[id].name}</b></li>`).join('')}</ul>`,
-    first.to?`<div class="dialog-buttons"><button class="secondary" data-action="close">나중에</button><button class="primary shine" data-action="unlock-go">${first.go}</button></div>`:'<button class="primary wide" data-action="close">확인</button>','news');
+    first.to?`<div class="dialog-buttons"><button class="secondary" data-action="close">${later?'계속 진행':'나중에'}</button><button class="primary shine" data-action="unlock-go">${first.go}</button></div>`:'<button class="primary wide" data-action="close">확인</button>','news');
   return true;
 }
 
@@ -2037,7 +2041,7 @@ document.addEventListener('click',e=>{
   if(d.action==='save-team'&&FW.ftueNext(p())==='formation'&&editingDeck.length===TEAM_SIZE){ftueDone('formation');setTimeout(()=>{if(modal)return;if(screen!=='home'){screen='home';render();}tipStep='stars';tutorialTips();},80);}
   const a={sprout:sproutSheet,'sprout-all':claimSproutAll,'ur-confirm':confirmUr,'first-ten':firstTen,
     'ftue-summon':()=>{close();screen='summon';banner='normal';render();},
-    'unlock-go':()=>{const go=unlockGo;unlockGo=null;close();go?.();},
+    'unlock-go':()=>{const go=unlockGo;unlockGo=null;unlockLater=null;close();returnTip=!!go;go?.();},
     'event-go':()=>{close();screen='adventure';mode=d.kind;render();},
   }[d.action];if(a)a();
 });
@@ -2113,7 +2117,7 @@ document.addEventListener('click',e=>{
     'auto-team-pick':()=>{editingDeck=autoDeck(p());formation('hero',true);},'auto-relic-pick':()=>{editingRelics=autoRelics(p());formation('relic',true);},
     'auto-twin':()=>{twinDraft=autoTwin(p());twinFormation(true);},'auto-oath':()=>{const ids=oathDeck(p(),oathPick);if(!ids){toast('조건에 맞는 동료가 부족해요');return;}if(act('deck',{ids},false).ok)oathPrepare();},
     'auto-prepare':()=>{const back=modalInfo,before=teamPower(p()),deck=autoDeck(p()),relics=autoRelics(p()),same=(a,b)=>[...a].sort().join()===[...b].sort().join(),changed=!same(deck,p().deck)||(featureOpen(p(),'relic')&&relics.length&&!same(relics,p().equipped));if(!changed){toast('지금 편성이 자동 편성과 같아요');return;}if(!act('deck',{ids:deck},false).ok)return;if(featureOpen(p(),'relic')&&relics.length&&!act('relics',{ids:relics},false).ok)return;prepare(back.stage,back.kind);const after=teamPower(p());toast(after>=before?`전투력 ${fmt(before)} → ${fmt(after)}`:'역할을 맞춰 편성했어요');},
-    'next-stage':()=>{close();prepare(Number(d.stage));},
+    'next-stage':()=>{close();const go=()=>prepare(Number(d.stage));if(!maybeUnlockNews(go))go();},
     'trial-start':()=>{if(!UNLOCKED)return;show('신규 플레이 체험','',`<p class="subtext">지금 프로필은 따로 보관하고, 처음 시작하는 프로필로 바꿉니다. 체험을 끝내면 지금 상태로 돌아옵니다.</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="settings">취소</button><button class="primary" data-action="trial-start-confirm">시작</button></div>`,'trial-confirm');},
     'trial-start-confirm':()=>{if(!UNLOCKED||p().trial)return;try{localStorage.setItem(SAVE_KEY+'.backup',store.raw||JSON.stringify(p()));const r=store.import(JSON.stringify(createProfile(Date.now(),{trial:true})));if(!r.ok){toast(r.message);return;}location.reload();}catch{toast('프로필을 보관할 수 없어요.');}},
     'trial-end':()=>{if(!UNLOCKED||!p().trial)return;show('체험 끝내기','',`<p class="subtext">보관한 프로필로 돌아갑니다.</p>`,`<div class="dialog-buttons"><button class="secondary" data-action="settings">취소</button><button class="primary" data-action="trial-end-confirm">돌아가기</button></div>`,'trial-confirm');},

@@ -1,7 +1,7 @@
-import { HERO, ARTIFACT, BLESSINGS, BLESSING, validArtifacts, BOSSES, BOSS_ORDER, CHAPTERS, DEFAULT_DECK, VERSION, GRID, MAX_RANK ,TIERS,CHALLENGE_WAVES} from '../content.js';
+import { HERO, ARTIFACT, BLESSINGS, BLESSING, validArtifacts, BOSSES, BOSS_ORDER, CHAPTERS, DEFAULT_DECK, VERSION, GRID, MAX_RANK, TIERS, CHALLENGE_WAVES, PREVIOUS_MAIN_STAGES, previousStageHp, stageHp, battleChapter } from '../content.js';
 import { TEAM_SIZE } from '../team-config.js';
 import {oathMods,oathConflict,OATH_WAVES} from '../preview/oath.js';
-import {TWIN_WAVES,TWIN_STAGE} from '../preview/twin.js';
+import {TWIN_WAVES} from '../preview/twin.js';
 import { RELIC_LEVEL_STEP } from '../economy.js';
 import {MIRACLE_FORMS} from '../new-companions.js';
 export {MIRACLE_FORMS} from '../new-companions.js';
@@ -493,13 +493,14 @@ export function castSpent(s,id){return !!(s?.oathMods?.oncePerWave&&s.castWave?.
 function freeCell(s){const order=[17,12,16,18,11,13,7,6,8,21,23,2,10,14,20,24,1,3,5,9,15,19,0,4,22];return order.find(i=>!s.board[i]&&!closedCell(s,i))??-1;}
 function place(s,id,rank=1,index=-1){rank=Math.min(rank,rankCap(s));const slot=Number.isInteger(index)&&index>=0&&index<25&&!s.board[index]&&!closedCell(s,index)?index:freeCell(s);if(slot<0)return -1;s.board[slot]=makeUnit(s,id,rank);syncTimeRuler(s);event(s,'summon',{index:slot,hero:id,rank});return slot;}
 
-export function newRun({deck=DEFAULT_DECK,chapter=0,seed=Date.now(),artifacts=[],meta={},relicAttack=0,relicLevels={},mode='main',boon=0,gaugeMax=GAUGE_MAX,startGold=0,tier='easy',met=BOSS_ORDER.length,crit={chance:.05,damage:1.5},oaths=[],side=null,lineup=null}={}){
+export function newRun({deck=DEFAULT_DECK,chapter=0,legacyMainStage,seed=Date.now(),artifacts=[],meta={},relicAttack=0,relicLevels={},mode='main',boon=0,gaugeMax=GAUGE_MAX,startGold=0,tier='easy',met=BOSS_ORDER.length,crit={chance:.05,damage:1.5},oaths=[],side=null,lineup=null}={}){
   const chosen=validDeck(deck)?[...deck]:DEFAULT_DECK.slice(0,TEAM_SIZE),arts=validArtifacts(artifacts)?[...artifacts]:[];
   const levels=Object.fromEntries(arts.filter(id=>Number.isInteger(relicLevels?.[id])&&relicLevels[id]>=1&&relicLevels[id]<=999).map(id=>[id,relicLevels[id]]));
-  const s={version:VERSION,balanceRevision:BALANCE_REVISION,statusRevision:STATUS_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,CHAPTERS.length-1),phase:'combat',wave:1,time:0,waveTime:0,
+  const s={version:VERSION,balanceRevision:BALANCE_REVISION,statusRevision:STATUS_REVISION,seed:seed>>>0,rng:(seed>>>0)||1,deck:chosen,chapter:clamp(chapter|0,0,chapterLimit(mode)-1),phase:'combat',wave:1,time:0,waveTime:0,
     board:Array(25).fill(null),enemies:[],shots:[],finishers:[],volleys:[],zones:[],events:[],critRevision:2,crit:cleanCrit(crit),critRng:critSeed(seed),bombs:[],sunlight:0,jokerColor:'red',jokerSeen:1,gold:70+Math.max(0,startGold|0),gauge:90,gaugeMax:Math.max(GAUGE_MAX,gaugeMax|0),health:20,summons:0,paidSummons:0,freeSummons:3,nextId:1,bag:[],artifacts:arts,upgrades:Object.fromEntries(chosen.map(x=>[x,0])),meta,relicAttack,relicLevels:levels,mode,boon,tier:TIERS[tier]?tier:'easy',met:Math.max(1,Math.min(BOSS_ORDER.length,met|0)),
     buffs:{},buffTotals:{},buffScale:{},buffSpotlight:{},goldCharge:null,queue:[],spawnIn:0,breakTime:0,reward:null,endless:false,telegraph:null,settlement:null,trainingDiscount:0,globalAttack:0,surgeWave:0,phoenixUsed:false,reserves:[],blessings:[],waveTotal:0,timeRulerUid:null,edictWave:0,phoenixUses:0,sandStore:0,amuletUsed:0,toffeeBlooms:0,appleBase:0,
     stats:{kills:0,merges:0,summons:0,skills:0,damage:0,income:{},byHero:{},leaks:0},tutorial:0,won:false};
+  if(legacyMainStage!==undefined)s.legacyMainStage=legacyMainStage;
   s.oaths=Array.isArray(oaths)?[...oaths]:[];s.oathMods=oathMods(s.oaths);s.side=side??null;s.lineup=Array.isArray(lineup)?[...lineup]:null;
   s.moveCooldown=0;s.castWave=[];
   const opening=shuffle(s,chosen).slice(0,3);
@@ -569,25 +570,30 @@ const enemyKind=(i,wave)=>i%7===6&&wave>=3?'armor':i%5===4&&wave>=2?'runner':i%9
 // can park that add-on on the last waves. `weeklyLate` in wavePlan raises a whole weekly wave the same way.
 // See docs/archive/2026-10-28-CHALLENGE_RETUNE.md.
 const CHALLENGE_BEND=.33;
-export function challengeBase(wave,tier='easy'){
-  const t=TIERS[tier]||TIERS.easy,k=(Math.min(wave,CHALLENGE_WAVES)-1)/(CHALLENGE_WAVES-1),over=Math.max(0,wave-CHALLENGE_WAVES);
+// One enemy-health multiplier per mode, measured at the public easy and hard unlock gates.
+const CHALLENGE_HP=Object.freeze({weekly:.44,monthly:.20,oath:.31,twin:.30});
+const chapterLimit=mode=>mode==='main'?CHAPTERS.length:PREVIOUS_MAIN_STAGES;
+const bandHp=(tier,progress)=>stageHp(tier.from+(tier.to-tier.from)*Math.pow(progress,CHALLENGE_BEND));
+export function challengeBase(wave,tier='easy',mode='weekly'){
+  const t=TIERS[tier]||TIERS.easy,waves=mode==='oath'?OATH_WAVES:CHALLENGE_WAVES;
+  const progress=(Math.min(wave,waves)-1)/(waves-1),over=Math.max(0,wave-waves);
+  // The oath still uses the former 1–12 wave pacing and late multiplier over its nine waves.
+  const k=mode==='oath'?progress*11/(CHALLENGE_WAVES-1):progress;
   const bend=Math.pow(k,CHALLENGE_BEND);
   // `lateAt` (default: the same bend) is when the late add-on arrives.
   // A higher power leaves the middle waves alone and raises only the clear.
   const lateK=Math.pow(k,t.lateAt??CHALLENGE_BEND);
-  const stage=t.from+(t.to-t.from)*bend,oldWave=2+10*bend;
-  return {base:WAVE_BASE_HEALTH*Math.pow(1.34,oldWave-1)*(1+2.5*(stage-1)/8)*(1+t.late*lateK)*Math.pow(1.25,over),oldWave};
+  const oldWave=2+10*bend;
+  return {base:WAVE_BASE_HEALTH*Math.pow(1.34,oldWave-1)*bandHp(t,progress)*(1+t.late*lateK)*Math.pow(1.25,over),oldWave};
 }
-export function wavePlan(wave,chapter=0,mode='main',tier='easy'){
+export function wavePlan(wave,chapter=0,mode='main',tier='easy',legacyMainStage){
   if(mode==='monthly'){
     // Monthly: one boss per round. A boss alone carries about a whole wave of the same point on the curve.
     const {base}=challengeBase(wave,tier),hp=Math.round(base*30*(TIERS[tier]||TIERS.easy).monthly);
     return {sequence:[{kind:'boss',hp}],interval:.65,healthBudget:hp};
   }
-  if(mode==='twin')return wavePlan(wave,(TWIN_STAGE[tier]||TWIN_STAGE.easy)-1,'main');
   if(mode==='oath'){
-    const cw=1+(wave-1)*11/8;
-    const {base,oldWave}=challengeBase(cw,tier),oldCount=12+Math.round(oldWave)*2,count=Math.round(oldCount*Math.min(.9,.64+(oldWave/2-1)*.025));
+    const {base,oldWave}=challengeBase(wave,tier,'oath'),oldCount=12+Math.round(oldWave)*2,count=Math.round(oldCount*Math.min(.9,.64+(oldWave/2-1)*.025));
     const sequence=Array.from({length:count},(_,i)=>{const kind=enemyKind(i,Math.ceil(oldWave/2));return {kind,hp:Math.round(base*enemyWeight[kind])};});
     const t=TIERS[tier]||TIERS.easy;
     if(wave%3===0)sequence.splice(Math.min(6,count),0,{kind:'boss',hp:Math.round(base*32*BOSS_HEALTH_SCALE*t.boss)});
@@ -604,9 +610,9 @@ export function wavePlan(wave,chapter=0,mode='main',tier='easy'){
     if(grow!==1)for(const e of sequence)e.hp=Math.round(e.hp*grow);
     return {sequence,interval:Math.max(.46,1.05-(oldWave-1)*.06),healthBudget:sequence.reduce((n,e)=>n+e.hp,0)};
   }
-  // Six waves sample the original twelve-wave curve at 2,4,...,12.
-  // Stage nine has the canonical seventh chapter's final enemy statistics.
-  const oldWave=wave*2,base=WAVE_BASE_HEALTH*Math.pow(1.34,oldWave-1)*CHAPTERS[chapter].hp,oldCount=12+oldWave*2;
+  // Main and twin keep their six-wave composition. Twin changes the stage difficulty on each wave.
+  const hp=mode==='twin'?bandHp(TIERS[tier]||TIERS.easy,(wave-1)/(TWIN_WAVES-1)):legacyMainStage===undefined?CHAPTERS[chapter].hp:previousStageHp(legacyMainStage);
+  const oldWave=wave*2,base=WAVE_BASE_HEALTH*Math.pow(1.34,oldWave-1)*hp,oldCount=12+oldWave*2;
   const budget=Array.from({length:oldCount},(_,i)=>Math.round(base*enemyWeight[enemyKind(i,wave)])).reduce((a,b)=>a+b,0);
   const count=Math.round(oldCount*Math.min(.9,.64+(wave-1)*.025));
   const kinds=Array.from({length:count},(_,i)=>enemyKind(i,wave)),weight=kinds.reduce((sum,k)=>sum+enemyWeight[k],0);let assigned=0;
@@ -622,13 +628,14 @@ export const lastWave=s=>s.mode==='oath'?OATH_WAVES:s.mode==='twin'?TWIN_WAVES:s
 function beginWave(s,wave){
   s.phase='combat';s.wave=wave;s.waveTime=0;s.spawnIn=wave===1?.65:.4;s.settlement=null;s.telegraph=null;s.zones=[];
   s.castWave=[];s.toffeeBlooms=0;
-  s.queue=wavePlan(wave,s.chapter,s.mode,s.tier).sequence;s.waveTotal=s.queue.length;
+  s.queue=wavePlan(wave,s.chapter,s.mode,s.tier,s.legacyMainStage).sequence;s.waveTotal=s.queue.length;
   if(s.queue.some(e=>e.kind==='boss'))event(s,'bossApproach',{wave});event(s,'wave',{wave});
 }
 function spawnEnemy(s,{kind,hp}){
-  const wave=s.wave,chapter=CHAPTERS[s.chapter];
+  const wave=s.wave,chapter=battleChapter(s);
   const isBoss=kind==='boss',bossId=isBoss?(s.mode==='monthly'?monthlyBoss(wave,s.met):s.mode==='weekly'?weeklyBoss(s.chapter,wave,s.met):(s.mode==='oath'||s.mode==='twin')&&s.lineup?.[Math.floor(wave/3)-1]||chapter.bosses[0]):null;
-  hp=Math.round(hp*(s.oathMods?.hp||1)*(isBoss?s.oathMods?.bossHp||1:1));
+  const healthScale=(s.oathMods?.hp||1)*(CHALLENGE_HP[s.mode]??1);
+  hp=Math.round(hp*healthScale*(isBoss?s.oathMods?.bossHp||1:1));
   const e={uid:s.nextId++,kind,boss:bossId,hp,maxHp:hp,progress:0,speed:isBoss?34:kind==='runner'?82:kind==='armor'?39:kind==='wisp'?67:49,
     slow:0,slowTime:0,slowEffects:[],statusEffects:[],stun:0,freeze:0,controlTime:0,burn:0,burnTime:0,burnOwner:null,poison:0,poisonTime:0,exposed:0,exposeTime:0,takenBonus:0,hit:0,skillIn:7.5,channel:0,channelHp:0,dotFlash:0,divine:0,divineTime:0,frostStacks:0,frostTime:0,rage:0,shield:0,ccImmune:0,frostLock:0,dawn:0,ultControl:0};
   e.speed*=1.1;if(s.oathMods?.speed)e.speed*=s.oathMods.speed;s.enemies.push(e);if(isBoss){event(s,'boss',{id:bossId,name:BOSSES[bossId].name});if(has(s,'royal_seal'))addGauge(s,RV.royal_seal.starlight*relicScaleIn(s,'royal_seal'));}return e;
@@ -1539,7 +1546,7 @@ export function step(s,dt){
   if(s.phase==='intermission'){s.breakTime-=dt;if(s.breakTime<=0)beginWave(s,s.wave+1);return;}
   if(s.moveCooldown>0){s.moveCooldown=Math.max(0,s.moveCooldown-dt);if(s.moveCooldown<1e-8)s.moveCooldown=0;}
   s.waveTime+=dt;addGauge(s,dt*STARLIGHT_PER_SECOND*(s.oathMods?.regen??1));
-  s.spawnIn-=dt;if(s.spawnIn<=0&&s.queue.length){spawnEnemy(s,s.queue.shift());s.spawnIn=wavePlan(s.wave,s.chapter,s.mode).interval;}
+  s.spawnIn-=dt;if(s.spawnIn<=0&&s.queue.length){spawnEnemy(s,s.queue.shift());s.spawnIn=wavePlan(s.wave,s.chapter,s.mode,s.tier,s.legacyMainStage).interval;}
   for(const e of s.enemies){
     if(e.hp<=0)continue;e.hit=Math.max(0,e.hit-dt);e.dotFlash-=dt;
     tickEnemyStatuses(s,e,start,s.time);
@@ -1689,7 +1696,8 @@ export function restore(raw){
     if(!numeric(s,['gold','gauge','health','time','waveTime','spawnIn','breakTime','summons','paidSummons','freeSummons','trainingDiscount','globalAttack','surgeWave','waveTotal','tutorial','seed'])||s.gold<0||s.time<0||s.health<0||s.health>20||s.gaugeMax!==undefined&&(!Number.isInteger(s.gaugeMax)||s.gaugeMax<GAUGE_MAX||s.gaugeMax>GAUGE_MAX+400)||s.gauge<0||s.gauge>gaugeCap(s)||!Number.isInteger(s.wave)||s.wave<1||s.wave>1000||!Number.isInteger(s.rng)||s.rng<=0||s.rng>0xffffffff||!id(s.nextId))return null;
     if(s.freeSummons<0||s.freeSummons>3||!Number.isInteger(s.freeSummons)||s.paidSummons<0||!Number.isInteger(s.paidSummons)||s.trainingDiscount<0||s.trainingDiscount>.5||s.globalAttack<0||typeof s.phoenixUsed!=='boolean')return null;
     if(s.phoenixUses===undefined)s.phoenixUses=s.phoenixUsed?1:0;if(!Number.isInteger(s.phoenixUses)||s.phoenixUses<0||s.phoenixUses>9)return null;
-    if(!['combat','intermission','reward','victory','defeat'].includes(s.phase)||!CHAPTERS[s.chapter])return null;
+    if(!['combat','intermission','reward','victory','defeat'].includes(s.phase)||!Number.isInteger(s.chapter)||s.chapter<0||s.chapter>=chapterLimit(s.mode))return null;
+    if(s.legacyMainStage!==undefined&&(s.mode!=='main'||!Number.isInteger(s.legacyMainStage)||s.legacyMainStage<1||s.legacyMainStage>PREVIOUS_MAIN_STAGES))return null;
     // A run saved before critical hits has no `crit`; it stays that way (resumeBattle accepts it) and never rolls.
     if(s.critRevision!==undefined&&s.critRevision!==2)return null;
     if(s.crit!==undefined&&s.crit!==null&&!(numeric(s.crit,['chance','damage'])&&s.crit.chance>0&&s.crit.chance<=1&&s.crit.damage>=1&&s.crit.damage<=10))return null;

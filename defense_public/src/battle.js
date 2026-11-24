@@ -5,6 +5,7 @@ import {season} from './preview/season.js';
 import {LEGACY_HOLLOW,OATH_RULES,oathBosses} from './preview/oath.js';
 import {twinBosses} from './preview/twin.js';
 import {playerAutoPlay} from './smart-auto.js';
+import {stageForUnlocks} from './content.js';
 
 export const battleMeta=(profile,deck)=>Object.fromEntries(deck.map(id=>{const entry=draftHeroEntry(profile.heroes[id]);return [id,{power:heroMultiplier(entry,profile.beds),special:specialMultiplier(entry.enhance)}];}));
 const pendingDraft=a=>a.mode==='weekly'&&a.draft?.length!==TEAM_SIZE;
@@ -13,10 +14,10 @@ function battleSnapshot(profile){
   return {
     meta:pendingDraft(a)?null:battleMeta(profile,a.deck),
     artifacts:[...(a.mode==='twin'?a.relics||[]:profile.equipped)],
-    met:Math.min(9,profile.cleared),
+    met:Math.min(9,Math.max(profile.cleared,profile.stageLegacyCleared??0)),
     gaugeMax:springGauge(profile.beds.spring),
     startGold:seedGold(profile.beds.seed),
-    crit:critStats(profile.beds,profile.cleared),
+    crit:critStats(profile.beds,stageForUnlocks(profile)),
   };
 }
 export function captureBattle(profile){
@@ -33,7 +34,7 @@ export function createBattle(profile){
   const twin=a.mode==='twin',index=a.mode==='oath'||twin?season(a.started).index:0;
   const relicAttack=a.relicAttack??collectionBonus(profile.relics),relicLevels=a.relicLevels??Object.fromEntries(artifacts.map(id=>[id,relicLevel(profile.relics[id])]));
   const oaths=a.mode==='oath'?a.oaths||[]:[];
-  const run=engine.newRun({deck:a.deck,chapter:a.stage-1,seed:a.seed,artifacts,meta:structuredClone(meta),
+  const run=engine.newRun({deck:a.deck,chapter:a.stage-1,legacyMainStage:a.legacyMainStage,seed:a.seed,artifacts,meta:structuredClone(meta),
     relicAttack,relicLevels,mode:a.mode,boon:a.boon,tier:a.tier||'easy',met,gaugeMax,startGold,crit,
     oaths:battleOaths(a,oaths),side:twin?a.side??null:null,lineup:a.mode==='oath'?oathBosses(index,met):twin?twinBosses(index,a.side,met):null});
   run.oaths=[...oaths];
@@ -49,7 +50,7 @@ export function resumeBattle(profile){
   const oaths=saved.oaths===undefined?[]:saved.oaths;
   if(!Array.isArray(oaths)||JSON.stringify(oaths)!==JSON.stringify(a.oaths??[]))return null;
   saved.oaths=battleOaths(a,oaths);
-  const s=engine.restore(saved);if(!s||s.mode!==a.mode||s.chapter!==a.stage-1||s.deck.join()!==a.deck.join())return null;
+  const s=engine.restore(saved);if(!s||s.mode!==a.mode||s.chapter!==a.stage-1||s.legacyMainStage!==a.legacyMainStage||s.deck.join()!==a.deck.join())return null;
   s.oaths=oaths;
   const expected=createBattle(profile);
   if(!expected||JSON.stringify(s.meta)!==JSON.stringify(expected.meta)||s.relicAttack!==expected.relicAttack||JSON.stringify(s.relicLevels||{})!==JSON.stringify(expected.relicLevels)||(s.gaugeMax||engine.GAUGE_MAX)!==expected.gaugeMax||s.critRevision===2&&s.crit!==undefined&&JSON.stringify(s.crit)!==JSON.stringify(expected.crit)||s.artifacts.join()!==expected.artifacts.join()||s.boon!==a.boon||s.seed!==a.seed||(s.tier||'easy')!==(a.tier||'easy'))return null;
