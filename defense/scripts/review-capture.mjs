@@ -28,7 +28,8 @@ const server=http.createServer(async(req,res)=>{
 let browser;
 try{
   await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
-  browser=await chromium.launch();const page=await browser.newPage({viewport:{width:1300,height:1000}});
+  // No Playwright browser download on some machines: fall back to the installed Chrome.
+  browser=await chromium.launch().catch(()=>chromium.launch({channel:'chrome'}));const page=await browser.newPage({viewport:{width:1300,height:1000}});
   await page.goto(`http://127.0.0.1:${server.address().port}/docs/review/${encodeURIComponent(pageName)}/index.html`);
   await page.waitForFunction(()=>window.UR_REVIEW?.state?.ready);
   const keys=await page.evaluate(()=>window.UR_REVIEW.entries.map(entry=>entry.key));

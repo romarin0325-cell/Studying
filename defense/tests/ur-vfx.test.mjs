@@ -30,7 +30,7 @@ for(const [hero,spec] of Object.entries(UR_SPECS))test(`${hero}: real cast plans
   const skill={...e,uid:1};let impacts;checked(fx.ctx,()=>{impacts=spec.plan(fx,skill);},'plan');
   const life=spec.life(skill);assert.ok(Number.isFinite(life)&&life>0,'life');skill.life=skill.total=life;
   // Delayed strikes land on a later engine event (Cherry Prince, Aurora, Shooting Star Boy); support casts (Harmonious, Rumi) deal no damage.
-  if(impacts==null)assert.ok(['cherry_prince','harmonious','rumi','aurora','star_boy','behemoth'].includes(hero),'unexpected missing impact map');
+  if(impacts==null)assert.ok(['cherry_prince','harmonious','rumi','aurora','star_boy','behemoth','victoria'].includes(hero),'unexpected missing impact map');
   else{assert.ok(impacts instanceof Map);for(const [uid,at] of impacts){assert.ok(Number.isFinite(uid));assert.ok(Number.isFinite(at)&&at>=0&&at<=life,`${uid}: ${at} / ${life}`);}}
   for(let frame=0;frame<=Math.ceil(life*60);frame++){
     const age=Math.min(life,frame/60);fx.clock=age;skill.life=life-age;

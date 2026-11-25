@@ -1,7 +1,8 @@
 // Real-game smoke for the sequenced ultimates (pass 3, 2026-11-07): the release build at 390x844, a saved battle per deck, every
 // ultimate cast from its own skill button with the real cut-in. Reports casts, page/console errors and the HUD gold around the
 // Queen's coins, and writes one mid-cast screenshot per ultimate to test-results/review-captures/ur-game-smoke.png.
-//   node defense/scripts/ur-game-smoke.mjs
+//   node defense/scripts/ur-game-smoke.mjs [--deck victoria,sakura,jasmine,zeke,queen] (one deck instead of the default four; the
+//   test build's card companions, 2026-11-25)
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
@@ -14,9 +15,12 @@ import {createBattle} from '../src/battle.js';
 import * as E from '../src/combat/engine.js';
 const url=pathToFileURL(path.join(gameRoot,'dist/StarGardenDefense.html')).href,NOW=Date.now(),out=path.join(gameRoot,'test-results/review-captures/ur-game-smoke.png');
 // Four decks cover every sequenced ultimate (Behemoth from 2026-11-07); Rumi at five stars casts the dream form.
-const DECKS=[[['queen','cinderella','venom','doom','rumi']],[['red_dragon','aurora','star_boy','jasmine','time_magician']],[['galaxy_whale','time_ruler','cherry_prince','luna','frost_witch']],[['rumi','harmonious','behemoth','zeke','queen'],{rumi:5},3]];
+const deckArg=process.argv.indexOf('--deck');
+const DECKS=deckArg>=0?[[process.argv[deckArg+1].split(',')]]:[[['queen','cinderella','venom','doom','rumi']],[['red_dragon','aurora','star_boy','jasmine','time_magician']],[['galaxy_whale','time_ruler','cherry_prince','luna','frost_witch']],[['rumi','harmonious','behemoth','zeke','queen'],{rumi:5},3]];
 function fixture(deck,ranks={}){
   const p=createProfile(NOW);p.settings.auto=false;for(const h of HEROES)p.heroes[h.id].owned=true;
+  // Skip the first-week coach: its shade would take the skill-button clicks (the FTUE arrived after this script).
+  command(p,'ftue',{skip:true},NOW);
   p.deck=[...deck];if(!command(p,'begin',{mode:'main',stage:1},NOW).ok)throw Error('begin');
   const s=createBattle(p),template={...s.board.find(Boolean)};s.board.fill(null);s.wave=3;s.gold=300;
   [12,6,8,16,18].forEach((cell,i)=>{const hero=deck[i];s.board[cell]={...template,uid:s.nextId++,hero,rank:ranks[hero]||3,birthWave:3,priority:E.targetingLocked(hero)?'random':'first',cooldown:i?.4:99};});
@@ -26,7 +30,8 @@ function fixture(deck,ranks={}){
   s.queue=[{kind:'grunt',hp:1e7}];s.spawnIn=999;s.gauge=E.gaugeCap(s);
   p.active.run=E.serialize(s);if(!E.restore(p.active.run))throw Error('fixture is not a valid saved battle');return p;
 }
-const browser=await chromium.launch(),errors=[],tiles=[],gold=[];
+// No Playwright browser download on some machines: fall back to the installed Chrome.
+const browser=await chromium.launch().catch(()=>chromium.launch({channel:'chrome'})),errors=[],tiles=[],gold=[];
 try{
   for(const [deck,ranks,count=5] of DECKS){
     const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true}),page=await context.newPage();
@@ -39,7 +44,8 @@ try{
       const before=await page.evaluate(()=>window.STAR_GARDEN.battle.stats.skills);await button.click();await page.waitForTimeout(80);
       if(await page.evaluate(()=>window.STAR_GARDEN.battle.stats.skills)===before){errors.push('cast refused: '+hero);continue;}
       if(hero==='queen'&&!gold.length){let last=0;for(const t of [250,700,1300,2000]){await page.waitForTimeout(t-last);last=t;gold.push({t,hud:await page.locator('#gold').textContent(),real:await page.evaluate(()=>window.STAR_GARDEN.battle.gold)});}}
-      else await page.waitForTimeout(hero==='aurora'?2500:900);
+      // Victoria fires after her 5 s charge; Sakura's blast lands about 1.3 s after the button (the UR slow motion included).
+      else await page.waitForTimeout({aurora:2500,victoria:6400,sakura:1350}[hero]??900);
       tiles.push({input:await sharp(await page.locator('#arena').screenshot()).resize(260).png().toBuffer(),label:hero+(ranks?.[hero]?' '+ranks[hero]+'★':'')});
       await page.waitForTimeout(hero==='aurora'?3200:2000);
     }

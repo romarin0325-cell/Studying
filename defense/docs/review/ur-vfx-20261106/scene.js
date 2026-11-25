@@ -56,6 +56,15 @@ export const ENTRIES=Object.freeze([
     note:'거울 축적이 보이게(R등급 수준). 대상 위에 손거울이 서고 빛줄로 대상과 이어짐 → 대상이 맞을 때마다 빛 조각이 거울로 빨려 들고 거울 빛이 차오름(모은 피해 ÷ 12배 피해), 시간이 갈수록 금이 늘어남 → 5초에 깨지며 빛이 대상에 내리꽂힘. 축적 표시가 늘 비어 있던 버그와 "천만경" 표기(스킬 이름은 천면경)도 고쳤다.'},
   {key:'star-boy',hero:'star_boy',mode:'skill',batch:3,label:'별똥별소년 · 소원을 담은 별 (C)',duration:1.8,moments:[.1,.25,.4,.6,1],options:['kills'],
     note:'쓴 별빛이 보이게(C등급 수준). 대상 발밑 조준 고리와 쓴 별빛(★) → 하늘에서 비스듬히 떨어지는 유성(쓴 별빛 60이면 1배, 120이면 1.35배) → 별 모양 폭발.'},
+  // Card companions (2026-11-25): the first versions were one emblem over the board; now sequences like the rest of the UR cast.
+  {key:'victoria',hero:'victoria',mode:'skill',batch:4,label:'빅토리아 · 기적의증명 (발동)',duration:3,moments:[.2,.5,.85,1.65,2.1],options:['spotlight'],
+    note:'5초 차지가 끝나 전체 강화(공격력 +70%, 공격 속도 +40%, 8초)가 걸리는 순간. 날개 지팡이를 들어 보주에 금빛이 모이고 뒤로 승리의 깃발이 선다 → 금빛 지휘 고리가 편성 위로 퍼지며 닿는 아군마다 한 번 뛰어오르고 짧은 금빛 기둥과 강화 화살표 둘(금색 공격력, 산호색 공격 속도) → 컷인 띠가 걷힐 때 판 가운데 월계관과 왕관이 열리고 금빛·산호색 꽃종이가 흔들리며 떨어진다. 지속시간은 우측 상단 타이머라 아군 발밑 표식은 남기지 않는다.'},
+  {key:'victoria-charge',hero:'victoria',mode:'skill',batch:4,label:'빅토리아 · 기적의증명 (5초 차지부터)',duration:7.9,moments:[.8,2.6,4.6,5.5,6.6],options:[],
+    note:'버튼을 누른 때부터. 차지 5초 동안 발밑 인장이 차오르고 금빛이 지팡이 보주로 모이며, 끝날수록 보주가 밝아진다(진행 고리와 남은 초는 그대로). 컷인은 실제 게임처럼 차지가 끝나 발동할 때 나온다.'},
+  {key:'sakura',hero:'sakura',mode:'skill',batch:4,label:'사쿠라 · 폭염부',duration:2.3,moments:[.15,.42,.7,.98,1.35],options:['kills','sealed'],
+    note:'가장 밀집한 반경 150 한 곳에 한 번의 일격. 꽃잎이 손에 모이며 부적을 꺼냄 → 부적 한 장이 돌며 포물선으로 날아가 무리 한가운데 꽂힘 → 실제 반경에 벚꽃 봉인진이 펼쳐지고 테두리가 안으로 조여 들며 부적이 아래부터 타오름 → 분홍 불기둥이 솟고 부적이 벚꽃으로 터지며 꽃잎 폭풍, 봉인진 안의 적마다 불꽃. 화상과 성광이 이미 있던 적(기절)에는 작은 부적이 붙는다.'},
+  {key:'sakura-top',hero:'sakura',mode:'skill',batch:4,label:'사쿠라 · 폭염부 (위쪽 길)',duration:3,moments:[.5,1.2,1.45,1.7,2.1],options:['kills','sealed'],
+    note:'무리가 위쪽 길(컷인 띠가 가리는 곳)에 있을 때: 띠가 걷힐 때까지 부적을 손에 들고 기다렸다가 던져, 폭발이 띠가 걷힌 뒤에 보인다.'},
 ]);
 
 export const ROSTERS={
@@ -83,13 +92,17 @@ export const ROSTERS={
   phantom:{deck:['phantom','jasmine','siren','queen','zeke'],units:[[12,'phantom',3],[6,'jasmine',1],[8,'siren',1],[16,'queen',1],[18,'zeke',1]]},
   aurora:{deck:['aurora','siren','great_detective','zeke','luna'],units:[[12,'aurora',3],[6,'siren',2],[8,'great_detective',2],[16,'zeke',2],[18,'luna',2]]},
   'star-boy':{deck:['star_boy','jasmine','siren','queen','zeke'],units:[[12,'star_boy',3],[6,'jasmine',1],[8,'siren',1],[16,'queen',1],[18,'zeke',1]]},
+  victoria:{deck:['victoria','siren','queen','jasmine','zeke'],units:[[12,'victoria',3],...[1,2,3,6,7,8,11,13,16,17,18,21,22,23].map((c,i)=>[c,['siren','queen','jasmine','zeke'][i%4],1])]},
+  'victoria-charge':{deck:['victoria','siren','queen','jasmine','zeke'],units:[[12,'victoria',3],...[6,7,8,11,13,16,17,18].map((c,i)=>[c,['siren','queen','jasmine','zeke'][i%4],1])]},
+  sakura:{deck:['sakura','jasmine','siren','queen','zeke'],units:[[12,'sakura',3],[6,'jasmine',2],[8,'siren',2],[16,'queen',2],[18,'zeke',2]]},
+  'sakura-top':{deck:['sakura','jasmine','siren','queen','zeke'],units:[[12,'sakura',3],[6,'jasmine',2],[8,'siren',2],[16,'queen',2],[18,'zeke',2]]},
   dense:{deck:['siren','guardian','storm_sage','zeke','luna'],units:Array.from({length:25},(_,i)=>[i,['siren','guardian','storm_sage','zeke','luna'][i%5],1+(i%3)])},
 };
 // Enemy places along the road (distance from the start). Skill scenes spread them around the whole loop.
 const SPREAD=[180,420,640,800,980,1160,1330,1520,1700,1880,2050];
 const ATTACK=[300,520,760,1000,1240,1480,1720,1960];
 
-export function reviewScene(entry,{kills=true,empowered=false,spotlight=false,moving=true,chapter=0,freed=true,repeat=false,twin=false,marks=true,rich=true}={}){
+export function reviewScene(entry,{kills=true,empowered=false,spotlight=false,moving=true,chapter=0,freed=true,repeat=false,twin=false,marks=true,rich=true,sealed=true}={}){
   const base=ROSTERS[entry.key],roster=entry.key==='trauma'&&twin?{...base,units:[...base.units,[14,'time_magician',2]]}:base,deck=roster.deck;
   const s=E.newRun({deck,chapter,seed:261106,crit:{chance:0,damage:1.5},artifacts:spotlight?['spotlight']:[]});
   const template={...s.board.find(Boolean)};s.board.fill(null);
@@ -121,6 +134,13 @@ export function reviewScene(entry,{kills=true,empowered=false,spotlight=false,mo
   if(entry.key==='red-dragon'||entry.key==='ash')enemies=[960,1010,1060,1110,1160,1215,420,1700,1960].map((p,i)=>fork(p,{hp:kills&&i%2===0?60:1e7,kind:i%4===3?'runner':'grunt'}));
   // Aurora's mirror goes on the toughest enemy while the allies keep attacking.
   if(entry.key==='aurora')enemies=SPREAD.slice(0,7).map((p,i)=>fork(p,{hp:i===3?2e7:1e7}));
+  // Sakura's seal lands on the densest pack: six close together on the right road (or the top road, under the cut-in band), three
+  // stragglers. With "sealed" every other enemy of the pack already burns and holds a divine mark, so the blast stuns it.
+  if(entry.key==='sakura'||entry.key==='sakura-top'){
+    const pack=entry.key==='sakura'?[880,925,970,1015,1060,1105]:[200,245,290,335,380,430];
+    enemies=[...pack,...(entry.key==='sakura'?[420,1700,1960]:[900,1500,1960])].map((p,i)=>fork(p,{hp:kills&&i%2===0?60:1e7,kind:i%4===3?'runner':'grunt'}));
+    if(sealed)enemies.slice(0,6).forEach((e,i)=>{if(i%2)e.statusEffects.push({type:'burn',source:'fixture',owner:'flame_sage',amount:6,until:30},{type:'divine',source:'fixture',owner:'jasmine',amount:1,until:30});});
+  }
   if(entry.key==='dense')enemies=[...ATTACK,...ATTACK.map(p=>p+110)].map(p=>fork(p));
   s.enemies=enemies;
   s.queue=[{kind:'grunt',hp:1e7}];s.spawnIn=999;s.events=[];s.time=0;s.shots=[];s.finishers=[];s.volleys=[];s.zones=[];s.telegraph=null;s.gauge=entry.key==='star-boy'?120:200;s.gold=entry.key==='doom'&&!rich?60:400;s.phase='combat';s.health=99;
@@ -131,6 +151,10 @@ export function reviewScene(entry,{kills=true,empowered=false,spotlight=false,mo
   const cast=()=>{
     if(!skill)return [];
     const result=E.cast(s,entry.hero);if(!result.ok)throw Error(entry.key+': '+(result.reason||'cast failed'));
+    // Victoria's Proof of Miracle charges for 5 s before it fires. The charge scene starts at the button; the release scene runs the
+    // charge through the engine first and starts at the release.
+    if(entry.key==='victoria-charge')return s.events.splice(0);
+    if(entry.hero==='victoria'){const events=s.events.splice(0);for(let i=0;i<400&&!events.some(e=>e.type==='skill');i++){E.step(s,.025);events.push(...s.events.splice(0));}s.events.push(...events);}
     if(!s.events.some(e=>e.type==='skill'&&e.hero===entry.hero))throw Error(entry.key+': missing skill event');
     return s.events.splice(0);
   };

@@ -84,6 +84,11 @@ const RAMPS=Object.freeze({
   dream:[[0,'#042a3a'],[.3,'#18a0c8'],[.55,'#64dcf0'],[.78,'#c4f4ff'],[.93,'#f4feff'],[1,'#ffffff']],
   dreamMoon:[[0,'#0a1640'],[.3,'#3a62d8'],[.55,'#7ab0ff'],[.78,'#c8e2ff'],[.93,'#f0f8ff'],[1,'#ffffff']],
   dreamStar:[[0,'#3a0a30'],[.3,'#e04a9a'],[.55,'#ff9ad0'],[.78,'#ffe0a0'],[.93,'#fff8e0'],[1,'#ffffff']],
+  // Card companions (2026-11-25): Victoria's coral accent, Sakura's paper talisman (an object: its gray shading reads as paper and
+  // crimson ink) and her pink flame.
+  victory:[[0,'#3a0806'],[.3,'#c03a2a'],[.55,'#f27b72'],[.78,'#ffc890'],[.93,'#fff2dc'],[1,'#ffffff']],
+  paper:[[0,'#3a0414'],[.3,'#a8163e'],[.55,'#ff6a8e'],[.75,'#ffc4d2'],[.9,'#fff4ec'],[1,'#ffffff']],
+  sakuraFire:[[0,'#3a0210'],[.3,'#d0143c'],[.55,'#ff4a6a'],[.78,'#ffa0b8'],[.93,'#ffe8ee'],[1,'#ffffff']],
 });
 // v2 tone curve for light pieces (brightness -> ramp position); objects keep their own shading.
 const TONE=Uint8Array.from({length:256},(_,i)=>Math.round(255*Math.pow(i/255,2)));
@@ -112,7 +117,7 @@ function kitCanvas(fx,frame,ramp,sheet='ur-kit'){
   const img=fx.art?.images?.[sheet];if(!img||typeof document==='undefined')return null;
   const v1=fx.palette==='v1',cache=fx.urCache||(fx.urCache=new Map()),key=(v1?'v1|':'')+sheet+'|'+frame+'|'+ramp;let c=cache.get(key);if(c)return c;
   const stops=(v1?RAMPS_V1[ramp]:null)||RAMPS[ramp]||(ramp.startsWith('hero:')?heroStops(ramp.slice(5)):null);if(!stops)return null;
-  const objects=sheet==='ur-kit2'?KIT2_OBJECT:sheet==='ur-kit3'?KIT3_OBJECT:null,object=!!objects?.has(frame),size=(sheet==='ur-kit2'?KIT2_SMALL:sheet==='ur-kit3'?KIT3_SMALL:SMALL).has(frame)?128:256,cw=img.naturalWidth/4;
+  const objects=sheet==='ur-kit2'?KIT2_OBJECT:sheet==='ur-kit3'?KIT3_OBJECT:sheet==='ur-kit4'?KIT4_OBJECT:null,object=!!objects?.has(frame),size=(sheet==='ur-kit2'?KIT2_SMALL:sheet==='ur-kit3'?KIT3_SMALL:sheet==='ur-kit4'?KIT4_SMALL:SMALL).has(frame)?128:256,cw=img.naturalWidth/4;
   c=document.createElement('canvas');c.width=c.height=size;const g=c.getContext('2d',{willReadFrequently:true});
   g.drawImage(img,frame%4*cw,Math.floor(frame/4)*cw,cw,cw,0,0,size,size);
   try{const d=g.getImageData(0,0,size,size),p=d.data,l=lutOf(stops);for(let i=0;i<p.length;i+=4){const a=p[i+3];if(!a)continue;const v=object?p[i]:v1?a:TONE[a];p[i]=l[v*3];p[i+1]=l[v*3+1];p[i+2]=l[v*3+2];}g.putImageData(d,0,0);}
@@ -131,8 +136,8 @@ function kitStanding(fx,frame,ramp,x,y,w,rise=1,flip=1,lean=0,alpha=1,blend='lig
   ctx.save();ctx.globalAlpha*=Math.min(1,alpha);ctx.globalCompositeOperation=blend;ctx.translate(x,y);if(lean)ctx.rotate(lean);ctx.scale(flip,rise);ctx.drawImage(c,-w/2,-w*KIT_FLOOR,w,w);ctx.restore();
 }
 // A round piece lying flat on the board (perspective squash), turning in its own plane.
-function disc(fx,frame,ramp,x,y,w,squash,spin,alpha,blend='lighter'){
-  if(!(alpha>.004)||!(w>0))return;const c=kitCanvas(fx,frame,ramp,'ur-kit2');if(!c)return;const ctx=fx.ctx;
+function disc(fx,frame,ramp,x,y,w,squash,spin,alpha,blend='lighter',sheet='ur-kit2'){
+  if(!(alpha>.004)||!(w>0))return;const c=kitCanvas(fx,frame,ramp,sheet);if(!c)return;const ctx=fx.ctx;
   ctx.save();ctx.globalAlpha*=Math.min(1,alpha);ctx.globalCompositeOperation=blend;ctx.translate(x,y);ctx.scale(1,squash);ctx.rotate(spin);ctx.drawImage(c,-w/2,-w/2,w,w);ctx.restore();
 }
 // A clock hand turning on its hub at (x, y); angle 0 points to twelve.
@@ -1286,11 +1291,175 @@ const behemoth={
   body(){return null;},
 };
 
+// ---------------------------------------------------------------------------------------------------------------------
+// Card companions (2026-11-25). The owner found the first Victoria and Sakura ultimates flat next to the cast's sequences: one emblem
+// over the board with a few code-drawn marks. They are now sequences like the rest. ur-kit4 (1024x512, 256-px cells 4x2, GPT image,
+// docs/art/card-ur-vfx-20261125): four light pieces (sakura seal, laurel wreath, blossom, rise arrow) and two gray objects (paper
+// talisman, victory banner), recoloured by the same ramps.
+export const KIT4=Object.freeze({seal:0,laurel:1,blossom:2,arrow:3,talisman:4,banner:5});
+const KIT4_OBJECT=new Set([KIT4.talisman,KIT4.banner]),KIT4_SMALL=new Set([KIT4.blossom,KIT4.arrow]);
+export function kit4(fx,frame,ramp,x,y,w,h=w,angle=0,alpha=1,blend='lighter',flip=1){drawPiece(fx,'ur-kit4',frame,ramp,x,y,w,h,angle,alpha,blend,flip);}
+
+// Victoria · Proof of Miracle. After her 5 s charge (expansion-vfx.js drawVictoriaCharge, with victoriaCharge below) the engine gives
+// every ally +70% power and +40% attack speed for 8 s; the HUD timer shows the duration, so nothing lingers on the units. She is the
+// commander of the formation: she raises her winged sceptre (gold gathers into its orb) and her victory standard rises behind her; a
+// golden command ring runs out from her cell across the formation, and every ally it reaches answers with a small hop, a short
+// column of gold and two rising arrows (gold for power, coral for speed); as the cut-in band lifts, a laurel wreath crowned in gold
+// opens over the middle of the board and gold and coral confetti flutter down over the formation.
+// The sceptre's orb on each facing frame (measured on the 512-px atlas cell, drawn at 126 px with the foot at the cell point + 31).
+const VIC_ORB={down:{x:-25,y:-37},up:{x:28,y:-37},left:{x:-25,y:-40},right:{x:24,y:-40}};
+const VIC_RING=.36,VIC_SPEED=720,VIC_PROOF=1.42,VIC_WREATH={x:360,y:424,w:560};
+const victoriaOrb=(p,dir)=>{const d=VIC_ORB[dir]||VIC_ORB.down;return {x:p.x+d.x,y:p.y+d.y};};
+const hopOf=c=>c<0||c>.4?0:bell(span(c,0,.32));
+const victoria={
+  life:()=>2.9,
+  plan(fx,skill){
+    const o=skill.origin,seed=(skill.uid||1)*5.77,allies=(skill.allies||skill.targets||[]).map(q=>({...q,at:VIC_RING+dist(q,o)/VIC_SPEED}));
+    const caster=allies.find(q=>Math.abs(q.x-o.x)<1&&Math.abs(q.y-o.y)<1);
+    skill.ur={seed,allies,byUid:new Map(allies.map(q=>[q.uid,q])),caster:caster?.uid,last:Math.max(VIC_RING,...allies.map(q=>q.at))};return null;
+  },
+  field(fx,skill,age){
+    const u=skill.ur,o=skill.origin,R=fx.reduced,mood=span(age,0,.25)*(1-span(age,1.9,2.6));
+    vignette(fx,o.x,o.y-40,100,600,'#1a1004',R?0:.4*mood);
+    // Her seal under her feet as she raises the sceptre, and her standard rising behind her (under the units: it never hides a face).
+    disc(fx,KIT2.circle,'gold',o.x,o.y+24,lerp(80,190,easeOut(span(age,.05,.4))),.38,age*.9,.85*(1-span(age,1.1,1.7)));
+    const plant=easeBack(span(age,.1,.36)),stand=plant*(1-span(age,2.05,2.5)),side=o.x>450?-1:1;
+    if(stand>0)kitStanding(fx,KIT4.banner,'holy',o.x+side*30,o.y+18,178,stand,side,R?0:Math.sin(age*3.2)*.03,stand,'source-over','ur-kit4');
+    // The command ring runs out over the formation.
+    const k=age-VIC_RING;if(k>=0){const r=k*VIC_SPEED,a=1-span(age,u.last,u.last+.35);if(a>0){kit(fx,KIT.ring,'gold',o.x,o.y+22,r*2,r*.84,0,.85*a);kit(fx,KIT.ring,'victory',o.x,o.y+22,r*1.86,r*.78,0,.45*a);}}
+    // As it passes, each ally's floor lights.
+    for(const q of u.allies){const c=age-q.at;if(c<0||c>.6)continue;disc(fx,KIT2.circle,'gold',q.x,q.y+24,lerp(60,112,easeOut(span(c,0,.4))),.38,c*2,.6*bell(span(c,0,.6)));}
+    // Under the laurel, a broad sun on the board.
+    const proof=span(age,VIC_PROOF,VIC_PROOF+.3)*(1-span(age,2.25,2.85));if(proof>0&&!R)fx.glow('rays','#ffd36a',VIC_WREATH.x,VIC_WREATH.y,680*easeOut(proof),.26*proof,age*.15);
+  },
+  over(fx,skill,age){
+    const u=skill.ur,o=skill.origin,R=fx.reduced,orb=victoriaOrb(o,'down'),spot=fx.s?.buffSpotlight?.victoriaMiracle;
+    // Gold gathers into the orb, which flares as she raises the sceptre.
+    if(age<.42)for(let i=0;i<(R?4:12);i++){const t0=hash(u.seed,i)*.12,k=span(age,t0,t0+.26);if(k<=0||k>=1)continue;const ang=hash(u.seed,i+20)*6.283,r=lerp(130,4,easeIn(k));kit(fx,KIT.flare,'gold',orb.x+Math.cos(ang)*r,orb.y+Math.sin(ang)*r*.8,14,undefined,ang,bell(k));}
+    const lift=bell(span(age,.18,.62));if(lift>0){if(!R)fx.glow('rays','#ffe08a',orb.x,orb.y,260*lift,.55*lift,age*.8);kit(fx,KIT.flare,'gold',orb.x,orb.y,150*lift,undefined,age*.6,lift);}
+    // Every ally the ring reaches answers: a hop (unitBody), a short gold column and two rising arrows; the spotlight lead burns brighter.
+    for(const q of u.allies){
+      const c=age-q.at;if(c<0||c>.9||q.uid===u.caster)continue;const lead=spot!==undefined&&q.uid===spot,unit=unitAt(fx,q),b=bell(span(c,0,.55));
+      pillar(fx,'gold',q.x,q.y-(lead?170:118),q.y+22,lead?24:13,(lead?.7:.5)*b);
+      if(unit&&!R)drawGhost(fx,unit.hero,q.x,q.y+31-8*hopOf(c),unit.facing||'down','#ffd36a',(lead?.2:.1)*b,126,unitForm(fx.s,unit));
+      if(c<.25)kit(fx,KIT.flare,'gold',q.x,q.y+14,(lead?120:70)*(1-span(c,0,.25)),undefined,.3,.8*(1-span(c,.02,.25)));
+      for(const [j,ramp] of [[0,'gold'],[1,'victory']]){const k=span(c,.04+j*.12,.62+j*.12);if(k<=0||k>=1)continue;kit4(fx,KIT4.arrow,ramp,q.x+(j?15:-15),q.y-26-62*easeOut(k),lead?40:32,undefined,0,bell(k)*.95);}
+    }
+    // The proof: as the band lifts, a laurel wreath opens around the whole formation and the crown settles into its open top.
+    const open=easeBack(span(age,VIC_PROOF,VIC_PROOF+.38)),show=span(age,VIC_PROOF,VIC_PROOF+.15)*(1-span(age,2.2,2.8));
+    if(show>0){const W=VIC_WREATH,w=W.w*lerp(.55,1,open),crownY=W.y-w*.4+(R?0:4*Math.sin(age*3)),drop=easeOut(span(age,VIC_PROOF+.08,VIC_PROOF+.4)),shine=bell(span(age,VIC_PROOF+.3,VIC_PROOF+.65));
+      kit4(fx,KIT4.laurel,'gold',W.x,W.y,w,w,0,.48*show);
+      if(!R)fx.glow('glow','#ffe6a5',W.x,crownY,220,.45*show);
+      kit2(fx,KIT2.crown,'gold',W.x,lerp(crownY-60,crownY,drop),96,undefined,0,show*drop,'source-over');
+      kit(fx,KIT.flare,'gold',W.x,crownY-14,240*shine,undefined,.4,shine);
+      if(!u.proved&&age>=VIC_PROOF+.4){u.proved=true;stun(fx,3,0);}}
+    // Gold and coral confetti flutter down over the formation (they sway as they fall).
+    if(!R)for(let i=0;i<34;i++){const t0=VIC_PROOF+.1+hash(u.seed,i+60)*.5,k=span(age,t0,t0+1.1);if(k<=0||k>=1)continue;
+      const x=60+hash(u.seed,i+90)*600+Math.sin(age*4+i*1.7)*16,y=lerp(240+hash(u.seed,i+120)*80,700,k*(.7+.3*hash(u.seed,i+150))),gold=i%2===1;
+      glint(fx,x,y,hash(u.seed,i)<.3?3.4:2.4,gold?'#ffd36a':'#ff9a88',gold?'#ffb72e':'#f27b72',bell(k)*(.6+.4*Math.sin(age*20+i)),age*3+i);}
+    wash(fx,'#ffd36a',.14*bell(span(age,.4,1.1))+.12*bell(span(age,VIC_PROOF,VIC_PROOF+.6)));
+  },
+  // She faces the board and lifts with the sceptre; each ally hops once as the command reaches it.
+  unitBody(fx,skill,age,u){
+    const v=skill.ur;if(u.uid===v.caster){if(fx.reduced)return {direction:'down'};const k=easeOut(span(age,0,.25))*(1-span(age,.9,1.3));return {direction:'down',dy:-10*k,squash:1+.03*k};}
+    if(fx.reduced)return null;const q=v.byUid.get(u.uid);if(!q)return null;const h=hopOf(age-q.at);return h>0?{dy:-8*h,squash:1+.04*h}:null;
+  },
+};
+// The 5 s charge, drawn while s.victoriaCharge runs (progress 0..1): her seal fills under her and gold drifts into the sceptre's orb,
+// which glows brighter as the release nears. Kept small and low: the formation keeps fighting for those five seconds.
+export function victoriaCharge(fx,p,facing,progress,foreground){
+  if(!urReady(fx,'victoria'))return false;const clock=fx.clock||0,R=fx.reduced;
+  if(!foreground){disc(fx,KIT2.circle,'gold',p.x,p.y+24,lerp(70,120,progress),.38,clock*.5,lerp(.22,.55,progress));return true;}
+  const orb=victoriaOrb(p,facing),pulse=.85+.15*Math.sin(clock*(6+progress*10)),near=span(progress,.88,1);
+  kit(fx,KIT.flare,'gold',orb.x,orb.y,lerp(34,72,progress)*pulse+70*near,undefined,clock,lerp(.55,.95,progress));
+  if(!R)for(let i=0;i<5;i++){const k=(clock*.9+i/5)%1,ang=i*1.256+Math.floor(clock*.9+i/5)*2.1,r=lerp(70,4,easeIn(k));kit(fx,KIT.flare,'gold',orb.x+Math.cos(ang)*r,orb.y+Math.sin(ang)*r*.7,11,undefined,ang,bell(k)*.85);}
+  return true;
+}
+
+// Sakura · Blazing Seal. The engine strikes the densest pack within radius 150 at the cast (x6 and a burn); an enemy already burning
+// and marked divine is also stunned (sealed). One talisman, one blast: petals gather at her hand while she draws the talisman; she
+// throws it in an arc onto the middle of the pack, it sticks there upright and the sakura seal unfolds on the ground at the real
+// radius; the seal draws in and the talisman catches fire; then a pillar of pink flame erupts from it, the talisman bursts into
+// blossoms and a petal storm, every enemy in the seal is struck, and a sealed enemy gets a talisman slapped on it for its stun.
+// On the top road (under the cut-in band) she holds the talisman until the band lifts.
+const SAKURA_HAND={down:{x:-33,y:-21},up:{x:33,y:-21},left:{x:-19,y:-16},right:{x:19,y:-16}};
+const SAKURA_BAND_Y=262;
+const sakura={
+  life:skill=>skill.ur.hit+1.05,
+  plan(fx,skill){
+    const t=skill.targets||[],o=skill.origin,B=skill.blast||(t.length?{x:t.reduce((n,q)=>n+q.x,0)/t.length,y:t.reduce((n,q)=>n+q.y,0)/t.length}:{x:360,y:405});
+    const radius=skill.radius||150,top=B.y<SAKURA_BAND_Y,throw0=top?1.12:.22,land=throw0+(top?.26:.3),hit=land+(top?.26:.42),dir=attackDirection(o,B),d=SAKURA_HAND[dir];
+    const at=new Map(t.map(q=>[q.uid,hit+.05*Math.min(1,dist(q,B)/radius)]));
+    skill.ur={seed:(skill.uid||1)*2.71,B:{x:B.x,y:B.y},radius,throw0,land,hit,dir,H:{x:o.x+d.x,y:o.y+d.y},at};return at;
+  },
+  field(fx,skill,age){
+    const u=skill.ur,B=u.B,R=fx.reduced,mood=span(age,0,.3)*(1-span(age,u.hit+.35,u.hit+.9));
+    vignette(fx,B.x,B.y-20,u.radius*.9,560,'#14040c',R?0:.42*mood);
+    if(age<u.land)return;
+    // The seal unfolds at the real radius when the talisman lands, turns while it draws in, and burns out after the blast.
+    const a=age-u.land,open=easeBack(span(a,0,.2)),charge=span(age,u.land,u.hit),out=1-span(age,u.hit+.2,u.hit+.85);
+    disc(fx,KIT4.seal,'sakura',B.x,B.y+6,u.radius*2/.9*lerp(.4,1,open),.42,age*.6,(.7+.3*charge)*out*Math.min(1,open*2),'lighter','ur-kit4');
+    if(age<u.hit){const r=lerp(u.radius*2,u.radius*.5,easeIn(charge));kit(fx,KIT.ring,'sakuraFire',B.x,B.y+6,r,r*.42,0,.7*charge);}
+    else{const k=span(age,u.hit,u.hit+.5),r=lerp(60,u.radius*2.7,easeOut(k));kit(fx,KIT.ring,'sakuraFire',B.x,B.y+6,r,r*.42,0,.9*(1-k));}
+  },
+  over(fx,skill,age){
+    const u=skill.ur,B=u.B,H=u.H,R=fx.reduced,big=u.radius/150;
+    // She draws the talisman: petals circle in to her hand, which glows pink.
+    if(age<u.throw0+.04){const k=span(age,0,.22);
+      for(let i=0;i<(R?3:9);i++){const f=((age+hash(u.seed,i+9)*.5)%.5)/.5,ang=hash(u.seed,i)*6.283+age*3,r=lerp(80,10,easeOut(f));kit(fx,KIT.petal,'sakura',H.x+Math.cos(ang)*r,H.y+Math.sin(ang)*r*.7,13,13,ang*1.7,.9*k*bell(f),'source-over');}
+      kit(fx,KIT.flare,'sakura',H.x,H.y,lerp(40,90,k)*(1+.08*Math.sin(age*18)),undefined,age*2,.9*k);
+      kit4(fx,KIT4.talisman,'paper',H.x,H.y-6,32,32,u.dir==='left'?-.2:.2,k,'source-over');}
+    // The throw: one talisman spinning along an arc, shedding petals behind it.
+    const f=span(age,u.throw0,u.land);
+    if(f>0&&f<1){const at=g=>({x:lerp(H.x,B.x,g),y:lerp(H.y,B.y-34,g)-Math.sin(Math.PI*g)*80});
+      for(let i=1;i<=(R?3:10);i++){const g=f-i*.045;if(g<=0)break;const P=at(g),w=1-i/11;kit(fx,KIT.petal,'sakura',P.x+(hash(u.seed,i)-.5)*14,P.y+(hash(u.seed,i+5)-.5)*14+i*2,14*w+6,undefined,i+age*6,.85*w,'source-over');}
+      const P=at(f);kit(fx,KIT.flare,'sakura',P.x,P.y,70,undefined,age*5,.8);kit4(fx,KIT4.talisman,'paper',P.x,P.y,52,52,f*Math.PI*3,1,'source-over');}
+    // It sticks upright in the middle of the seal; petals spiral in and it starts to burn from the bottom.
+    if(age>=u.land&&age<u.hit+.06){const a=age-u.land,slap=1+.25*(1-easeOut(span(a,0,.12))),wob=R?0:Math.sin(a*30)*.12*(1-span(a,0,.3)),charge=span(age,u.land,u.hit);
+      if(a<.2)kit(fx,KIT.flare,'sakura',B.x,B.y-30,160*(1-span(a,0,.2)),undefined,.3,1-span(a,0,.2));
+      kitStanding(fx,KIT3.flame,'sakuraFire',B.x,B.y-6,lerp(30,74,charge),lerp(.3,1,charge),1,0,.9*charge,'lighter','ur-kit3');
+      kit4(fx,KIT4.talisman,'paper',B.x,B.y-36,60*slap,60*slap,wob,1,'source-over');
+      if(!R)fx.glow('glow','#ff5a7a',B.x,B.y-30,lerp(60,180,charge),.5*charge);
+      for(let i=0;i<(R?4:14);i++){const t0=u.land+hash(u.seed,i+30)*.16,k=span(age,t0,t0+.26);if(k<=0||k>=1)continue;const ang=hash(u.seed,i+40)*6.283+k*2.5,r=lerp(u.radius*1.1,8,easeIn(k));kit(fx,KIT.petal,'sakura',B.x+Math.cos(ang)*r,B.y-14+Math.sin(ang)*r*.42,15,15,ang*2,bell(k),'source-over');}}
+    // The blast: a pillar of pink flame, the talisman bursting into blossoms, a petal storm and embers that sway as they rise.
+    const h=age-u.hit;
+    if(h>=0){
+      if(!u.blasted){u.blasted=true;stun(fx,7,.07);}
+      wash(fx,'#ff6a8a',.22*(1-span(h,0,.35)));
+      const rise=easeBack(span(h,0,.14))*(1-span(h,.35,.7)),burn=1-span(h,.3,.7);
+      if(rise>0)kit(fx,KIT.mist,'sakuraFire',B.x,B.y-70*rise*big,260*big,240*rise*big,0,.5*burn);
+      for(const side of [-1,1])kitStanding(fx,KIT3.flame,'sakuraFire',B.x+side*26*big,B.y+6,170*big,rise*.85,side,side*.42,.9*burn,'lighter','ur-kit3');
+      kitStanding(fx,KIT3.flame,'sakuraFire',B.x,B.y+4,250*big,rise,1,0,burn,'lighter','ur-kit3');
+      kit(fx,KIT.shatter,'sakuraFire',B.x,B.y-24,lerp(u.radius*.9,u.radius*1.9,easeOut(span(h,0,.35))),undefined,u.seed,1-span(h,.05,.45));
+      kit(fx,KIT.flare,'sakuraFire',B.x,B.y-40,320*big*easeOut(span(h,0,.08)),undefined,.2,1-span(h,.06,.35));
+      if(!R)fx.glow('glow','#ff7a9a',B.x,B.y-30,300*big,.6*(1-span(h,0,.3)));
+      for(let i=0;i<(R?3:7);i++){const ang=i*Math.PI*2/7+hash(u.seed,i+70),k=span(h,0,.7),d=(60+120*hash(u.seed,i+80))*easeOut(k)*big;kit4(fx,KIT4.blossom,'sakura',B.x+Math.cos(ang)*d,B.y-30+Math.sin(ang)*d*.6-20*k,lerp(38,22,k),undefined,ang+k*3,1-span(k,.4,1));}
+      for(let i=0;i<(R?10:30);i++){const ang=hash(u.seed,i+100)*6.283,v=(140+hash(u.seed,i+130)*220)*big,k=span(h,0,1),d=v*(1-Math.exp(-k*3))/3;
+        kit(fx,KIT.petal,'sakura',B.x+Math.cos(ang)*d+Math.sin(age*5+i)*8,B.y-30+Math.sin(ang)*d*.7+70*k*k,14+hash(u.seed,i)*8,undefined,ang*2+k*6,1-k,'source-over');}
+      if(!R)for(let i=0;i<14;i++){const t0=hash(u.seed,i+170)*.3,k=span(h,t0,t0+.7);if(k<=0||k>=1)continue;
+        kit(fx,KIT.flare,'fire',B.x+(hash(u.seed,i+180)-.5)*u.radius*1.4+Math.sin(age*6+i)*10,B.y-10-k*(90+hash(u.seed,i+190)*80),10+hash(u.seed,i)*8,undefined,k*4,bell(k));}
+    }
+    // Each enemy in the seal is struck as the blast reaches it; a sealed one gets a talisman slapped on for its stun.
+    for(const q of skill.targets||[]){
+      const c=age-u.at.get(q.uid);if(c<0||c>1)continue;const P=fx.point(q.uid,q),bg=bossOf(fx,q)?1.4:1,cy=P.y-(bg>1?40:22);
+      if(c<.5){kitStanding(fx,KIT3.flame,'sakuraFire',P.x,P.y+6,lerp(40,64,easeOut(span(c,0,.2)))*bg,easeBack(span(c,0,.12))*(1-span(c,.25,.5)),1,0,1,'lighter','ur-kit3');kit(fx,KIT.flare,'sakuraFire',P.x,cy,110*bg*(1-span(c,0,.2)),undefined,.4,1-span(c,.03,.25));}
+      if(q.sealed){const k=span(c,.08,.2),gone=span(c,.7,1);if(k>0&&gone<1){const s=lerp(58,38,easeOut(k))*bg;kit4(fx,KIT4.talisman,'paper',P.x,cy-6,s,s,-.15,1-gone,'source-over');kit(fx,KIT.ring,'sakuraFire',P.x,P.y+6,(54+(R?0:8*Math.sin(age*8)))*bg,23*bg,0,.8*(1-gone));}}
+    }
+  },
+  // She turns to the pack, winds up with the talisman and snaps forward on the throw.
+  body(fx,skill,age){
+    const u=skill.ur;if(fx.reduced)return {direction:u.dir};
+    const t=span(age,u.throw0-.06,u.throw0+.1),wind=age<u.throw0?easeOut(span(age,0,.2)):1-t,lean=u.dir==='left'?-1:u.dir==='right'?1:0,back=1-span(age,u.land,u.land+.25);
+    return {direction:u.dir,dy:-3*wind,angle:lean*(-.06*wind+.09*bell(t))*back,squash:1+.02*wind};
+  },
+};
+
 export const UR_SPECS=Object.freeze({cherry_prince:cherry,luna,frost_witch:frost,harmonious:harmony,jasmine,queen,time_magician:trauma,galaxy_whale:whale,time_ruler:chrono,
-  cinderella,venom,doom,rumi,red_dragon:redDragon,aurora,star_boy:starBoy,behemoth});
+  cinderella,venom,doom,rumi,red_dragon:redDragon,aurora,star_boy:starBoy,behemoth,victoria,sakura});
 const KIT_BOTH=['ur-kit','ur-kit2'],KIT_ALL=['ur-kit','ur-kit2','ur-kit3'],KIT_ONE_THREE=['ur-kit','ur-kit3'];
 const NEEDS=Object.freeze({harmonious:['ur-kit','ur-sweets'],jasmine:KIT_BOTH,queen:KIT_BOTH,time_magician:KIT_BOTH,galaxy_whale:KIT_BOTH,time_ruler:KIT_BOTH,
-  cinderella:KIT_ALL,venom:KIT_ONE_THREE,doom:KIT_ALL,rumi:KIT_ALL,red_dragon:KIT_ONE_THREE,aurora:KIT_ALL,star_boy:KIT_ONE_THREE,behemoth:['ur-kit','effects-behemoth']});
+  cinderella:KIT_ALL,venom:KIT_ONE_THREE,doom:KIT_ALL,rumi:KIT_ALL,red_dragon:KIT_ONE_THREE,aurora:KIT_ALL,star_boy:KIT_ONE_THREE,behemoth:['ur-kit','effects-behemoth'],
+  victoria:['ur-kit','ur-kit2','ur-kit4'],sakura:['ur-kit','ur-kit3','ur-kit4']});
 // A sequence runs only with its art loaded; otherwise the previous visuals stay (same fallback rule as Ragnarok).
 export function urReady(fx,hero){const spec=UR_SPECS[hero];return !!spec&&(NEEDS[hero]||['ur-kit']).every(id=>fx.art?.images?.[id]);}
 export function urSpec(fx,skill){return skill&&skill.kind!=='dream'&&urReady(fx,skill.hero)?UR_SPECS[skill.hero]:null;}
