@@ -16,7 +16,7 @@ const dir=path.join(gameRoot,'docs/review',page),beforeDir=path.join(dir,'before
 await fs.mkdir(beforeDir,{recursive:true});
 // main's renderer files, with every import except each other resolved to the shared src/ copy.
 const repoRoot=execFileSync('git',['rev-parse','--show-toplevel'],{cwd:gameRoot}).toString().trim();
-const copies=['render.js','effects.js','ur-vfx.js'];
+const copies=['render.js','effects.js','ur-vfx.js','expansion-vfx.js'];
 for(const name of copies){
   let text=execFileSync('git',['show',`${base}:defense/src/combat/${name}`],{cwd:repoRoot,maxBuffer:64<<20}).toString();
   // Paths are built from a prefix so this script itself has no out-of-game import-like string (tests/independence.test.mjs).
@@ -27,7 +27,7 @@ for(const name of copies){
 // Only presentation payload additions are shared with main's renderer.
 const allowedShared=new Map([
   ['combat/engine.js','shared scene engine adds only blast, radius, bonus and spent presentation event fields'],
-  ['data.js','adds only the ur-kit3 asset path'],
+  ['data.js','adds only UR kit asset paths (ur-kit3, ur-kit4)'],
 ]);
 const srcDir=path.join(gameRoot,'src'),checked=new Set();
 const guard={name:'before-dependency-guard',setup(b){

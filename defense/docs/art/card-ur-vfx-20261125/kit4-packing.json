@@ -1,0 +1,194 @@
+{
+  "spec": "defense/docs/art/card-ur-vfx-20261125/kit4-pack.json",
+  "mode": "kit",
+  "cells": [
+    {
+      "index": 0,
+      "name": "seal",
+      "kind": "light",
+      "src": "defense/docs/art/card-ur-vfx-20261125/gpt-kitL4-b.webp",
+      "cut": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "box": [
+        47,
+        35,
+        534,
+        536
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        14,
+        13,
+        229,
+        230
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 1,
+      "name": "laurel",
+      "kind": "light",
+      "src": "defense/docs/art/card-ur-vfx-20261125/gpt-kitL4-b.webp",
+      "cut": [
+        627,
+        0,
+        1254,
+        627
+      ],
+      "box": [
+        678,
+        65,
+        526,
+        483
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        269,
+        22,
+        230,
+        213
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 2,
+      "name": "blossom",
+      "kind": "light",
+      "src": "defense/docs/art/card-ur-vfx-20261125/gpt-kitL4-c.webp",
+      "cut": [
+        0,
+        627,
+        627,
+        1254
+      ],
+      "box": [
+        96,
+        697,
+        440,
+        418
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        525,
+        19,
+        230,
+        219
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 3,
+      "name": "arrow",
+      "kind": "light",
+      "src": "defense/docs/art/card-ur-vfx-20261125/gpt-kitL4-b.webp",
+      "cut": [
+        627,
+        627,
+        1254,
+        1254
+      ],
+      "box": [
+        781,
+        682,
+        316,
+        499
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        820,
+        13,
+        152,
+        230
+      ],
+      "anchor": "center"
+    },
+    {
+      "index": 4,
+      "name": "talisman",
+      "kind": "object",
+      "src": "defense/docs/art/card-ur-vfx-20261125/gpt-kitO4-b.webp",
+      "cut": [
+        0,
+        0,
+        887,
+        887
+      ],
+      "box": [
+        339,
+        105,
+        264,
+        706
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        80,
+        269,
+        97,
+        230
+      ],
+      "anchor": "center",
+      "solo": true
+    },
+    {
+      "index": 5,
+      "name": "banner",
+      "kind": "object",
+      "src": "defense/docs/art/card-ur-vfx-20261125/gpt-kitO4-b.webp",
+      "cut": [
+        887,
+        0,
+        1774,
+        887
+      ],
+      "box": [
+        1134,
+        47,
+        390,
+        795
+      ],
+      "touchesCut": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "placed": [
+        323,
+        269,
+        122,
+        230
+      ],
+      "anchor": "bottom",
+      "solo": true
+    }
+  ]
+}

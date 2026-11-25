@@ -1,0 +1,16 @@
+{
+ "nodeModules": "C:/Users/BOMHANA/Downloads/게임/Studying/node_modules",
+ "out": "defense/assets/merge/ur-kit4.webp",
+ "cell": 256,
+ "columns": 4,
+ "rows": 2,
+ "mode": "kit",
+ "cells": [
+  {"name": "seal", "src": "defense/docs/art/card-ur-vfx-20261125/gpt-kitL4-b.webp", "grid": [2,2], "at": [0,0], "source": "light"},
+  {"name": "laurel", "src": "defense/docs/art/card-ur-vfx-20261125/gpt-kitL4-b.webp", "grid": [2,2], "at": [1,0], "source": "light"},
+  {"name": "blossom", "src": "defense/docs/art/card-ur-vfx-20261125/gpt-kitL4-c.webp", "grid": [2,2], "at": [0,1], "source": "light"},
+  {"name": "arrow", "src": "defense/docs/art/card-ur-vfx-20261125/gpt-kitL4-b.webp", "grid": [2,2], "at": [1,1], "source": "light"},
+  {"name": "talisman", "src": "defense/docs/art/card-ur-vfx-20261125/gpt-kitO4-b.webp", "grid": [2,1], "at": [0,0], "solo": true},
+  {"name": "banner", "src": "defense/docs/art/card-ur-vfx-20261125/gpt-kitO4-b.webp", "grid": [2,1], "at": [1,0], "solo": true, "anchor": "bottom"}
+ ]
+}

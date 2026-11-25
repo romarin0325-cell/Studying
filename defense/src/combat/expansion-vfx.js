@@ -4,6 +4,7 @@
 import {HERO} from '../content.js';
 import {cellPoint,VICTORIA_CHARGE} from './engine.js';
 import {EXPANSION_IDS,EXPANSION_RARITIES} from '../expansion-companions.js';
+import {urReady,victoriaCharge} from './ur-vfx.js';
 
 export const EXPANSION_VFX=Object.freeze({
   ancient_soul:Object.freeze({motif:'soulFlame',skill:'soulOrbit',primary:'#ffb35e',accent:'#8d67d8'}),
@@ -137,6 +138,8 @@ export function drawVictoriaCharge(fx,s,foreground,hiddenUid=null){
   const charge=s.victoriaCharge;if(!charge||s.phase!=='combat'||charge.wave!==s.wave||charge.source===hiddenUid)return;
   const index=s.board.findIndex(u=>u?.uid===charge.source&&u.hero==='victoria');if(index<0)return;
   const ctx=fx.ctx,p=cellPoint(index),progress=clamp((s.time-charge.started)/VICTORIA_CHARGE),remaining=Math.max(0,charge.ends-s.time);
+  // With the UR kit loaded her seal fills under her and gold gathers into the sceptre (ur-vfx.js); the progress arc and countdown stay.
+  victoriaCharge(fx,p,s.board[index].facing||'down',progress,foreground);
   if(!foreground){ctx.save();ctx.strokeStyle='#ffe29a';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(p.x,p.y+30,31,10,0,-Math.PI/2,-Math.PI/2+Math.PI*2*progress);ctx.stroke();ctx.restore();return;}
   fx.glow('glow','#ffde93',p.x,p.y-88,95,.2+progress*.25);
   drawExpansionEmblem(fx,'victoria',p.x,p.y-88,42+progress*28,0,.85);
@@ -237,6 +240,8 @@ export function drawExpansionSkill(fx,skill){
 
 export function expansionSkillEvents(fx,e){
   if(e.type!=='skill'||!EXPANSION_VFX[e.hero])return false;
+  // Sequenced ultimates (ur-vfx.js: Victoria, Sakura) draw their own receipts on their own timeline.
+  if(urReady(fx,e.hero))return true;
   const type=e.support?'expansionSupport':'expansionReceipt',life=e.support?.72:.58;
   for(const p of e.targets||[])fx.add({...p,type,hero:e.hero,life,total:life});
   return true;
