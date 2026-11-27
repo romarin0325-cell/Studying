@@ -50,9 +50,12 @@ export function freshDaily(now){return {day:calendar(now).day,combat:false,merge
 // Study (루미의 별의 서재): wrong answers wait in a notebook (latest pick kept); one a day becomes a star.
 // Finishing a constellation unlocks its illustration and opens the next one.
 export const WRONG_MAX=60;
-export const freshStudy=()=>({wrong:[],solved:[],library:{index:0,stars:0,unlocked:[],day:''}});
+// Question-set revision. 2 = the Japanese exam-style rewrite (2026-11-28): choices and their order changed, so a pick
+// recorded under an older set no longer points at the choice the player saw.
+export const QUIZ_REV=2;
+export const freshStudy=()=>({wrong:[],solved:[],library:{index:0,stars:0,unlocked:[],day:''},quizRev:QUIZ_REV});
 function validStudy(s){
-  if(!s||typeof s!=='object'||!Array.isArray(s.wrong)||s.wrong.length>WRONG_MAX||!s.library||typeof s.library!=='object')return false;
+  if(!s||typeof s!=='object'||!Array.isArray(s.wrong)||s.wrong.length>WRONG_MAX||!s.library||typeof s.library!=='object'||s.quizRev!==QUIZ_REV)return false;
   const keys=new Set();
   for(const w of s.wrong){if(!w||!['concept','term'].includes(w.kind)||typeof w.id!=='string'||w.id.length>40||!(w.choice===-1||integer(w.choice,9))||!integer(w.at))return false;const key=w.kind+':'+w.id;if(keys.has(key))return false;keys.add(key);}
   if(!Array.isArray(s.solved)||s.solved.length>2000||new Set(s.solved).size!==s.solved.length||s.solved.some(k=>typeof k!=='string'||k.length>60))return false;
@@ -61,9 +64,11 @@ function validStudy(s){
   return l.unlocked.length===l.index&&l.unlocked.every((id,i)=>CONSTELLATIONS[i].id===id);
 }
 // Saves from before the library get an empty one; entries whose question left the course (a new subject) are dropped.
+// Notes kept from an older question set stay in the notebook (same id, same concept) but forget the old pick.
 export function migrateStudy(p){
   if(p.study===undefined)p.study=freshStudy();
   if(Array.isArray(p.study?.wrong))p.study.wrong=p.study.wrong.filter(w=>w&&questionOf(w.kind,w.id));
+  if(p.study&&typeof p.study==='object'&&p.study.quizRev!==QUIZ_REV){if(Array.isArray(p.study.wrong))for(const w of p.study.wrong)if(w&&typeof w==='object')w.choice=-1;p.study.quizRev=QUIZ_REV;}
   if(p.study&&typeof p.study==='object'){if(p.study.solved===undefined)p.study.solved=[];if(Array.isArray(p.study.solved))p.study.solved=p.study.solved.filter(k=>typeof k==='string'&&questionOf(...k.split(':')));}
 }
 // Gift basket: the clock starts when an old save first opens (nothing is owed for the time before).

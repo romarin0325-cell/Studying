@@ -1,0 +1,1197 @@
+{
+ "note": "Target answer index (0=① … 3=④) for each rewritten 개념 확인 question, balanced in blocks of four. Batches are the GPT work split.",
+ "questions": [
+  {
+   "id": "pm-l01-c1",
+   "owner": "L01",
+   "target": 2
+  },
+  {
+   "id": "pm-l01-c2",
+   "owner": "L01",
+   "target": 3
+  },
+  {
+   "id": "pm-l02-c1",
+   "owner": "L02",
+   "target": 0
+  },
+  {
+   "id": "pm-l03-c1",
+   "owner": "L03",
+   "target": 1
+  },
+  {
+   "id": "pm-l04-c1",
+   "owner": "L04",
+   "target": 0
+  },
+  {
+   "id": "pm-l04-c2",
+   "owner": "L04",
+   "target": 3
+  },
+  {
+   "id": "pm-l08-c1",
+   "owner": "L08",
+   "target": 2
+  },
+  {
+   "id": "pm-l11-c1",
+   "owner": "L11",
+   "target": 1
+  },
+  {
+   "id": "pm-l11-c2",
+   "owner": "L11",
+   "target": 3
+  },
+  {
+   "id": "pm-l12-c1",
+   "owner": "L12",
+   "target": 2
+  },
+  {
+   "id": "pm-l18-c1",
+   "owner": "L18",
+   "target": 0
+  },
+  {
+   "id": "pm-l20-c1",
+   "owner": "L20",
+   "target": 1
+  },
+  {
+   "id": "pm-l20-c2",
+   "owner": "L20",
+   "target": 0
+  },
+  {
+   "id": "pm-l21-c1",
+   "owner": "L21",
+   "target": 2
+  },
+  {
+   "id": "pm-l22-c1",
+   "owner": "L22",
+   "target": 1
+  },
+  {
+   "id": "pm-l25-c1",
+   "owner": "L25",
+   "target": 3
+  },
+  {
+   "id": "pm-l26-c1",
+   "owner": "L26",
+   "target": 1
+  },
+  {
+   "id": "pm-l27-c1",
+   "owner": "L27",
+   "target": 0
+  },
+  {
+   "id": "pm-l28-c1",
+   "owner": "L28",
+   "target": 3
+  },
+  {
+   "id": "pm-l28-c2",
+   "owner": "L28",
+   "target": 2
+  },
+  {
+   "id": "pm-l30-c1",
+   "owner": "L30",
+   "target": 0
+  },
+  {
+   "id": "T001-q2",
+   "owner": "T001",
+   "target": 3
+  },
+  {
+   "id": "T002-q1",
+   "owner": "T002",
+   "target": 1
+  },
+  {
+   "id": "T002-q2",
+   "owner": "T002",
+   "target": 2
+  },
+  {
+   "id": "T003-q2",
+   "owner": "T003",
+   "target": 3
+  },
+  {
+   "id": "T005-q1",
+   "owner": "T005",
+   "target": 1
+  },
+  {
+   "id": "T005-q2",
+   "owner": "T005",
+   "target": 0
+  },
+  {
+   "id": "T006-q2",
+   "owner": "T006",
+   "target": 2
+  },
+  {
+   "id": "T007-q1",
+   "owner": "T007",
+   "target": 3
+  },
+  {
+   "id": "T007-q2",
+   "owner": "T007",
+   "target": 1
+  },
+  {
+   "id": "T008-q1",
+   "owner": "T008",
+   "target": 2
+  },
+  {
+   "id": "T008-q2",
+   "owner": "T008",
+   "target": 0
+  },
+  {
+   "id": "T009-q2",
+   "owner": "T009",
+   "target": 1
+  },
+  {
+   "id": "T012-q2",
+   "owner": "T012",
+   "target": 3
+  },
+  {
+   "id": "T013-q2",
+   "owner": "T013",
+   "target": 2
+  },
+  {
+   "id": "T014-q2",
+   "owner": "T014",
+   "target": 0
+  },
+  {
+   "id": "T015-q1",
+   "owner": "T015",
+   "target": 3
+  },
+  {
+   "id": "T015-q2",
+   "owner": "T015",
+   "target": 1
+  },
+  {
+   "id": "T017-q1",
+   "owner": "T017",
+   "target": 0
+  },
+  {
+   "id": "T017-q2",
+   "owner": "T017",
+   "target": 2
+  },
+  {
+   "id": "T018-q2",
+   "owner": "T018",
+   "target": 0
+  },
+  {
+   "id": "T019-q2",
+   "owner": "T019",
+   "target": 1
+  },
+  {
+   "id": "T020-q1",
+   "owner": "T020",
+   "target": 2
+  },
+  {
+   "id": "T020-q2",
+   "owner": "T020",
+   "target": 3
+  },
+  {
+   "id": "T021-q1",
+   "owner": "T021",
+   "target": 1
+  },
+  {
+   "id": "T021-q2",
+   "owner": "T021",
+   "target": 0
+  },
+  {
+   "id": "T022-q1",
+   "owner": "T022",
+   "target": 2
+  },
+  {
+   "id": "T022-q2",
+   "owner": "T022",
+   "target": 3
+  },
+  {
+   "id": "T023-q2",
+   "owner": "T023",
+   "target": 2
+  },
+  {
+   "id": "T024-q2",
+   "owner": "T024",
+   "target": 1
+  },
+  {
+   "id": "T025-q2",
+   "owner": "T025",
+   "target": 3
+  },
+  {
+   "id": "T026-q1",
+   "owner": "T026",
+   "target": 0
+  },
+  {
+   "id": "T026-q2",
+   "owner": "T026",
+   "target": 2
+  },
+  {
+   "id": "T027-q1",
+   "owner": "T027",
+   "target": 0
+  },
+  {
+   "id": "T027-q2",
+   "owner": "T027",
+   "target": 3
+  },
+  {
+   "id": "T028-q1",
+   "owner": "T028",
+   "target": 1
+  },
+  {
+   "id": "T028-q2",
+   "owner": "T028",
+   "target": 2
+  },
+  {
+   "id": "T029-q1",
+   "owner": "T029",
+   "target": 0
+  },
+  {
+   "id": "T029-q2",
+   "owner": "T029",
+   "target": 3
+  },
+  {
+   "id": "T030-q1",
+   "owner": "T030",
+   "target": 1
+  },
+  {
+   "id": "T030-q2",
+   "owner": "T030",
+   "target": 2
+  },
+  {
+   "id": "T031-q1",
+   "owner": "T031",
+   "target": 1
+  },
+  {
+   "id": "T031-q2",
+   "owner": "T031",
+   "target": 0
+  },
+  {
+   "id": "T032-q1",
+   "owner": "T032",
+   "target": 3
+  },
+  {
+   "id": "T032-q2",
+   "owner": "T032",
+   "target": 2
+  },
+  {
+   "id": "T033-q1",
+   "owner": "T033",
+   "target": 1
+  },
+  {
+   "id": "T033-q2",
+   "owner": "T033",
+   "target": 3
+  },
+  {
+   "id": "T034-q1",
+   "owner": "T034",
+   "target": 0
+  },
+  {
+   "id": "T034-q2",
+   "owner": "T034",
+   "target": 1
+  },
+  {
+   "id": "T035-q2",
+   "owner": "T035",
+   "target": 3
+  },
+  {
+   "id": "T036-q1",
+   "owner": "T036",
+   "target": 2
+  },
+  {
+   "id": "T036-q2",
+   "owner": "T036",
+   "target": 0
+  },
+  {
+   "id": "T037-q1",
+   "owner": "T037",
+   "target": 3
+  },
+  {
+   "id": "T037-q2",
+   "owner": "T037",
+   "target": 2
+  },
+  {
+   "id": "T038-q1",
+   "owner": "T038",
+   "target": 0
+  },
+  {
+   "id": "T038-q2",
+   "owner": "T038",
+   "target": 1
+  },
+  {
+   "id": "T039-q1",
+   "owner": "T039",
+   "target": 3
+  },
+  {
+   "id": "T039-q2",
+   "owner": "T039",
+   "target": 0
+  },
+  {
+   "id": "T040-q1",
+   "owner": "T040",
+   "target": 2
+  },
+  {
+   "id": "T040-q2",
+   "owner": "T040",
+   "target": 1
+  },
+  {
+   "id": "T041-q1",
+   "owner": "T041",
+   "target": 0
+  },
+  {
+   "id": "T041-q2",
+   "owner": "T041",
+   "target": 3
+  },
+  {
+   "id": "T043-q1",
+   "owner": "T043",
+   "target": 2
+  },
+  {
+   "id": "T043-q2",
+   "owner": "T043",
+   "target": 1
+  },
+  {
+   "id": "T044-q1",
+   "owner": "T044",
+   "target": 3
+  },
+  {
+   "id": "T044-q2",
+   "owner": "T044",
+   "target": 0
+  },
+  {
+   "id": "T045-q1",
+   "owner": "T045",
+   "target": 2
+  },
+  {
+   "id": "T045-q2",
+   "owner": "T045",
+   "target": 1
+  },
+  {
+   "id": "T046-q1",
+   "owner": "T046",
+   "target": 3
+  },
+  {
+   "id": "T046-q2",
+   "owner": "T046",
+   "target": 2
+  },
+  {
+   "id": "T047-q1",
+   "owner": "T047",
+   "target": 1
+  },
+  {
+   "id": "T047-q2",
+   "owner": "T047",
+   "target": 0
+  },
+  {
+   "id": "T048-q1",
+   "owner": "T048",
+   "target": 1
+  },
+  {
+   "id": "T048-q2",
+   "owner": "T048",
+   "target": 0
+  },
+  {
+   "id": "T049-q1",
+   "owner": "T049",
+   "target": 2
+  },
+  {
+   "id": "T049-q2",
+   "owner": "T049",
+   "target": 3
+  },
+  {
+   "id": "T050-q1",
+   "owner": "T050",
+   "target": 2
+  },
+  {
+   "id": "T050-q2",
+   "owner": "T050",
+   "target": 3
+  },
+  {
+   "id": "T051-q1",
+   "owner": "T051",
+   "target": 1
+  },
+  {
+   "id": "T051-q2",
+   "owner": "T051",
+   "target": 0
+  },
+  {
+   "id": "T052-q1",
+   "owner": "T052",
+   "target": 3
+  },
+  {
+   "id": "T052-q2",
+   "owner": "T052",
+   "target": 1
+  },
+  {
+   "id": "T053-q1",
+   "owner": "T053",
+   "target": 2
+  },
+  {
+   "id": "T053-q2",
+   "owner": "T053",
+   "target": 0
+  },
+  {
+   "id": "T054-q1",
+   "owner": "T054",
+   "target": 2
+  },
+  {
+   "id": "T054-q2",
+   "owner": "T054",
+   "target": 0
+  },
+  {
+   "id": "T055-q1",
+   "owner": "T055",
+   "target": 1
+  },
+  {
+   "id": "T055-q2",
+   "owner": "T055",
+   "target": 3
+  },
+  {
+   "id": "T056-q2",
+   "owner": "T056",
+   "target": 0
+  },
+  {
+   "id": "T057-q1",
+   "owner": "T057",
+   "target": 1
+  },
+  {
+   "id": "T057-q2",
+   "owner": "T057",
+   "target": 2
+  },
+  {
+   "id": "T058-q1",
+   "owner": "T058",
+   "target": 3
+  },
+  {
+   "id": "T058-q2",
+   "owner": "T058",
+   "target": 2
+  },
+  {
+   "id": "T059-q1",
+   "owner": "T059",
+   "target": 0
+  },
+  {
+   "id": "T059-q2",
+   "owner": "T059",
+   "target": 3
+  },
+  {
+   "id": "T060-q1",
+   "owner": "T060",
+   "target": 1
+  },
+  {
+   "id": "T060-q2",
+   "owner": "T060",
+   "target": 3
+  },
+  {
+   "id": "T061-q1",
+   "owner": "T061",
+   "target": 2
+  },
+  {
+   "id": "T061-q2",
+   "owner": "T061",
+   "target": 0
+  },
+  {
+   "id": "T062-q1",
+   "owner": "T062",
+   "target": 1
+  },
+  {
+   "id": "T062-q2",
+   "owner": "T062",
+   "target": 0
+  },
+  {
+   "id": "T063-q1",
+   "owner": "T063",
+   "target": 1
+  },
+  {
+   "id": "T063-q2",
+   "owner": "T063",
+   "target": 2
+  },
+  {
+   "id": "T064-q1",
+   "owner": "T064",
+   "target": 3
+  },
+  {
+   "id": "T064-q2",
+   "owner": "T064",
+   "target": 1
+  },
+  {
+   "id": "T065-q1",
+   "owner": "T065",
+   "target": 0
+  },
+  {
+   "id": "T065-q2",
+   "owner": "T065",
+   "target": 2
+  },
+  {
+   "id": "T066-q1",
+   "owner": "T066",
+   "target": 3
+  },
+  {
+   "id": "T066-q2",
+   "owner": "T066",
+   "target": 0
+  },
+  {
+   "id": "T067-q1",
+   "owner": "T067",
+   "target": 2
+  },
+  {
+   "id": "T067-q2",
+   "owner": "T067",
+   "target": 1
+  },
+  {
+   "id": "T068-q1",
+   "owner": "T068",
+   "target": 3
+  },
+  {
+   "id": "T068-q2",
+   "owner": "T068",
+   "target": 2
+  },
+  {
+   "id": "T069-q1",
+   "owner": "T069",
+   "target": 3
+  },
+  {
+   "id": "T069-q2",
+   "owner": "T069",
+   "target": 0
+  },
+  {
+   "id": "T070-q1",
+   "owner": "T070",
+   "target": 1
+  },
+  {
+   "id": "T070-q2",
+   "owner": "T070",
+   "target": 3
+  },
+  {
+   "id": "T071-q1",
+   "owner": "T071",
+   "target": 0
+  },
+  {
+   "id": "T071-q2",
+   "owner": "T071",
+   "target": 2
+  },
+  {
+   "id": "T072-q1",
+   "owner": "T072",
+   "target": 1
+  },
+  {
+   "id": "T072-q2",
+   "owner": "T072",
+   "target": 3
+  },
+  {
+   "id": "T073-q1",
+   "owner": "T073",
+   "target": 0
+  },
+  {
+   "id": "T073-q2",
+   "owner": "T073",
+   "target": 2
+  },
+  {
+   "id": "T074-q1",
+   "owner": "T074",
+   "target": 1
+  },
+  {
+   "id": "T074-q2",
+   "owner": "T074",
+   "target": 0
+  },
+  {
+   "id": "T075-q1",
+   "owner": "T075",
+   "target": 3
+  },
+  {
+   "id": "T075-q2",
+   "owner": "T075",
+   "target": 1
+  },
+  {
+   "id": "T076-q1",
+   "owner": "T076",
+   "target": 2
+  },
+  {
+   "id": "T076-q2",
+   "owner": "T076",
+   "target": 1
+  },
+  {
+   "id": "T077-q1",
+   "owner": "T077",
+   "target": 0
+  },
+  {
+   "id": "T077-q2",
+   "owner": "T077",
+   "target": 2
+  },
+  {
+   "id": "T078-q1",
+   "owner": "T078",
+   "target": 3
+  },
+  {
+   "id": "T078-q2",
+   "owner": "T078",
+   "target": 2
+  },
+  {
+   "id": "T079-q1",
+   "owner": "T079",
+   "target": 3
+  },
+  {
+   "id": "T079-q2",
+   "owner": "T079",
+   "target": 0
+  },
+  {
+   "id": "T080-q1",
+   "owner": "T080",
+   "target": 1
+  },
+  {
+   "id": "T080-q2",
+   "owner": "T080",
+   "target": 2
+  },
+  {
+   "id": "T081-q1",
+   "owner": "T081",
+   "target": 3
+  },
+  {
+   "id": "T081-q2",
+   "owner": "T081",
+   "target": 0
+  },
+  {
+   "id": "T082-q1",
+   "owner": "T082",
+   "target": 1
+  },
+  {
+   "id": "T082-q2",
+   "owner": "T082",
+   "target": 2
+  },
+  {
+   "id": "T083-q1",
+   "owner": "T083",
+   "target": 3
+  },
+  {
+   "id": "T083-q2",
+   "owner": "T083",
+   "target": 0
+  },
+  {
+   "id": "T084-q1",
+   "owner": "T084",
+   "target": 1
+  },
+  {
+   "id": "T084-q2",
+   "owner": "T084",
+   "target": 2
+  },
+  {
+   "id": "T085-q1",
+   "owner": "T085",
+   "target": 3
+  },
+  {
+   "id": "T085-q2",
+   "owner": "T085",
+   "target": 0
+  },
+  {
+   "id": "T086-q1",
+   "owner": "T086",
+   "target": 1
+  },
+  {
+   "id": "T086-q2",
+   "owner": "T086",
+   "target": 2
+  },
+  {
+   "id": "T087-q1",
+   "owner": "T087",
+   "target": 3
+  },
+  {
+   "id": "T087-q2",
+   "owner": "T087",
+   "target": 0
+  },
+  {
+   "id": "T088-q1",
+   "owner": "T088",
+   "target": 1
+  },
+  {
+   "id": "T088-q2",
+   "owner": "T088",
+   "target": 3
+  },
+  {
+   "id": "T089-q1",
+   "owner": "T089",
+   "target": 1
+  },
+  {
+   "id": "T089-q2",
+   "owner": "T089",
+   "target": 0
+  },
+  {
+   "id": "T090-q1",
+   "owner": "T090",
+   "target": 2
+  },
+  {
+   "id": "T090-q2",
+   "owner": "T090",
+   "target": 0
+  },
+  {
+   "id": "T091-q1",
+   "owner": "T091",
+   "target": 1
+  },
+  {
+   "id": "T091-q2",
+   "owner": "T091",
+   "target": 3
+  },
+  {
+   "id": "T092-q1",
+   "owner": "T092",
+   "target": 2
+  },
+  {
+   "id": "T092-q2",
+   "owner": "T092",
+   "target": 1
+  },
+  {
+   "id": "T093-q1",
+   "owner": "T093",
+   "target": 0
+  },
+  {
+   "id": "T093-q2",
+   "owner": "T093",
+   "target": 3
+  },
+  {
+   "id": "T094-q1",
+   "owner": "T094",
+   "target": 2
+  },
+  {
+   "id": "T094-q2",
+   "owner": "T094",
+   "target": 3
+  },
+  {
+   "id": "T095-q1",
+   "owner": "T095",
+   "target": 0
+  },
+  {
+   "id": "T095-q2",
+   "owner": "T095",
+   "target": 1
+  },
+  {
+   "id": "T096-q1",
+   "owner": "T096",
+   "target": 2
+  },
+  {
+   "id": "T096-q2",
+   "owner": "T096",
+   "target": 0
+  },
+  {
+   "id": "T097-q1",
+   "owner": "T097",
+   "target": 3
+  },
+  {
+   "id": "T097-q2",
+   "owner": "T097",
+   "target": 1
+  },
+  {
+   "id": "T098-q1",
+   "owner": "T098",
+   "target": 2
+  },
+  {
+   "id": "T098-q2",
+   "owner": "T098",
+   "target": 1
+  },
+  {
+   "id": "T099-q1",
+   "owner": "T099",
+   "target": 3
+  },
+  {
+   "id": "T099-q2",
+   "owner": "T099",
+   "target": 0
+  },
+  {
+   "id": "T100-q1",
+   "owner": "T100",
+   "target": 2
+  },
+  {
+   "id": "T100-q2",
+   "owner": "T100",
+   "target": 1
+  }
+ ],
+ "batches": {
+  "batch-1": [
+   "pm-l01-c1",
+   "pm-l01-c2",
+   "pm-l02-c1",
+   "pm-l03-c1",
+   "pm-l04-c1",
+   "pm-l04-c2",
+   "pm-l08-c1",
+   "pm-l11-c1",
+   "pm-l11-c2",
+   "pm-l12-c1",
+   "pm-l18-c1",
+   "pm-l20-c1",
+   "pm-l20-c2",
+   "pm-l21-c1",
+   "pm-l22-c1",
+   "pm-l25-c1",
+   "pm-l26-c1",
+   "pm-l27-c1",
+   "pm-l28-c1",
+   "pm-l28-c2",
+   "pm-l30-c1",
+   "T001-q2",
+   "T002-q1",
+   "T002-q2",
+   "T003-q2",
+   "T005-q1",
+   "T005-q2",
+   "T006-q2",
+   "T007-q1",
+   "T007-q2",
+   "T008-q1",
+   "T008-q2",
+   "T009-q2",
+   "T012-q2",
+   "T013-q2",
+   "T014-q2",
+   "T015-q1",
+   "T015-q2",
+   "T017-q1",
+   "T017-q2",
+   "T018-q2",
+   "T019-q2",
+   "T020-q1",
+   "T020-q2",
+   "T021-q1",
+   "T021-q2",
+   "T022-q1",
+   "T022-q2",
+   "T023-q2",
+   "T024-q2"
+  ],
+  "batch-2": [
+   "T025-q2",
+   "T026-q1",
+   "T026-q2",
+   "T027-q1",
+   "T027-q2",
+   "T028-q1",
+   "T028-q2",
+   "T029-q1",
+   "T029-q2",
+   "T030-q1",
+   "T030-q2",
+   "T031-q1",
+   "T031-q2",
+   "T032-q1",
+   "T032-q2",
+   "T033-q1",
+   "T033-q2",
+   "T034-q1",
+   "T034-q2",
+   "T035-q2",
+   "T036-q1",
+   "T036-q2",
+   "T037-q1",
+   "T037-q2",
+   "T038-q1",
+   "T038-q2",
+   "T039-q1",
+   "T039-q2",
+   "T040-q1",
+   "T040-q2",
+   "T041-q1",
+   "T041-q2",
+   "T043-q1",
+   "T043-q2",
+   "T044-q1",
+   "T044-q2",
+   "T045-q1",
+   "T045-q2",
+   "T046-q1",
+   "T046-q2",
+   "T047-q1",
+   "T047-q2",
+   "T048-q1",
+   "T048-q2",
+   "T049-q1",
+   "T049-q2",
+   "T050-q1",
+   "T050-q2",
+   "T051-q1",
+   "T051-q2"
+  ],
+  "batch-3": [
+   "T052-q1",
+   "T052-q2",
+   "T053-q1",
+   "T053-q2",
+   "T054-q1",
+   "T054-q2",
+   "T055-q1",
+   "T055-q2",
+   "T056-q2",
+   "T057-q1",
+   "T057-q2",
+   "T058-q1",
+   "T058-q2",
+   "T059-q1",
+   "T059-q2",
+   "T060-q1",
+   "T060-q2",
+   "T061-q1",
+   "T061-q2",
+   "T062-q1",
+   "T062-q2",
+   "T063-q1",
+   "T063-q2",
+   "T064-q1",
+   "T064-q2",
+   "T065-q1",
+   "T065-q2",
+   "T066-q1",
+   "T066-q2",
+   "T067-q1",
+   "T067-q2",
+   "T068-q1",
+   "T068-q2",
+   "T069-q1",
+   "T069-q2",
+   "T070-q1",
+   "T070-q2",
+   "T071-q1",
+   "T071-q2",
+   "T072-q1",
+   "T072-q2",
+   "T073-q1",
+   "T073-q2",
+   "T074-q1",
+   "T074-q2",
+   "T075-q1",
+   "T075-q2",
+   "T076-q1",
+   "T076-q2",
+   "T077-q1"
+  ],
+  "batch-4": [
+   "T077-q2",
+   "T078-q1",
+   "T078-q2",
+   "T079-q1",
+   "T079-q2",
+   "T080-q1",
+   "T080-q2",
+   "T081-q1",
+   "T081-q2",
+   "T082-q1",
+   "T082-q2",
+   "T083-q1",
+   "T083-q2",
+   "T084-q1",
+   "T084-q2",
+   "T085-q1",
+   "T085-q2",
+   "T086-q1",
+   "T086-q2",
+   "T087-q1",
+   "T087-q2",
+   "T088-q1",
+   "T088-q2",
+   "T089-q1",
+   "T089-q2",
+   "T090-q1",
+   "T090-q2",
+   "T091-q1",
+   "T091-q2",
+   "T092-q1",
+   "T092-q2",
+   "T093-q1",
+   "T093-q2",
+   "T094-q1",
+   "T094-q2",
+   "T095-q1",
+   "T095-q2",
+   "T096-q1",
+   "T096-q2",
+   "T097-q1",
+   "T097-q2",
+   "T098-q1",
+   "T098-q2",
+   "T099-q1",
+   "T099-q2",
+   "T100-q1",
+   "T100-q2"
+  ]
+ }
+}

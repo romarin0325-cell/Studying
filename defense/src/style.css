@@ -1262,6 +1262,8 @@ em.scaled{font-style:normal;font-weight:800;color:var(--teal);text-shadow:0 0 8p
 .quiz-q{display:grid;gap:10px}
 .quiz-q .kind-chip{justify-self:start}
 .quiz-prompt{font-size:15px;font-weight:700;line-height:1.55;white-space:pre-line;overflow-wrap:anywhere}
+/* Exam questions are Japanese (lang=ja): use a Japanese face instead of drawing kana with the Korean UI font. */
+.quiz-q [lang=ja]{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic UI','Yu Gothic',Meiryo,'Noto Sans JP','Noto Sans CJK JP',system-ui,sans-serif}
 .quiz-choices{display:grid;gap:7px}
 .quiz-choice{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:13px;text-align:left;font-size:13.5px;line-height:1.45;border:1px solid var(--line2);background:linear-gradient(180deg,rgba(44,58,120,.6),rgba(20,27,64,.85))}
 .quiz-choice:disabled{color:var(--text2)}
