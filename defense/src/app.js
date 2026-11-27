@@ -1474,8 +1474,8 @@ function tutorPanel(){
 }
 // Shared question markup: choices are buttons until answered, then ✓ marks the answer and ✗ the pick.
 function questionBlock(q,chosen=-1,answered=true){
-  return `<div class="quiz-q"><div class="quiz-meta"><span class="kind-chip ${q.kind}">${KIND_NAME[q.kind]}</span>${q.source?`<small>${escapeText(q.source)}</small>`:''}</div><p class="quiz-prompt">${escapeText(q.prompt)}</p><div class="quiz-choices">${q.choices.map((c,i)=>{const state=!answered?'':i===q.answer?'right':i===chosen?'wrong':'';
-    return `<button class="quiz-choice ${state}" ${answered?'disabled':`data-quiz-choice="${i}"`}><span class="mark">${LETTERS[i]}</span><span class="text">${escapeText(c)}</span>${state==='right'?icon('check'):state==='wrong'?icon('close'):''}</button>`;}).join('')}</div></div>`;
+  return `<div class="quiz-q"><div class="quiz-meta"><span class="kind-chip ${q.kind}">${KIND_NAME[q.kind]}</span>${q.source?`<small>${escapeText(q.source)}</small>`:''}</div><p class="quiz-prompt" lang="ja">${escapeText(q.prompt)}</p><div class="quiz-choices">${q.choices.map((c,i)=>{const state=!answered?'':i===q.answer?'right':i===chosen?'wrong':'';
+    return `<button class="quiz-choice ${state}" ${answered?'disabled':`data-quiz-choice="${i}"`}><span class="mark">${LETTERS[i]}</span><span class="text" lang="ja">${escapeText(c)}</span>${state==='right'?icon('check'):state==='wrong'?icon('close'):''}</button>`;}).join('')}</div></div>`;
 }
 const lectureBody=l=>`<p class="lec-core">${escapeText(l.core)}</p><p class="lec-analogy"><b>오늘의 이야기</b> ${escapeText(l.analogy)}</p>${l.body.map(t=>t.startsWith('## ')?`<h4 class="lec-h">${escapeText(t.slice(3))}</h4>`:`<p>${escapeText(t)}</p>`).join('')}
   ${l.principles.length?`<div class="lec-box"><b>루미의 핵심 정리</b><ol>${l.principles.map(t=>`<li>${escapeText(t)}</li>`).join('')}</ol></div>`:''}${l.confusion?`<div class="lec-box warn"><b>헷갈림 주의</b><p>${escapeText(l.confusion)}</p></div>`:''}

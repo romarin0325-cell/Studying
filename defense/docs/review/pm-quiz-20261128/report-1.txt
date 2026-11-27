@@ -1,0 +1,15 @@
+**batch-1의 자체 제작 문항 50개를 재작성했고, 최종 검사기는 `OK`를 출력했습니다.** 지정 ID와 정답 위치가 모두 일치합니다. 전 문항을 다시 풀어 정답이 하나인지 확인했고, 계산 문항은 별도 검수에서도 재계산했습니다. 정답이 단독으로 가장 긴 문항은 14개(28%)입니다.
+
+결과 파일은 `defense/docs/review/pm-quiz-20261128/batches/batch-1.jsonl`입니다.
+
+**교재에서 보완할 표현**
+
+- `pm-l01-c1`의 한시성은 시작과 종료가 있다는 뜻입니다. 종료 날짜를 착수 전에 확정해야 한다는 조건은 문항에서 뺐습니다. [PMI 정의](https://www.pmi.org/learning/library/framework-part-1-rationale-9103)
+- `pm-l12-c1`의 강의 예시에서 EAC 112.5는 반올림 전 CPI로 계산한 값입니다. 본문에 적힌 `100 ÷ 0.89`는 약 112.36입니다.
+- `T001-q2`는 PMO 유형을 지원형으로 명시했습니다. 교재의 일반화와 달리 지휘형 PMO는 프로젝트를 직접 관리할 수 있습니다. [PMI의 PMO 유형](https://www.pmi.org/-/media/pmi/documents/public/pdf/pmbok-standards/pmbok-guide-5th-errata.pdf)
+- `T007-q2`는 두 사례의 특징을 가장 잘 설명하는 용어를 묻도록 했습니다. 골드 플레이팅도 통제되지 않은 범위 확대를 일으킬 수 있습니다. [PMI의 스코프 크리프 사례](https://www.pmi.org/learning/library/top-five-causes-scope-creep-6675)
+- `T015-q1/q2`의 용어 설명에서 경로 분산의 단순 합산은 작업 기간 간 공분산이 0이라는 가정이 필요하고, 68·95·99.7%는 정규근사에 따른 값입니다. `T019-q2`의 힌트는 브레인스토밍을 대면 의사결정으로 설명하지만, 문항에서는 아이디어를 내는 활동으로 구분했습니다. [PERT 연구](https://www.sciencedirect.com/science/article/abs/pii/S0377221719306307), [RAND의 델파이 절차](https://www.rand.org/content/dam/rand/pubs/tools/TLA3000/TLA3082-1/RAND_TLA3082-1.pdf)
+
+**판단이 필요했던 문항**은 `T008-q2`의 60%를 표준적인 DSDM 권고로 한정했고, `pm-l28-c1`은 병행 이행의 안전성·비용 순위 대신 결과 대조와 이중 운영 부담을 물었습니다. `pm-l28-c2`는 장애 연락 절차도 원복 계획에 들어갈 수 있어 원복 판단의 기한과 기준을 묻도록 좁혔습니다. [DSDM 권고](https://www.agilebusiness.org/resource/what-is-moscow-prioritization/), [IPA 이행 지침](https://www.ipa.go.jp/digital/dx/hjuojm000000gx4n-att/000094497.pdf)
+
+요청 범위에서 미완료 항목은 없습니다.

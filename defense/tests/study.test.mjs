@@ -98,8 +98,27 @@ test('wrong picks go to the notebook once (latest pick kept), correct ones count
 test('saves from before the library get an empty one; notebook entries outside the course are dropped',async()=>{
   const {createProfile,parseProfile}=await import('../src/profile.js');
   const old=createProfile(0);delete old.study;
-  assert.deepEqual(parseProfile(JSON.stringify(old)).study,{wrong:[],solved:[],library:{index:0,stars:0,unlocked:[],day:''}});
+  assert.deepEqual(parseProfile(JSON.stringify(old)).study,{wrong:[],solved:[],library:{index:0,stars:0,unlocked:[],day:''},quizRev:2});
   const keep=firstLecture.quizzes[0].id,swapped=createProfile(0);swapped.study.wrong=[{kind:'concept',id:'C001',choice:0,at:0},{kind:'concept',id:keep,choice:1,at:0}];delete swapped.study.solved;
   const parsed=parseProfile(JSON.stringify(swapped));assert.deepEqual(parsed.study.wrong.map(w=>w.id),[keep]);assert.deepEqual(parsed.study.solved,[]);
   const broken=createProfile(0);broken.study.library.stars=99;assert.equal(parseProfile(JSON.stringify(broken)),null);
+});
+
+test('notes from the old question set keep their place and progress but forget the old pick; new notes keep theirs',async()=>{
+  const {createProfile,parseProfile,command}=await import('../src/profile.js');
+  const q=conceptQuestion(firstLecture.quizzes[0].id),t=termQuestion(firstTerm.quizzes[1].id),old=createProfile(0);
+  old.study.wrong=[{kind:'concept',id:q.id,choice:(q.answer+1)%4,at:5},{kind:'term',id:t.id,choice:-1,at:6}];old.study.solved=['term:'+t.id];delete old.study.quizRev;
+  const p=parseProfile(JSON.stringify(old));
+  assert.deepEqual(p.study.wrong,[{kind:'concept',id:q.id,choice:-1,at:5},{kind:'term',id:t.id,choice:-1,at:6}]);
+  assert.deepEqual(p.study.solved,['term:'+t.id]);assert.equal(p.study.quizRev,2);
+  command(p,'answer',{kind:'term',id:t.id,choice:(t.answer+2)%4},10);
+  assert.equal(parseProfile(JSON.stringify(p)).study.wrong.find(w=>w.id===t.id).choice,(t.answer+2)%4);
+});
+
+test('self-made questions read like the exam: Japanese only, IPA punctuation, no length tell, balanced answer positions',async()=>{
+  const {selfQuestions,questionProblems,setStats,setProblems}=await import('../scripts/pm-quiz-check.mjs');
+  const qs=selfQuestions(COURSE);
+  assert.ok(qs.length>=150,'self-made questions found');
+  assert.deepEqual(qs.flatMap(q=>questionProblems(q).map(p=>`${q.id}: ${p}`)),[]);
+  assert.deepEqual(setProblems(setStats(qs)),[]);
 });

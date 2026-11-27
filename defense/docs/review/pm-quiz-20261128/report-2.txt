@@ -1,0 +1,12 @@
+배치 2의 **50문항**을 `defense/docs/review/pm-quiz-20261128/batches/batch-2.jsonl`에 저장했습니다. 검사기는 **`OK`**를 출력했습니다. 지정된 ID와 정답 위치가 모두 일치했고, 정답이 단독으로 가장 긴 문항은 **22%**였습니다. 전 문항을 다시 읽어 정답이 하나로 결정되는지 확인했습니다.
+
+**본문·기존 해설과 대조해 조정한 사항**
+
+- `T041-q1·q2`는 구제수단별 행사 요건을 뭉뚱그리지 않도록 이행 추완을 묻고, 1년 통지 규칙은 종류·품질의 부적합으로 한정했습니다. [일본 민법 제636·637조](https://laws.e-gov.go.jp/data/Act/129AC0000000089/637374_1/129AC0000000089_20260624_508AC0000000045_h1.pdf)
+- `T043-q1`은 SLO를 내부 목표로만 설명한 용어 노트를 보완했습니다. SLA에도 SLO가 포함될 수 있어 오답을 내부용 목표의 사례로 구체화했습니다. [Google SRE](https://sre.google/sre-book/service-level-objectives/)
+- `T045-q2`는 DoD 미충족 항목을 제품 백로그로 돌려보내는 규칙을 물었습니다. `T047-q2`는 기존의 ‘1~4주’ 표현을 걷어내고 1개월 스프린트에서 각 이벤트의 시간을 물었습니다. [Scrum Guide 2020](https://scrumguides.org/scrum-guide)
+- `T049-q1·q2`는 본문과 기존 해설의 공정 명칭이 달라, 테스트의 근거 문서와 확인 대상을 기준으로 시스템 테스트와 사용자 수락 테스트를 구분했습니다. [ISTQB 실라버스](https://www.istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf)
+
+**판단이 필요했던 문항**은 `T028-q2`의 7점 기준을 해당 공정의 규칙으로 명시했고, `T029-q1·q2`는 각각 변곡점이 관측 구간에 있다는 조건과 미발견 결함을 추정한다는 범위를 명시했습니다. `T046-q2`는 평균 벨로시티로 나눈 뒤 올림해야 하는 수치로 바꿨습니다. [NIST 관리도 규칙](https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc32.htm) · [IPA 신뢰도 성장 곡선 자료](https://www.ipa.go.jp/archive/publish/qv6pgp0000000y6r-att/000005126.pdf)
+
+배치 내 미완료 항목은 없습니다. 원본 병합과 게임 실행은 후속 단계입니다.
