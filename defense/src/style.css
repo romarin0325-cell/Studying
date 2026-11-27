@@ -1261,12 +1261,12 @@ em.scaled{font-style:normal;font-weight:800;color:var(--teal);text-shadow:0 0 8p
 /* Quiz, lecture and review sheets */
 .quiz-q{display:grid;gap:10px}
 .quiz-q .kind-chip{justify-self:start}
-.quiz-prompt{font-size:15px;font-weight:700;line-height:1.55}
+.quiz-prompt{font-size:15px;font-weight:700;line-height:1.55;white-space:pre-line;overflow-wrap:anywhere}
 .quiz-choices{display:grid;gap:7px}
 .quiz-choice{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:13px;text-align:left;font-size:13.5px;line-height:1.45;border:1px solid var(--line2);background:linear-gradient(180deg,rgba(44,58,120,.6),rgba(20,27,64,.85))}
 .quiz-choice:disabled{color:var(--text2)}
 .quiz-choice .mark{flex-shrink:0;font-size:15px;color:var(--gold)}
-.quiz-choice .text{flex:1;min-width:0}
+.quiz-choice .text{flex:1;min-width:0;overflow-wrap:anywhere}
 .quiz-choice .ic{width:18px;height:18px;flex-shrink:0}
 .quiz-choice.right{border-color:#7fe6d3;background:linear-gradient(180deg,rgba(60,140,130,.45),rgba(20,60,64,.8));color:#e6fffa}
 .quiz-choice.right .ic{color:var(--teal);stroke-width:2.6}
